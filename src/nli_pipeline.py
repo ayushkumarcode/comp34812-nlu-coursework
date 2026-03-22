@@ -29,7 +29,7 @@ class NLIFeatureExtractor:
     def __init__(self, use_spacy=True, use_glove=False, n_svd_components=100):
         self.use_spacy = use_spacy
         self.use_glove = use_glove
-        self.tfidf = NLITfidfFeatures(n_components=n_svd_components)
+        self.tfidf = NLITfidfFeatures(n_svd_components=n_svd_components)
         self.glove = GloveFeatures() if use_glove else None
         self.nlp = None
         self._fitted = False
