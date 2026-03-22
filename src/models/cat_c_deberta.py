@@ -1,0 +1,231 @@
+"""
+Category C — DeBERTa-v3-base Fine-Tuning.
+
+For AV: Siamese architecture with learnable layer-weighted representations
+        + contrastive loss + GRL topic debiasing.
+For NLI: Cross-encoder with hypothesis-only adversarial debiasing via GRL.
+"""
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.autograd import Function
+
+
+class GradientReversalFunction(Function):
+    @staticmethod
+    def forward(ctx, x, lambda_val):
+        ctx.lambda_val = lambda_val
+        return x.clone()
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        return -ctx.lambda_val * grad_output, None
+
+
+class GRL(nn.Module):
+    def __init__(self, lambda_val=0.05):
+        super().__init__()
+        self.lambda_val = lambda_val
+
+    def forward(self, x):
+        return GradientReversalFunction.apply(x, self.lambda_val)
+
+
+class ScalarMix(nn.Module):
+    """Learnable scalar mixture of transformer layer outputs.
+    Inspired by Peters et al. 2018 (ELMo)."""
+
+    def __init__(self, num_layers=12, style_bias=True):
+        super().__init__()
+        # Initialize weights with slight bias toward early layers (style)
+        if style_bias:
+            init_weights = torch.tensor(
+                [0.12] * 4 + [0.07] * 8, dtype=torch.float
+            )
+        else:
+            init_weights = torch.ones(num_layers) / num_layers
+        self.weights = nn.Parameter(init_weights)
+
+    def forward(self, hidden_states):
+        """
+        Args:
+            hidden_states: List of (batch, seq_len, hidden) tensors.
+
+        Returns:
+            Weighted sum: (batch, seq_len, hidden)
+        """
+        normed = F.softmax(self.weights, dim=0)
+        mixed = sum(w * h for w, h in zip(normed, hidden_states))
+        return mixed
+
+
+# ============================================================
+# AV Cat C — Siamese DeBERTa
+# ============================================================
+
+class AVDeBERTaSiamese(nn.Module):
+    """Siamese DeBERTa for Authorship Verification.
+
+    Each text encoded independently through shared DeBERTa.
+    Layer-weighted [CLS] representations compared via MLP.
+    """
+
+    def __init__(self, model_name='microsoft/deberta-v3-base',
+                 proj_dim=128, num_topics=10, grl_lambda=0.05):
+        super().__init__()
+        from transformers import AutoModel
+
+        self.encoder = AutoModel.from_pretrained(
+            model_name, output_hidden_states=True
+        )
+        hidden_size = self.encoder.config.hidden_size  # 768
+        num_layers = self.encoder.config.num_hidden_layers  # 12
+
+        # Scalar mix of layers
+        self.scalar_mix = ScalarMix(num_layers, style_bias=True)
+
+        # Style projection
+        self.style_proj = nn.Sequential(
+            nn.Linear(hidden_size, 256),
+            nn.LayerNorm(256),
+            nn.GELU(),
+            nn.Dropout(0.1),
+            nn.Linear(256, proj_dim),
+        )
+
+        # Comparison + classifier
+        # [v1, v2, |v1-v2|, v1*v2, cos_sim] = 4*proj_dim + 1
+        comparison_dim = proj_dim * 4 + 1
+        self.classifier = nn.Sequential(
+            nn.Linear(comparison_dim, 256),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, 1),
+        )
+
+        # Topic adversarial head
+        self.grl = GRL(grl_lambda)
+        self.topic_head = nn.Sequential(
+            nn.Linear(proj_dim, 64),
+            nn.ReLU(),
+            nn.Linear(64, num_topics),
+        )
+
+    def encode(self, input_ids, attention_mask):
+        """Encode a single text to style embedding."""
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+
+        # Get all hidden states (skip embedding layer)
+        hidden_states = outputs.hidden_states[1:]  # 12 layers
+
+        # Layer-weighted [CLS] representation
+        cls_states = [h[:, 0, :] for h in hidden_states]  # each (batch, hidden)
+        # Stack for scalar mix
+        stacked = torch.stack(cls_states, dim=0)  # (layers, batch, hidden)
+        mixed_cls = sum(
+            w * s for w, s in zip(
+                F.softmax(self.scalar_mix.weights, dim=0), cls_states
+            )
+        )
+
+        # Project to style embedding
+        style_emb = self.style_proj(mixed_cls)
+        style_emb = F.normalize(style_emb, p=2, dim=1)  # L2 normalize
+
+        return style_emb
+
+    def forward(self, input_ids_1, attention_mask_1,
+                input_ids_2, attention_mask_2):
+        """
+        Returns:
+            logits: (batch, 1)
+            topic_logits: (batch, num_topics)
+            embeddings: (v1, v2)
+        """
+        v1 = self.encode(input_ids_1, attention_mask_1)
+        v2 = self.encode(input_ids_2, attention_mask_2)
+
+        # Comparison
+        diff = torch.abs(v1 - v2)
+        prod = v1 * v2
+        cos_sim = (v1 * v2).sum(dim=1, keepdim=True)
+        combined = torch.cat([v1, v2, diff, prod, cos_sim], dim=1)
+
+        logits = self.classifier(combined)
+
+        # Topic adversarial
+        topic_input = self.grl(v1)
+        topic_logits = self.topic_head(topic_input)
+
+        return logits, topic_logits, (v1, v2)
+
+
+# ============================================================
+# NLI Cat C — Cross-Encoder DeBERTa
+# ============================================================
+
+class NLIDeBERTaCrossEncoder(nn.Module):
+    """Cross-encoder DeBERTa for NLI with hypothesis-only adversarial debiasing.
+
+    Input: [CLS] premise [SEP] hypothesis [SEP]
+    Adversarial: GRL on hypothesis-only representation.
+    """
+
+    def __init__(self, model_name='microsoft/deberta-v3-base',
+                 grl_lambda=0.1):
+        super().__init__()
+        from transformers import AutoModel
+
+        self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size  # 768
+
+        # Main classifier
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1),
+            nn.Linear(hidden_size, 256),
+            nn.Tanh(),
+            nn.Dropout(0.1),
+            nn.Linear(256, 1),
+        )
+
+        # Hypothesis-only encoder (for adversarial debiasing)
+        self.hyp_encoder = AutoModel.from_pretrained(model_name)
+
+        # Adversarial head
+        self.grl = GRL(grl_lambda)
+        self.adversarial_head = nn.Sequential(
+            nn.Linear(hidden_size, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1),
+        )
+
+    def forward(self, input_ids, attention_mask,
+                hyp_input_ids=None, hyp_attention_mask=None):
+        """
+        Args:
+            input_ids: (batch, seq_len) concatenated premise+hypothesis
+            attention_mask: (batch, seq_len)
+            hyp_input_ids: (batch, hyp_len) hypothesis-only
+            hyp_attention_mask: (batch, hyp_len)
+
+        Returns:
+            logits: (batch, 1)
+            adv_logits: (batch, 1) or None
+        """
+        # Main forward pass
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        cls_repr = outputs.last_hidden_state[:, 0, :]
+        logits = self.classifier(cls_repr)
+
+        # Adversarial debiasing
+        adv_logits = None
+        if hyp_input_ids is not None:
+            hyp_outputs = self.hyp_encoder(
+                input_ids=hyp_input_ids, attention_mask=hyp_attention_mask
+            )
+            hyp_cls = hyp_outputs.last_hidden_state[:, 0, :]
+            adv_input = self.grl(hyp_cls)
+            adv_logits = self.adversarial_head(adv_input)
+
+        return logits, adv_logits
