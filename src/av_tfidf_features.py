@@ -1,0 +1,113 @@
+"""
+AV Feature Engineering — TF-IDF and cosine similarity features.
+Group 3: Char n-gram TF-IDF + SVD (100 features per text).
+Pairwise cosine similarity features (3 features).
+"""
+
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+from sklearn.metrics.pairwise import cosine_similarity
+
+
+class CharNgramTFIDF:
+    """Character n-gram TF-IDF + SVD dimensionality reduction.
+
+    Fits on training texts, transforms to dense features.
+    """
+
+    def __init__(self, ngram_range=(3, 5), max_features=10000, n_components=100):
+        self.ngram_range = ngram_range
+        self.max_features = max_features
+        self.n_components = n_components
+        self.vectorizer = TfidfVectorizer(
+            analyzer='char',
+            ngram_range=ngram_range,
+            max_features=max_features,
+            sublinear_tf=True,
+        )
+        self.svd = TruncatedSVD(n_components=n_components, random_state=42)
+        self._fitted = False
+
+    def fit(self, texts):
+        """Fit on all training texts (both text_1 and text_2 columns).
+
+        Args:
+            texts: List of all training text strings.
+        """
+        tfidf_matrix = self.vectorizer.fit_transform(texts)
+        self.svd.fit(tfidf_matrix)
+        self._fitted = True
+        return self
+
+    def transform(self, texts):
+        """Transform texts to dense SVD features.
+
+        Args:
+            texts: List of text strings.
+
+        Returns:
+            numpy array of shape (n_texts, n_components).
+        """
+        tfidf_matrix = self.vectorizer.transform(texts)
+        return self.svd.transform(tfidf_matrix)
+
+    def transform_to_dict(self, text):
+        """Transform a single text and return as feature dict.
+
+        Args:
+            text: Single text string.
+
+        Returns:
+            Dict with keys 'tfidf_svd_0', 'tfidf_svd_1', etc.
+        """
+        vec = self.transform([text])[0]
+        return {f'tfidf_svd_{i}': float(v) for i, v in enumerate(vec)}
+
+
+class CosineSimFeatures:
+    """Pairwise cosine similarity features using raw TF-IDF vectors.
+
+    Computes cosine similarity at char 3-gram, 4-gram, and 5-gram levels.
+    """
+
+    def __init__(self, max_features=10000):
+        self.max_features = max_features
+        self.vectorizers = {}
+        for n in [3, 4, 5]:
+            self.vectorizers[n] = TfidfVectorizer(
+                analyzer='char',
+                ngram_range=(n, n),
+                max_features=max_features,
+                sublinear_tf=True,
+            )
+        self._fitted = False
+
+    def fit(self, texts):
+        """Fit vectorizers on all training texts.
+
+        Args:
+            texts: List of all training text strings.
+        """
+        for n, vec in self.vectorizers.items():
+            vec.fit(texts)
+        self._fitted = True
+        return self
+
+    def compute_similarities(self, text_1, text_2):
+        """Compute cosine similarities for a text pair.
+
+        Args:
+            text_1: First text string.
+            text_2: Second text string.
+
+        Returns:
+            Dict with 'cosine_char3', 'cosine_char4', 'cosine_char5'.
+        """
+        feats = {}
+        for n, vec in self.vectorizers.items():
+            v1 = vec.transform([text_1])
+            v2 = vec.transform([text_2])
+            sim = cosine_similarity(v1, v2)[0, 0]
+            feats[f'cosine_char{n}'] = float(sim)
+        return feats
