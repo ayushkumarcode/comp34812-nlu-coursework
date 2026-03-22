@@ -124,11 +124,11 @@ def load_baseline_predictions(task='av'):
         task: 'av' or 'nli'.
 
     Returns:
-        DataFrame with baseline model predictions.
+        Dict with keys 'reference', 'SVM', 'LSTM', 'BERT' mapping to numpy arrays.
     """
     path = AV_BASELINE_PATH if task == 'av' else NLI_BASELINE_PATH
-    df = pd.read_csv(path)
-    return df
+    df = pd.read_csv(path, index_col=0)
+    return {col: df[col].values.astype(int) for col in df.columns}
 
 
 def load_solution_labels(task='av'):
