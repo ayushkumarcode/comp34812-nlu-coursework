@@ -42,14 +42,15 @@ Follow this cycle for every task. NEVER skip steps:
 
 ## Agent Teams
 
-When you need research or decisions, spin up specialized agent teams. Examples:
+When you need research or decisions, spin up agent TEAMS — not just independent sub-agents. Agents in a team should communicate: one agent's findings inform the next agent's work. Agent characteristics should VARY based on the task at hand. Examples:
 
-- **NLU Expert + ML Expert**: For architecture decisions, feature engineering choices
-- **Evaluation Expert**: For designing evaluation beyond standard metrics
+- **NLU/NLP Expert + ML Expert**: For architecture decisions, feature engineering choices. The NLU expert provides domain knowledge, the ML expert translates it into implementation.
+- **Fine-Tuning / Post-Training Specialist**: For training procedures, hyperparameter optimization, learning rate schedules
+- **Evaluation Expert**: For designing evaluation beyond standard metrics, statistical testing, error analysis
 - **Literature Research Agent**: For finding papers, verifying citations, checking approach novelty
-- **Compliance Agent**: For checking everything matches the coursework spec and rubric
+- **Compliance Agent**: Run at major milestones to verify: rubric coverage, spec requirements, naming conventions (`Group_n_category.csv`), file paths, model card accuracy vs code, AI tool declaration in README, models >10MB on cloud not in zip
 
-Agents should be given specific, bounded tasks with clear deliverables.
+Agents should be given specific, bounded tasks with clear deliverables. When the task requires multiple perspectives (e.g. "should we use GRL or contrastive loss?"), launch multiple agents and have their findings synthesized.
 
 ## Git Rules — CRITICAL
 
@@ -95,6 +96,18 @@ Follow `TRACK_DECISION_FRAMEWORK.md` Phase ordering:
 
 ### Phase 5: Category C Backup (if needed)
 ### Phase 6: Polish — model cards, evaluation commentary, documentation, poster
+
+## Start Now
+
+## Spec Compliance Reminders
+- README must have a **"Use of Generative AI Tools"** section (university requirement, Section VI of spec)
+- README must have code attribution and data source attribution
+- Prediction files: `Group_n_A.csv`, `Group_n_B.csv` (n = Canvas group number)
+- All deliverables in ONE zip file for Canvas
+- Models >10MB: store on OneDrive, link in README — do NOT include in zip
+- Demo code must be Python notebooks with `!pip install` lines at the top
+- Training code separated from demo code
+- Evaluation code separated from training code
 
 ## Start Now
 

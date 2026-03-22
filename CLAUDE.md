@@ -30,9 +30,11 @@ Follow this loop for EVERY piece of work:
 ```
 
 When things are NOT obvious (e.g. hyperparameter choices, architecture decisions):
-- Spin up agent teams to research, hypothesize, and test experiments
+- Spin up agent TEAMS (not just independent sub-agents) to research, hypothesize, and test experiments
 - Agents should be specialized (NLU expert, ML expert, fine-tuning expert, evaluation expert)
-- Agents should communicate findings and recommendations
+- Agents MUST communicate findings to each other — one agent's output should inform another's work
+- Agent characteristics should VARY based on the task (e.g. a post-training specialist for fine-tuning decisions, an evals specialist for metrics design, a literature researcher for novelty checks)
+- This is an agent TEAM, not a collection of independent workers
 
 ## Agent Team Specifications
 Use specialized agents based on the task:
@@ -69,6 +71,9 @@ Use specialized agents based on the task:
 ## Local Scorer
 `cd baseline_extracted/nlu_bundle-feature-unified-local-scorer && python3 -m local_scorer.main --task {av|nli} --prediction path/to/file.csv`
 
+## AI Tool Declaration — REQUIRED BY SPEC
+The README MUST include a section called **"Use of Generative AI Tools"** describing which AI tools were used and for what purposes. This is a university requirement (Section VI of spec). Failure to declare = academic malpractice.
+
 ## Key Constraints
 - Closed mode: only provided training data, no external datasets
 - Pre-trained models (GloVe, BERT, DeBERTa, spaCy) are allowed
@@ -76,3 +81,7 @@ Use specialized agents based on the task:
 - Statistical significance test (McNemar's) is REQUIRED for performance marks
 - Model cards must EXACTLY match implementations
 - Time is NOT a constraint — optimize purely for grade
+- Prediction files named `Group_n_A.csv` and `Group_n_B.csv` (n = Canvas group number)
+- All deliverables compressed into ONE zip file for Canvas upload
+- Models >10MB must NOT be in the zip — store on OneDrive, link in README
+- Code attribution required — acknowledge any reused code or face academic malpractice
