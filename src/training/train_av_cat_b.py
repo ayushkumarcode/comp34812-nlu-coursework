@@ -62,11 +62,11 @@ def train_epoch(model, dataloader, optimizer, device, epoch,
             topic_labels = batch['topic'].to(device)
             loss_topic = topic_loss_fn(topic_logits, topic_labels)
 
-        # Total loss
+        # Total loss (gradual introduction)
         loss = loss_bce
-        if epoch >= 2:  # Introduce contrastive after epoch 1
+        if epoch >= 5:  # BCE-only warmup for first 4 epochs
             loss = loss + contrastive_weight * loss_contrastive
-        if topic_weight > 0:
+        if topic_weight > 0 and epoch >= 3:
             loss = loss + topic_weight * loss_topic
 
         loss.backward()
@@ -168,7 +168,7 @@ def main():
     topic_loss_fn = nn.CrossEntropyLoss()
 
     # Optimizer and scheduler
-    optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    optimizer = AdamW(model.parameters(), lr=5e-4, weight_decay=1e-4)
     scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=2, eta_min=1e-6)
 
     # Training loop
@@ -194,8 +194,8 @@ def main():
         train_loss, train_f1 = train_epoch(
             model, train_loader, optimizer, device, epoch,
             bce_loss_fn, contrastive_loss_fn, topic_loss_fn,
-            contrastive_weight=0.2,
-            topic_weight=0.1,
+            contrastive_weight=0.1,
+            topic_weight=0.05,
         )
         scheduler.step()
 
