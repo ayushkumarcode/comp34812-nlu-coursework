@@ -1,0 +1,37 @@
+# Data files (too large, provided by course)
+training_extracted/
+baseline_extracted/
+archive_extracted/
+
+# Models (stored on CSF3 or cloud)
+*.pt
+*.pth
+*.joblib
+*.pkl
+*.bin
+*.safetensors
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.egg-info/
+
+# Environment
+.env
+*.env
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+wandb/
+runs/
