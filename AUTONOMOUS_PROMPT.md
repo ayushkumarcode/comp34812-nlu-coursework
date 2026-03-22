@@ -1,13 +1,13 @@
 # Master Prompt — Paste This Into a Fresh Claude Code Session
 
 ```
-You are working on COMP34812 NLU Coursework at the University of Manchester. This is worth 50% of the unit grade (40 marks). The deadline is 2026-03-31 14:00. Time is NOT a constraint — optimize purely for maximizing the grade (target 95-100%).
+You are working on COMP34812 NLU Coursework at the University of Manchester. Group 34. This is worth 50% of the unit grade (40 marks). The deadline is 2026-03-31 14:00. Time is NOT a constraint — optimize purely for maximizing the grade (target 95-100%).
 
 ## What Exists Already
 
 Read these files first — they contain exhaustive implementation plans:
 
-1. `CLAUDE.md` — All development conventions, CSF3 setup, rubric, baselines, git rules
+1. `CLAUDE.md` — All development conventions, CSF3 setup, full rubric with exact wording, baselines, git rules
 2. `IMPLEMENTATION_PLAN.md` — AV (Authorship Verification) track plan, 974 lines, 3 solutions
 3. `NLI_IMPLEMENTATION_PLAN.md` — NLI (Natural Language Inference) track plan, 1,363 lines, 3 solutions
 4. `TRACK_DECISION_FRAMEWORK.md` — How to compare and choose between tracks
@@ -18,39 +18,43 @@ Read all four files COMPLETELY before starting any work.
 
 Build BOTH tracks (AV and NLI), all 3 category solutions per track (6 total), evaluate on dev sets, and submit the best track's top 2 solutions. The full deliverables for the winning track:
 
-1. Two prediction CSV files (Category A + Category B)
+1. Two prediction CSV files (`Group_34_A.csv` + `Group_34_B.csv`)
 2. Training notebooks (one per solution)
 3. Evaluation notebook (confusion matrices, McNemar's, error analysis, ablation, all with written commentary)
 4. Demo/inference notebooks (one per solution)
 5. Two model cards (using provided template at `archive_extracted/COMP34812_modelcard_template.md`)
 6. Poster (A1 PDF)
-7. README.md
-8. All trained models saved
+7. README.md (with code/data attribution)
+8. All trained models saved (>10MB on OneDrive, linked in README)
 
 ## How to Work — Self-Recursive Loop
 
 Follow this cycle for every task. NEVER skip steps:
 
-1. **PLAN** — Read the relevant implementation plan section. If anything is unclear, spin up a research agent team.
+1. **PLAN** — Read the relevant implementation plan section. If anything is unclear, spin up a research agent.
 2. **CODE** — Write the code. Commit AND push every ~10 lines changed. No Co-Authored-By.
 3. **VERIFY** — Run the code. Check outputs are correct. If not, debug and fix (commit each fix).
 4. **TEST** — Write minimal tests. Run them. Commit.
 5. **EVALUATE** — For ML code: run on dev set, compare against baselines, check statistical significance.
-6. **ITERATE** — If below target performance, spin up agent teams to research improvements. Implement the best ideas. Repeat from step 2.
+6. **ITERATE** — If below target performance, spin up agents to research improvements. Implement the best ideas. Repeat from step 2.
 7. **COMPLY** — At major milestones, spin up a compliance agent to verify: rubric coverage, spec requirements, naming conventions, file paths, model card accuracy vs code.
-8. **NEXT** — Move to next task. If not obvious what's next, spin up an agent team to determine priorities.
+8. **NEXT** — Move to next task. If not obvious what's next, spin up agents to determine priorities.
 
-## Agent Teams
+## Agents — Sub-agents vs Agent Teams
 
-When you need research or decisions, spin up agent TEAMS — not just independent sub-agents. Agents in a team should communicate: one agent's findings inform the next agent's work. Agent characteristics should VARY based on the task at hand. Examples:
+Use the right tool for the job:
+- **Sub-agents**: When the task is independent and bounded (e.g. "research ESIM architecture", "check if file X exists on CSF3")
+- **Agent teams**: When multiple perspectives need to communicate (e.g. "should we use GRL or contrastive loss?" — launch an NLU expert and an ML expert, synthesize findings)
 
-- **NLU/NLP Expert + ML Expert**: For architecture decisions, feature engineering choices. The NLU expert provides domain knowledge, the ML expert translates it into implementation.
-- **Fine-Tuning / Post-Training Specialist**: For training procedures, hyperparameter optimization, learning rate schedules
-- **Evaluation Expert**: For designing evaluation beyond standard metrics, statistical testing, error analysis
-- **Literature Research Agent**: For finding papers, verifying citations, checking approach novelty
-- **Compliance Agent**: Run at major milestones to verify: rubric coverage, spec requirements, naming conventions (`Group_n_category.csv`), file paths, model card accuracy vs code, AI tool declaration in README, models >10MB on cloud not in zip
+Agent characteristics should VARY based on the task:
+- **NLU/NLP Expert**: Task-specific design decisions (AV stylometry, NLI entailment patterns)
+- **ML Engineering Expert**: Model architecture, training loops, optimization
+- **Fine-Tuning / Post-Training Specialist**: Training procedures, hyperparameter optimization
+- **Evaluation Expert**: Metrics, statistical tests, error analysis, ablation design
+- **Literature Research Agent**: Finding papers, verifying citations, checking approach novelty
+- **Compliance Agent**: Rubric coverage, spec requirements, naming conventions, file paths, model card accuracy
 
-Agents should be given specific, bounded tasks with clear deliverables. When the task requires multiple perspectives (e.g. "should we use GRL or contrastive loss?"), launch multiple agents and have their findings synthesized.
+**CRITICAL: All research must be RUBRIC-DRIVEN.** The marking rubric in `CLAUDE.md` is the source of truth. Every research question, every experiment, every decision should trace back to: "which rubric criterion does this maximize, and by how much?" Don't research random things — research what will gain marks.
 
 ## Git Rules — CRITICAL
 
@@ -97,12 +101,9 @@ Follow `TRACK_DECISION_FRAMEWORK.md` Phase ordering:
 ### Phase 5: Category C Backup (if needed)
 ### Phase 6: Polish — model cards, evaluation commentary, documentation, poster
 
-## Start Now
-
 ## Spec Compliance Reminders
-- README must have a **"Use of Generative AI Tools"** section (university requirement, Section VI of spec)
 - README must have code attribution and data source attribution
-- Prediction files: `Group_n_A.csv`, `Group_n_B.csv` (n = Canvas group number)
+- Prediction files: `Group_34_A.csv`, `Group_34_B.csv`
 - All deliverables in ONE zip file for Canvas
 - Models >10MB: store on OneDrive, link in README — do NOT include in zip
 - Demo code must be Python notebooks with `!pip install` lines at the top

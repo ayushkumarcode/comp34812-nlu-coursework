@@ -3,6 +3,8 @@
 ## Project Goal
 Maximize marks (target 95-100%) on COMP34812 NLU Coursework (40 marks, 50% of unit grade). Build TWO tracks (AV + NLI), Categories A+B+C for each, evaluate both, submit the best. Deadline: 2026-03-31 14:00.
 
+**Group number: 34.** Prediction files: `Group_34_A.csv`, `Group_34_B.csv` (or `Group_34_C.csv`).
+
 ## Plans
 - `IMPLEMENTATION_PLAN.md` — AV track (974 lines, all 3 categories)
 - `NLI_IMPLEMENTATION_PLAN.md` — NLI track (1,363 lines, all 3 categories)
@@ -30,11 +32,10 @@ Follow this loop for EVERY piece of work:
 ```
 
 When things are NOT obvious (e.g. hyperparameter choices, architecture decisions):
-- Spin up agent TEAMS (not just independent sub-agents) to research, hypothesize, and test experiments
-- Agents should be specialized (NLU expert, ML expert, fine-tuning expert, evaluation expert)
-- Agents MUST communicate findings to each other — one agent's output should inform another's work
+- Spin up agents to research, hypothesize, and test experiments
+- Use sub-agents when the task is independent and bounded; use agent TEAMS when multiple perspectives need to communicate
 - Agent characteristics should VARY based on the task (e.g. a post-training specialist for fine-tuning decisions, an evals specialist for metrics design, a literature researcher for novelty checks)
-- This is an agent TEAM, not a collection of independent workers
+- **All research must be RUBRIC-DRIVEN.** The marking rubric (Section IX of spec, reproduced below) is the source of truth. Every research question, experiment, and decision should trace back to: "which rubric criterion does this maximize, and by how much?"
 
 ## Agent Team Specifications
 Use specialized agents based on the task:
@@ -53,16 +54,27 @@ Use specialized agents based on the task:
 - GPU partition: `#SBATCH -p gpuA` (A100 80GB), max 4 days walltime
 - Activate: `module load apps/binapps/conda/miniforge3/25.3.0 && conda activate nlu`
 
-## Rubric (40 marks)
-- System Predictions: 6 (3+3, must be statistically significant over baseline)
-- Organisation & Documentation: 3
-- Completeness & Reproducibility: 3
-- Soundness: 6 (3+3)
-- Creativity: 6 (3+3, "beyond typical standard approaches")
-- Evaluation: 3 (beyond just Codabench — needs commentary)
-- Model Card Formatting: 3
-- Model Card Informativeness: 6 (3+3)
-- Model Card Accurate Representation: 4 (HIGHEST SINGLE CRITERION)
+## Marking Rubric — SOURCE OF TRUTH (40 marks)
+All research, decisions, and agent tasks must trace back to maximizing these criteria.
+
+**System Predictions (6 marks):**
+- Competitive performance Sol 1 (3): "The solution obtains performance improvement that is statistically significant, in comparison with a baseline method for the same type of approach."
+- Competitive performance Sol 2 (3): Same.
+
+**Implementation of Solutions (21 marks):**
+- Organisation and documentation (3): "The code is well-documented and structured in a way that even developers outside of the team can follow it."
+- Completeness and Reproducibility (3): "All necessary resources, including trained models and demo code, were provided for both solutions, allowing for reproducibility."
+- Soundness Sol 1 (3): "The design of the solution is technically sound; there were no obvious technical details that were ignored/misunderstood."
+- Soundness Sol 2 (3): Same.
+- Creativity Sol 1 (3): "The design of the solution draws from literature on state-of-the-art approaches; the group was adventurous in that they went beyond the typical, standard approaches to the problem."
+- Creativity Sol 2 (3): Same.
+- Evaluation (3): "There is evidence that the group put effort into evaluating their solutions, outside of the supporting benchmarking tool (Codabench)."
+
+**Model Cards (13 marks):**
+- Formatting (3): "Both model cards were prepared in the correct format."
+- Informativeness Sol 1 (3): "The model card sufficiently describes the model, allowing any potential users to reuse/build upon the model."
+- Informativeness Sol 2 (3): Same.
+- Accurate representation (4): "The model cards accurately represent the implemented solutions." — **HIGHEST SINGLE CRITERION.**
 
 ## Baselines (macro_f1)
 - AV: SVM=0.5610, LSTM=0.6226, BERT=0.7854
@@ -71,9 +83,6 @@ Use specialized agents based on the task:
 ## Local Scorer
 `cd baseline_extracted/nlu_bundle-feature-unified-local-scorer && python3 -m local_scorer.main --task {av|nli} --prediction path/to/file.csv`
 
-## AI Tool Declaration — REQUIRED BY SPEC
-The README MUST include a section called **"Use of Generative AI Tools"** describing which AI tools were used and for what purposes. This is a university requirement (Section VI of spec). Failure to declare = academic malpractice.
-
 ## Key Constraints
 - Closed mode: only provided training data, no external datasets
 - Pre-trained models (GloVe, BERT, DeBERTa, spaCy) are allowed
@@ -81,7 +90,7 @@ The README MUST include a section called **"Use of Generative AI Tools"** descri
 - Statistical significance test (McNemar's) is REQUIRED for performance marks
 - Model cards must EXACTLY match implementations
 - Time is NOT a constraint — optimize purely for grade
-- Prediction files named `Group_n_A.csv` and `Group_n_B.csv` (n = Canvas group number)
+- Prediction files named `Group_34_A.csv` and `Group_34_B.csv`
 - All deliverables compressed into ONE zip file for Canvas upload
 - Models >10MB must NOT be in the zip — store on OneDrive, link in README
 - Code attribution required — acknowledge any reused code or face academic malpractice
