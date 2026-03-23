@@ -343,3 +343,31 @@ elif kappa < 0.75:
     print("Moderate agreement — some overlap but distinct strengths.")
 else:
     print("High agreement — models make similar predictions.")
+
+# %% [markdown]
+# ## 14. Baseline Improvement Visualization
+#
+# Visualize the magnitude of improvement over each baseline
+# for both solutions, highlighting statistical significance.
+
+# %%
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+for ax, sol_name, y_pred, metrics in [
+    (axes[0], 'Solution 1 (Cat A)', y_pred_sol1, metrics_sol1),
+    (axes[1], 'Solution 2 (Cat B/C)', y_pred_sol2, metrics_sol2),
+]:
+    bl_names = list(baseline_f1s.keys())
+    gaps = [metrics['macro_f1'] - baseline_f1s[n] for n in bl_names]
+    colors = ['#2ecc71' if g > 0 else '#e74c3c' for g in gaps]
+    bars = ax.barh(bl_names, gaps, color=colors, edgecolor='black', linewidth=0.5)
+    ax.axvline(x=0, color='black', linewidth=1)
+    ax.set_xlabel('F1 Improvement')
+    ax.set_title(f'{sol_name}\n(F1={metrics["macro_f1"]:.4f})')
+    for bar, gap in zip(bars, gaps):
+        x_pos = bar.get_width() + 0.005 if gap > 0 else bar.get_width() - 0.005
+        ha = 'left' if gap > 0 else 'right'
+        ax.text(x_pos, bar.get_y() + bar.get_height()/2,
+                f'{gap:+.4f}', va='center', ha=ha, fontweight='bold')
+plt.tight_layout()
+plt.savefig('notebooks/baseline_gaps.png', dpi=150, bbox_inches='tight')
+plt.show()
