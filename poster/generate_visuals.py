@@ -47,6 +47,32 @@ def f1_bar_chart(results, baselines, task='av', save=True):
     return fig
 
 
+def confusion_matrix_heatmap(y_true, y_pred, title='Confusion Matrix', save_name='cm.png'):
+    """Generate confusion matrix heatmap."""
+    from sklearn.metrics import confusion_matrix
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    fig, ax = plt.subplots(figsize=(6, 5))
+    im = ax.imshow(cm, cmap='Blues', interpolation='nearest')
+    ax.set_xticks([0, 1])
+    ax.set_yticks([0, 1])
+    ax.set_xticklabels(['Class 0', 'Class 1'], fontsize=12)
+    ax.set_yticklabels(['Class 0', 'Class 1'], fontsize=12)
+    ax.set_xlabel('Predicted', fontsize=14)
+    ax.set_ylabel('True', fontsize=14)
+    ax.set_title(title, fontsize=16)
+    for i in range(2):
+        for j in range(2):
+            color = 'white' if cm[i, j] > cm.max()/2 else 'black'
+            ax.text(j, i, str(cm[i, j]), ha='center', va='center',
+                    fontsize=18, fontweight='bold', color=color)
+    plt.colorbar(im, ax=ax)
+    plt.tight_layout()
+    path = POSTER_DIR / save_name
+    plt.savefig(str(path), dpi=200, bbox_inches='tight')
+    print(f"Saved to {path}")
+    return fig
+
+
 if __name__ == '__main__':
     # Test with AV results
     f1_bar_chart(
