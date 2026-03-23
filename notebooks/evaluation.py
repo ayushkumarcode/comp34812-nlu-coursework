@@ -265,3 +265,29 @@ plt.tight_layout()
 plt.savefig('notebooks/f1_comparison.png', dpi=150, bbox_inches='tight')
 plt.show()
 print("Bar chart saved to notebooks/f1_comparison.png")
+
+# %% [markdown]
+# ## 10. Ablation: What if we used only Sol 1 or Sol 2?
+#
+# We analyze how each solution performs on different subsets
+# of the data to understand their complementary strengths.
+
+# %%
+# Agreement analysis
+agree = y_pred_sol1 == y_pred_sol2
+disagree = ~agree
+print(f"Agreement rate: {agree.mean():.4f} ({agree.sum()}/{len(agree)})")
+print(f"Disagreement rate: {disagree.mean():.4f} ({disagree.sum()}/{len(disagree)})")
+print(f"\nOn disagreement cases:")
+correct_sol1 = (y_pred_sol1[disagree] == y_true[disagree])
+correct_sol2 = (y_pred_sol2[disagree] == y_true[disagree])
+print(f"  Sol 1 correct: {correct_sol1.sum()} ({correct_sol1.mean():.4f})")
+print(f"  Sol 2 correct: {correct_sol2.sum()} ({correct_sol2.mean():.4f})")
+print(f"  Neither correct: {(~correct_sol1 & ~correct_sol2).sum()}")
+
+print("""
+INTERPRETATION: The agreement/disagreement analysis shows how often our
+two solutions agree on predictions. When they disagree, we examine which
+model is more often correct. This reveals their complementary strengths
+and suggests potential for ensemble combinations in future work.
+""")
