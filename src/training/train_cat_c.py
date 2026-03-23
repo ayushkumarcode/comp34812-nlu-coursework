@@ -97,7 +97,7 @@ def train_av(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name, use_fast=False)
 
     # Load data
     train_df = load_av_data(split='train')
@@ -224,7 +224,7 @@ def train_nli(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name, use_fast=False)
 
     train_df = load_nli_data(split='train')
     dev_df = load_nli_data(split='dev')
