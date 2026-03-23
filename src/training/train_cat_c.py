@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from torch.optim import AdamW
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from pathlib import Path
 from sklearn.metrics import f1_score
 
@@ -124,7 +124,7 @@ def train_av(args):
         {'params': model.topic_head.parameters(), 'lr': 5e-4},
     ]
     optimizer = AdamW(param_groups, weight_decay=0.01)
-    scaler = GradScaler()
+    scaler = GradScaler('cuda')
 
     best_f1 = 0
     patience_counter = 0
@@ -143,7 +143,7 @@ def train_av(args):
             labels = batch['label'].to(device)
 
             optimizer.zero_grad()
-            with autocast():
+            with autocast('cuda'):
                 logits, topic_logits, (v1, v2) = model(ids1, mask1, ids2, mask2)
                 loss_bce = bce_loss(logits.squeeze(-1), labels)
                 target = labels * 2 - 1
@@ -213,7 +213,7 @@ def train_nli(args):
     bce_loss = nn.BCEWithLogitsLoss()
 
     optimizer = AdamW(model.parameters(), lr=2e-5, weight_decay=0.01)
-    scaler = GradScaler()
+    scaler = GradScaler('cuda')
 
     best_f1 = 0
     patience_counter = 0
@@ -232,7 +232,7 @@ def train_nli(args):
             labels = batch['label'].to(device)
 
             optimizer.zero_grad()
-            with autocast():
+            with autocast('cuda'):
                 logits, adv_logits = model(ids, mask, hyp_ids, hyp_mask)
                 loss = bce_loss(logits.squeeze(-1), labels)
                 if adv_logits is not None:
