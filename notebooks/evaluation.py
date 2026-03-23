@@ -326,3 +326,20 @@ print(f"Solution 1 MCC: {mcc_sol1:.4f}")
 print(f"Solution 2 MCC: {mcc_sol2:.4f}")
 print(f"\nMCC > 0.4 indicates moderate agreement with ground truth.")
 print(f"MCC > 0.7 indicates strong agreement.")
+
+# %% [markdown]
+# ## 13. Inter-Model Agreement (Cohen's Kappa)
+#
+# Cohen's Kappa measures agreement between our two solutions
+# beyond chance. Low kappa suggests complementary models.
+
+# %%
+from src.evaluation.eval_utils import cohens_kappa
+kappa = cohens_kappa(y_pred_sol1, y_pred_sol2)
+print(f"Cohen's Kappa between Sol 1 and Sol 2: {kappa:.4f}")
+if kappa < 0.4:
+    print("Low agreement — models capture different aspects of the task.")
+elif kappa < 0.75:
+    print("Moderate agreement — some overlap but distinct strengths.")
+else:
+    print("High agreement — models make similar predictions.")
