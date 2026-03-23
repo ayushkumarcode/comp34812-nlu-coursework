@@ -38,3 +38,18 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
 model = NLIDeBERTaCrossEncoder(model_name=MODEL_NAME).to(device)
 model.load_state_dict(torch.load('models/nli_cat_c_best.pt',
                                   map_location=device, weights_only=True))
+model.eval()
+print("DeBERTa NLI model loaded.")
+
+# %% [markdown]
+# ## 2. Load Test Data and Predict
+
+# %%
+test_df = load_nli_data(split='dev')
+print(f"Test data: {len(test_df)} pairs")
+
+all_preds = []
+for i in range(0, len(test_df), 32):
+    batch_df = test_df.iloc[i:i+32]
+    enc = tokenizer(
+        list(batch_df['premise']), list(batch_df['hypothesis']),
