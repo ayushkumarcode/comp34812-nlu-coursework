@@ -17,9 +17,9 @@ from src.av_tfidf_features import CharNgramTFIDF, CosineSimFeatures
 
 # Style-only feature prefixes (for topic-robustness mechanism)
 STYLE_FEATURE_PREFIXES = [
-    'fw_', 'pos_', 'avg_dep_depth', 'max_dep_depth', 'avg_branching',
-    'subordination', 'avg_dep_arc', 'passive_ratio', 'relcl_ratio',
-    'avg_conjuncts', 'content_clause', 'fronted_adverb',
+    'fw_', 'pos_', 'avg_dep_depth', 'max_dep_depth', 'avg_branching_factor',
+    'subordination_index', 'avg_dep_arc_length', 'passive_ratio', 'relcl_ratio',
+    'avg_conjuncts', 'content_clause_ratio', 'fronted_adverb_ratio',
     'sent_len_autocorr', 'sent_len_entropy', 'punct_burstiness',
     'sent_len_var_ratio', 'sent_len_mean_reversion', 'punct_diversity_entropy',
     'char_bigram_mi', 'text_entropy_rate', 'char_cond_entropy',
