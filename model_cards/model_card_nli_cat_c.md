@@ -48,3 +48,8 @@ COMP34812 NLI shared task training set: 24,432 premise-hypothesis pairs with bin
 - **Training time:** ~10 minutes on NVIDIA A2 (15GB)
 - **Model size:** ~370MB (includes adversarial encoder)
 - **Inference speed:** ~200 samples/second on GPU
+
+## Evaluation
+
+### Testing Data & Metrics
+
