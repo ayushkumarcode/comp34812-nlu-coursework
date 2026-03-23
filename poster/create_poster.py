@@ -116,3 +116,16 @@ def create_poster(task='av'):
     add_section(slide, 'Results', _results(task), x2, y_start + Emu(6000000), col_w)
 
     # Column 3
+    x3 = x2 + col_w + gap
+    add_section(slide, 'Error Analysis', _errors(task), x3, y_start, col_w)
+    add_section(slide, 'Limitations & Ethics', _limits(task), x3, y_start + Emu(6000000), col_w)
+
+    # Embed charts if they exist
+    poster_dir = Path(__file__).parent
+    for img_name in ['f1_chart.png', 'cm_av_cat_b.png']:
+        img_path = poster_dir / img_name
+        if img_path.exists():
+            slide.shapes.add_picture(str(img_path), x2, y_start + Emu(9000000), Emu(11000000))
+
+    prs.save('poster/poster.pptx')
+    print("Poster saved to poster/poster.pptx")
