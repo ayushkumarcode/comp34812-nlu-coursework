@@ -1,10 +1,10 @@
 # COMP34812 NLU Coursework — Group 34
 
-## Authorship Verification Shared Task
+## Natural Language Inference Shared Task
 
-This repository contains our solutions for the COMP34812 NLU shared task on Authorship Verification (AV). Given a pair of texts, the task is to determine whether they were written by the same author (label 1) or different authors (label 0).
+This repository contains our solutions for the COMP34812 NLU shared task on Natural Language Inference (NLI). Given a premise and hypothesis, the task is to determine whether the hypothesis is entailed (1) or not (0).
 
-We submit two solutions from **two different categories** (A and B):
+We submit two solutions from **two different categories** (A and C):
 
 ### Solution 1: Category A — Diff-Vector Stacking Ensemble (AV-StyleStack)
 
