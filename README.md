@@ -6,20 +6,19 @@ This repository contains our solutions for the COMP34812 NLU shared task on Natu
 
 We submit two solutions from **two different categories** (A and C):
 
-### Solution 1: Category A — Diff-Vector Stacking Ensemble (AV-StyleStack)
+### Solution 1: Category A — Feature-Rich Stacking Ensemble
 
-A traditional ML approach using ~950 stylometric features per text pair:
-- 9 feature groups including novel syntactic complexity, writing rhythm, and information-theoretic features
-- Diff-vector representation |f(text1) - f(text2)| with topic-robust style-only variant
-- Stacking ensemble: SVM-RBF + Random Forest + XGBoost → Logistic Regression meta-learner
+~280 features per premise-hypothesis pair including alignment and natural logic:
+- Lexical overlap, semantic similarity, negation detection
+- Word alignment (Sultan et al. 2014), natural logic (MacCartney & Manning 2007)
+- XGBoost + LightGBM + SVM-RBF + LR → LR meta-learner
 
-### Solution 2: Category B — Adversarial Style-Content Disentanglement Network (AV-StyleDisentangle)
+### Solution 2: Category C — DeBERTa-v3 Cross-Encoder (F1=0.9167)
 
-A Siamese neural network with:
-- Character-level multi-width CNN + BiLSTM + additive attention encoder
-- Gradient Reversal Layer (GRL) for topic debiasing
-- Contrastive embedding loss for style-space shaping
-- Stylistic invariance training via character perturbation
+Fine-tuned DeBERTa-v3-base as cross-encoder:
+- Hypothesis-only adversarial debiasing via GRL
+- Mixed precision training, early stopping
+- Beats BERT baseline by +0.097 (p < 0.001)
 
 ## Repository Structure
 
