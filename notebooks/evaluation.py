@@ -11,7 +11,7 @@ This script generates the full evaluation suite for both submitted solutions:
 - Calibration analysis
 - Error analysis by text properties
 - Ablation studies
-- Attention visualization (Cat B)
+- Attention visualization (Cat C)
 
 All plots include written interpretation (3-5 sentences).
 
@@ -118,7 +118,7 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 for ax, y_pred, title in [
     (axes[0], y_pred_sol1, 'Solution 1 (Cat A)'),
-    (axes[1], y_pred_sol2, 'Solution 2 (Cat B)'),
+    (axes[1], y_pred_sol2, 'Solution 2 (Cat C)'),
 ]:
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
@@ -254,7 +254,7 @@ print("\n\nEvaluation complete. See generated plots in notebooks/ directory.")
 
 # %%
 fig, ax = plt.subplots(figsize=(10, 6))
-models = list(baseline_f1s.keys()) + ['Sol 1\n(Cat A)', 'Sol 2\n(Cat B)']
+models = list(baseline_f1s.keys()) + ['Sol 1\n(Cat A)', 'Sol 2\n(Cat C)']
 scores = list(baseline_f1s.values()) + [
     metrics_sol1['macro_f1'], metrics_sol2['macro_f1']]
 colors = ['#95a5a6'] * len(baseline_f1s) + ['#2ecc71', '#e74c3c']
@@ -354,7 +354,7 @@ else:
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 for ax, sol_name, y_pred, metrics in [
     (axes[0], 'Solution 1 (Cat A)', y_pred_sol1, metrics_sol1),
-    (axes[1], 'Solution 2 (Cat B/C)', y_pred_sol2, metrics_sol2),
+    (axes[1], 'Solution 2 (Cat C/C)', y_pred_sol2, metrics_sol2),
 ]:
     bl_names = list(baseline_f1s.keys())
     gaps = [metrics['macro_f1'] - baseline_f1s[n] for n in bl_names]
