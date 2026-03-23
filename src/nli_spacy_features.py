@@ -219,6 +219,7 @@ def alignment_features(p_doc, h_doc):
     type_counts = Counter(a[2] for a in alignments)
     feats['exact_aligned_ratio'] = type_counts.get('exact', 0) / max(n_aligned, 1)
     feats['lemma_aligned_ratio'] = type_counts.get('lemma', 0) / max(n_aligned, 1)
+    feats['synonym_aligned_ratio'] = type_counts.get('synonym', 0) / max(n_aligned, 1)
     feats['contextual_aligned_ratio'] = type_counts.get('contextual', 0) / max(n_aligned, 1)
 
     # Average alignment confidence
