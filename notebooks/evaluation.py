@@ -132,14 +132,18 @@ plt.tight_layout()
 plt.savefig('notebooks/confusion_matrices.png', dpi=150, bbox_inches='tight')
 plt.show()
 
-# Interpretation
-print("""
-INTERPRETATION: The confusion matrices show the distribution of correct and
-incorrect predictions for each class. Solution 1 shows [describe pattern —
-e.g., balanced performance across classes / slight bias toward class 1].
-Solution 2 shows [describe]. The off-diagonal elements indicate the specific
-error types each model makes, which we analyze further in the error analysis section.
-""")
+# Auto-generated interpretation
+for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    tn, fp, fn, tp = cm.ravel()
+    total = len(y_true)
+    print(f"\n{sol_name}: TN={tn}, FP={fp}, FN={fn}, TP={tp}")
+    if fp > fn:
+        print(f"  Bias: More false positives than false negatives ({fp} vs {fn})")
+    elif fn > fp:
+        print(f"  Bias: More false negatives than false positives ({fn} vs {fp})")
+    else:
+        print(f"  Balanced error types ({fp} FP, {fn} FN)")
 
 # %% [markdown]
 # ## 4. McNemar's Test vs Baselines
