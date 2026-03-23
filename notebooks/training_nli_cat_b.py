@@ -73,3 +73,31 @@ dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
 dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+# %% [markdown]
+# ## 3. Training
+# See `src/training/train_nli_cat_b.py` for full training loop.
+# Key: BCE loss, ReduceLROnPlateau scheduler, early stopping on dev F1.
+# GloVe embeddings frozen for first 5 epochs then fine-tuned at 0.1x LR.
+
+# %%
+# Training is done via: python -u -m src.training.train_nli_cat_b
+# on CSF3 GPU with Slurm: sbatch scripts/train_nli_cat_b.sh
+# Full results are logged to logs/nli_cat_b_<jobid>.log
+
+# %% [markdown]
+# ## 4. Results
+# Load best model and evaluate on dev set.
+
+# %%
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+checkpoint = torch.load('models/nli_cat_b_best.pt', map_location=device, weights_only=False)
+
+model = ESIM(
+    vocab_size=vocab.vocab_size, embedding_dim=300,
+    hidden_size=HIDDEN_SIZE, char_vocab_size=vocab.char_vocab_size,
+    knowledge_dim=5, dropout=0.0,
+).to(device)
+model.load_state_dict(checkpoint['model_state_dict'])
+model.eval()
+print("Best model loaded.")
