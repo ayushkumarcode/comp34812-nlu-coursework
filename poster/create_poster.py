@@ -26,3 +26,17 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 import numpy as np
 
 # ============================================================
+# CONFIGURATION
+# ============================================================
+
+SLIDE_WIDTH = Inches(40)
+SLIDE_HEIGHT = Inches(22.5)
+
+TITLE_BG = RGBColor(0x1B, 0x3A, 0x5C)
+HEADER_BG = RGBColor(0x2E, 0x86, 0xAB)
+WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+DARK = RGBColor(0x2D, 0x2D, 0x2D)
+
+TITLE_SIZE = Pt(48)
+HEADER_SIZE = Pt(28)
+BODY_SIZE = Pt(16)
