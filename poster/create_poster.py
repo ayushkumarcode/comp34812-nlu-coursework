@@ -100,10 +100,19 @@ def create_poster(task='av'):
     p2.font.color.rgb = RGBColor(0xCC, 0xCC, 0xCC)
     p2.alignment = PP_ALIGN.CENTER
 
-    prs.save('poster/poster.pptx')
-    print("Poster saved to poster/poster.pptx")
+    # 3-column layout
+    col_w = Emu(12000000)
+    gap = Emu(200000)
+    y_start = Emu(4500000)
 
+    # Column 1
+    x1 = Emu(200000)
+    add_section(slide, 'Introduction & Dataset', _intro(task), x1, y_start, col_w)
+    add_section(slide, 'Solution 1 (Cat A)', _sol1(task), x1, y_start + Emu(6000000), col_w)
 
-if __name__ == '__main__':
-    task = sys.argv[1] if len(sys.argv) > 1 else 'av'
-    create_poster(task=task)
+    # Column 2
+    x2 = x1 + col_w + gap
+    add_section(slide, 'Solution 2', _sol2(task), x2, y_start, col_w)
+    add_section(slide, 'Results', _results(task), x2, y_start + Emu(6000000), col_w)
+
+    # Column 3
