@@ -67,3 +67,29 @@ def add_section(slide, title, body, x, y, width, header_h=Emu(1500000)):
     p.text = body
     p.font.size = BODY_SIZE
     p.font.color.rgb = DARK
+
+
+def create_poster(task='av'):
+    """Create academic poster as PPTX."""
+    prs = Presentation()
+    prs.slide_width = SLIDE_WIDTH
+    prs.slide_height = SLIDE_HEIGHT
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+    # Title banner
+    shape = slide.shapes.add_shape(1, 0, 0, SLIDE_WIDTH, Emu(4000000))
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = TITLE_BG
+    shape.line.fill.background()
+
+    txBox = slide.shapes.add_textbox(Emu(500000), Emu(500000),
+                                      SLIDE_WIDTH - Emu(1000000), Emu(2500000))
+    tf = txBox.text_frame
+    tf.word_wrap = True
+    task_name = 'Authorship Verification' if task == 'av' else 'NLI'
+    p = tf.paragraphs[0]
+    p.text = f'{task_name}: A Multi-Strategy Approach'
+    p.font.size = TITLE_SIZE
+    p.font.color.rgb = WHITE
+    p.font.bold = True
+    p.alignment = PP_ALIGN.CENTER
