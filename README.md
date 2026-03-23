@@ -49,17 +49,17 @@ Fine-tuned DeBERTa-v3-base as cross-encoder:
 │   └── evaluation/
 │       └── eval_utils.py          # Evaluation utilities
 ├── notebooks/
-│   ├── training_cat_a.py          # Cat A training notebook
-│   ├── training_cat_b.py          # Cat B training notebook
-│   ├── demo_cat_a.py              # Cat A inference demo
-│   ├── demo_cat_b.py              # Cat B inference demo
-│   └── evaluation.py              # Comprehensive evaluation
+│   ├── demo_nli_cat_a.ipynb       # Cat A inference demo
+│   ├── demo_nli_cat_c.ipynb       # Cat C inference demo
+│   ├── training_nli_cat_a.py      # Cat A training notebook
+│   ├── training_nli_cat_c.py      # Cat C training notebook
+│   └── evaluation.ipynb           # Comprehensive evaluation
 ├── model_cards/
-│   ├── model_card_cat_a.md        # Model card for Solution 1
-│   └── model_card_cat_b.md        # Model card for Solution 2
+│   ├── model_card_nli_cat_a.md    # Model card for Solution 1
+│   └── model_card_nli_cat_c.md    # Model card for Solution 2
 ├── predictions/
 │   ├── Group_34_A.csv             # Solution 1 predictions
-│   └── Group_34_B.csv             # Solution 2 predictions
+│   └── Group_34_C.csv             # Solution 2 predictions
 ├── scripts/                       # Slurm batch scripts for CSF3
 └── models/                        # Trained model files (>10MB on OneDrive)
 ```
