@@ -24,3 +24,12 @@ X_dev, _ = ext.transform(dev_df)
 scaler = StandardScaler()
 X_tr = scaler.fit_transform(X_train)
 X_dv = scaler.transform(X_dev)
+
+base = [
+    ('xgb', XGBClassifier(n_estimators=500, max_depth=7, learning_rate=0.05,
+                           subsample=0.8, colsample_bytree=0.8,
+                           eval_metric='logloss', random_state=42, n_jobs=1)),
+    ('lgbm', LGBMClassifier(n_estimators=500, max_depth=7, learning_rate=0.05,
+                             num_leaves=63, verbose=-1, random_state=42, n_jobs=1)),
+    ('lr', LogisticRegression(C=1.0, max_iter=2000, random_state=42)),
+]
