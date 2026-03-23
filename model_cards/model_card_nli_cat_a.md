@@ -53,3 +53,29 @@ COMP34812 NLI dev set: 6,736 pairs. Primary: macro_f1.
 
 ### Results
 
+| Metric | Value |
+|--------|-------|
+| **macro_f1** | **0.6999** |
+| accuracy | 0.7013 |
+| **MCC** | **0.4016** |
+
+Beats SVM (+0.115) and LSTM (+0.040).
+
+## Technical Specifications
+
+### Hardware
+
+Training: 1 CPU core. Inference: any machine with Python.
+
+### Software
+
+Python 3.11, XGBoost, scikit-learn, spaCy en_core_web_sm.
+
+## Bias, Risks, and Limitations
+
+Closed-mode, English-only, surface features without deep semantics.
+
+## Additional Information
+
+Feature pipeline: src/nli_pipeline.py. Training: scripts/nli_cat_a_simple.py.
+
