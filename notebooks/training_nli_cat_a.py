@@ -56,3 +56,25 @@ extractor.fit(train_df)
 X_train, feature_names = extractor.transform(train_df)
 X_dev, _ = extractor.transform(dev_df)
 print(f"Train: {X_train.shape}, Dev: {X_dev.shape}")
+
+# %% [markdown]
+# ## 3. Train Stacking Ensemble
+
+# %%
+scaler, ensemble, dev_metrics = train_ensemble(X_train, y_train, X_dev, y_dev)
+
+# %% [markdown]
+# ## 4. Save Model and Generate Predictions
+
+# %%
+save_ensemble(scaler, ensemble, extractor, save_dir='models')
+y_pred = predict(X_dev, scaler, ensemble)
+save_predictions(y_pred, 'predictions/Group_34_A.csv')
+
+metrics = compute_all_metrics(y_dev, y_pred)
+print_metrics(metrics, "NLI Cat A — Dev Set Results")
+
+baselines = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
+for name, baseline in baselines.items():
+    gap = metrics['macro_f1'] - baseline
+    print(f"vs {name} ({baseline:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
