@@ -72,8 +72,8 @@ print(f"Baselines loaded: {list(baselines.keys())}")
 
 # Load our predictions
 # Paths to prediction files (update category letters as needed)
-sol1_path = f'predictions/{TASK}_Group_34_A.csv'  # Cat A
-sol2_path = f'predictions/{TASK}_Group_34_C.csv'  # Cat C (or B)
+sol1_path = f'predictions/Group_34_A.csv'  # Cat A
+sol2_path = f'predictions/Group_34_C.csv'  # Cat C (best variant)
 
 def load_preds(path):
     preds = []
