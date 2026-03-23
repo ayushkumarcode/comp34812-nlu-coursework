@@ -101,8 +101,10 @@ Models larger than 10MB are stored on OneDrive:
 ## Code Attribution
 
 - scikit-learn (Pedregosa et al., 2011) — ML framework
-- XGBoost (Chen & Guestrin, 2016) — gradient boosting
+- XGBoost (Chen & Guestrin, 2016), LightGBM (Ke et al., 2017) — gradient boosting
 - spaCy (Honnibal & Montani, 2017) — NLP pipeline
 - PyTorch (Paszke et al., 2019) — deep learning framework
-- Gradient Reversal Layer implementation adapted from Ganin & Lempitsky (2015)
+- HuggingFace Transformers (Wolf et al., 2020) — DeBERTa model loading
+- Gradient Reversal Layer adapted from Ganin & Lempitsky (2015)
+- GloVe embeddings (Pennington et al., 2014) — pre-trained word vectors
 - All code written by Group 34 unless otherwise noted
