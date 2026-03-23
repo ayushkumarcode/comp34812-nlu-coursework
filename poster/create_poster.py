@@ -129,3 +129,22 @@ def create_poster(task='av'):
 
     prs.save('poster/poster.pptx')
     print("Poster saved to poster/poster.pptx")
+
+
+def _intro(t):
+    if t == 'nli':
+        return ('NLI: determine if hypothesis is entailed by premise.\n'
+                'Dataset: 24,432 train / 6,736 dev. Near-balanced.')
+    return 'AV: determine if two texts share the same author.'
+
+
+def _sol1(t):
+    if t == 'nli':
+        return 'Cat A — Stacking Ensemble, ~280 features.'
+    return 'Cat A — ~950 stylometric features, stacking ensemble.'
+
+
+def _sol2(t):
+    if t == 'nli':
+        return 'Cat C — DeBERTa-v3-base cross-encoder with GRL.'
+    return 'Cat B — Siamese char-CNN + BiLSTM + GRL.'
