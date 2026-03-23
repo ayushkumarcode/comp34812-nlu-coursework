@@ -40,3 +40,30 @@ DARK = RGBColor(0x2D, 0x2D, 0x2D)
 TITLE_SIZE = Pt(48)
 HEADER_SIZE = Pt(28)
 BODY_SIZE = Pt(16)
+
+
+def add_section(slide, title, body, x, y, width, header_h=Emu(1500000)):
+    """Add a section with colored header and body text."""
+    header = slide.shapes.add_shape(1, x, y, width, header_h)
+    header.fill.solid()
+    header.fill.fore_color.rgb = HEADER_BG
+    header.line.fill.background()
+
+    txBox = slide.shapes.add_textbox(x + Emu(100000), y + Emu(150000),
+                                      width - Emu(200000), header_h - Emu(300000))
+    tf = txBox.text_frame
+    p = tf.paragraphs[0]
+    p.text = title
+    p.font.size = HEADER_SIZE
+    p.font.color.rgb = WHITE
+    p.font.bold = True
+
+    body_y = y + header_h + Emu(100000)
+    body_box = slide.shapes.add_textbox(x + Emu(100000), body_y,
+                                         width - Emu(200000), Emu(15000000))
+    bf = body_box.text_frame
+    bf.word_wrap = True
+    p = bf.paragraphs[0]
+    p.text = body
+    p.font.size = BODY_SIZE
+    p.font.color.rgb = DARK
