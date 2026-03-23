@@ -132,3 +132,17 @@ def main():
 
         dev_f1 = f1_score(labels_all, preds, average='macro', zero_division=0)
         print(f"Epoch {epoch:3d} | Loss: {total_loss/len(train_loader):.4f} | Dev F1: {dev_f1:.4f}")
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save({
+                'encoder_state_dict': encoder.state_dict(),
+                'classifier_state_dict': classifier.state_dict(),
+            }, save_dir / 'av_cat_c_crossenc_best.pt')
+            print(f"  -> Best model saved (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
