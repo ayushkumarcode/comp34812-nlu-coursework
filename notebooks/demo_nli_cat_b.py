@@ -63,3 +63,25 @@ test_dataset = NLIESIMDataset(
 )
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 print(f"Test data: {len(test_df)} pairs")
+
+# %% [markdown]
+# ## 3. Generate Predictions
+
+# %%
+all_preds, all_probs = [], []
+with torch.no_grad():
+    for batch in test_loader:
+        p_word = batch['premise_word_ids'].to(device)
+        p_char = batch['premise_char_ids'].to(device)
+        h_word = batch['hypothesis_word_ids'].to(device)
+        h_char = batch['hypothesis_char_ids'].to(device)
+        logits = model(p_word, p_char, h_word, h_char)
+        probs = torch.sigmoid(logits.squeeze(-1))
+        preds = (probs > 0.5).long()
+        all_preds.extend(preds.cpu().numpy())
+        all_probs.extend(probs.cpu().numpy())
+
+predictions = np.array(all_preds)
+probabilities = np.array(all_probs)
+print(f"Predictions: {len(predictions)}")
+print(f"Class distribution: {np.bincount(predictions)}")
