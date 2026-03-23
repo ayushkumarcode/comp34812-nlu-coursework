@@ -312,3 +312,17 @@ for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2
     print(f"  False Positive Rate: {fpr:.4f} ({fp} out of {fp+tn} negatives)")
     print(f"  False Negative Rate: {fnr:.4f} ({fn} out of {fn+tp} positives)")
     print()
+
+# %% [markdown]
+# ## 12. MCC Comparison
+#
+# Matthews Correlation Coefficient provides a balanced measure
+# even for imbalanced classes, ranging from -1 to +1.
+
+# %%
+mcc_sol1 = metrics_sol1['matthews_corrcoef']
+mcc_sol2 = metrics_sol2['matthews_corrcoef']
+print(f"Solution 1 MCC: {mcc_sol1:.4f}")
+print(f"Solution 2 MCC: {mcc_sol2:.4f}")
+print(f"\nMCC > 0.4 indicates moderate agreement with ground truth.")
+print(f"MCC > 0.7 indicates strong agreement.")
