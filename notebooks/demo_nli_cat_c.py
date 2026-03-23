@@ -53,3 +53,20 @@ for i in range(0, len(test_df), 32):
     batch_df = test_df.iloc[i:i+32]
     enc = tokenizer(
         list(batch_df['premise']), list(batch_df['hypothesis']),
+        truncation=True, max_length=128, padding='max_length',
+        return_tensors='pt'
+    )
+    with torch.no_grad():
+        logits, _ = model(enc['input_ids'].to(device), enc['attention_mask'].to(device))
+        pred = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+        all_preds.extend(pred.cpu().numpy())
+
+predictions = np.array(all_preds)
+print(f"Predictions: {len(predictions)}")
+
+# %% [markdown]
+# ## 3. Save Predictions
+
+# %%
+save_predictions(predictions, 'predictions/Group_34_C.csv')
+print("Saved to predictions/Group_34_C.csv")
