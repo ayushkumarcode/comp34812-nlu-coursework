@@ -146,3 +146,22 @@ def main():
             if patience_counter >= PATIENCE:
                 print(f"Early stopping at epoch {epoch}")
                 break
+
+    # Final evaluation
+    print(f"\nBest AV Cat C (cross-encoder) dev F1: {best_f1:.4f}")
+    checkpoint = torch.load(save_dir / 'av_cat_c_crossenc_best.pt', weights_only=True)
+    encoder.load_state_dict(checkpoint['encoder_state_dict'])
+    classifier.load_state_dict(checkpoint['classifier_state_dict'])
+    encoder.eval()
+    classifier.eval()
+
+    final_preds = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            outputs = encoder(input_ids=ids, attention_mask=mask)
+            cls_repr = outputs.last_hidden_state[:, 0, :]
+            logits = classifier(cls_repr)
+            pred = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+            final_preds.extend(pred.cpu().numpy())
