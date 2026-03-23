@@ -178,9 +178,11 @@ def main():
     print(f"  Total params: {total_params:,}")
     print(f"  Trainable: {trainable:,}")
 
-    # Loss, optimizer, scheduler
+    # Loss, optimizer, scheduler — exclude frozen word_emb initially
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = Adam(model.parameters(), lr=LR)
+    emb_ids = set(id(p) for p in model.word_emb.parameters())
+    non_emb_params = [p for p in model.parameters() if id(p) not in emb_ids]
+    optimizer = Adam(non_emb_params, lr=LR)
     scheduler = ReduceLROnPlateau(
         optimizer, mode='max', factor=0.5, patience=3, min_lr=1e-6
     )
