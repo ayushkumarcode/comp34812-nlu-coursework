@@ -178,11 +178,9 @@ def main():
     print(f"  Total params: {total_params:,}")
     print(f"  Trainable: {trainable:,}")
 
-    # Loss, optimizer, scheduler — exclude frozen word_emb initially
+    # Loss, optimizer, scheduler
     criterion = nn.BCEWithLogitsLoss()
-    emb_ids = set(id(p) for p in model.word_emb.parameters())
-    non_emb_params = [p for p in model.parameters() if id(p) not in emb_ids]
-    optimizer = Adam(non_emb_params, lr=LR)
+    optimizer = Adam(model.parameters(), lr=LR)
     scheduler = ReduceLROnPlateau(
         optimizer, mode='max', factor=0.5, patience=3, min_lr=1e-6
     )
@@ -200,12 +198,7 @@ def main():
         # Unfreeze embeddings after epoch 5
         if epoch == 6 and pretrained_emb is not None:
             model.unfreeze_embeddings()
-            # Add embeddings to optimizer with lower LR
-            optimizer.add_param_group({
-                'params': model.word_emb.parameters(),
-                'lr': LR * 0.1
-            })
-            print("  -> Word embeddings unfrozen (lr=0.1x)")
+            print("  -> Word embeddings unfrozen")
 
         # Train
         train_loss, train_f1 = train_epoch(
