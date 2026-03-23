@@ -73,3 +73,27 @@ def main():
     print("\n--- NLI Track ---")
     nli = evaluate_track('nli',
         str(pred_dir / 'nli_Group_34_A.csv'),
+        str(pred_dir / 'nli_Group_34_B.csv'))
+
+    # Decision
+    print("\n" + "=" * 60)
+    av_valid = all(v is not None for v in av.values())
+    nli_valid = all(v is not None for v in nli.values())
+
+    if av_valid and nli_valid:
+        av_gap = sum(v['gap'] for v in av.values())
+        nli_gap = sum(v['gap'] for v in nli.values())
+        print(f"AV total gap: {av_gap:+.4f}")
+        print(f"NLI total gap: {nli_gap:+.4f}")
+        winner = 'NLI' if nli_gap > av_gap else 'AV'
+        print(f"DECISION: {winner}")
+    elif av_valid:
+        print("DECISION: AV (only track with results)")
+    elif nli_valid:
+        print("DECISION: NLI (only track with results)")
+    else:
+        print("No complete track — waiting for results")
+
+
+if __name__ == '__main__':
+    main()
