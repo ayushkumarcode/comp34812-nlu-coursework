@@ -53,3 +53,22 @@ COMP34812 NLI shared task training set: 24,432 premise-hypothesis pairs with bin
 
 ### Testing Data & Metrics
 
+#### Testing Data
+
+COMP34812 NLI dev set: 6,736 premise-hypothesis pairs.
+
+#### Metrics
+
+Primary: macro_f1. Secondary: accuracy, MCC.
+
+### Results
+
+| Metric | Value |
+|--------|-------|
+| accuracy | 0.9169 |
+| macro_precision | 0.9177 |
+| macro_recall | 0.9162 |
+| **macro_f1** | **0.9167** |
+| **MCC** | **0.8339** |
+
+Beats SVM (+0.332), LSTM (+0.256), BERT (+0.097). All p < 0.001.
