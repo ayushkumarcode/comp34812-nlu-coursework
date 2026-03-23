@@ -12,3 +12,15 @@ from lightgbm import LGBMClassifier
 from src.data_utils import load_av_data, load_solution_labels, save_predictions
 from src.av_pipeline import AVFeatureExtractor
 from src.scorer import compute_all_metrics, print_metrics
+
+train_df = load_av_data(split='train')
+dev_df = load_av_data(split='dev')
+y_train = train_df['label'].values
+y_dev = np.array(load_solution_labels(task='av'))
+ext = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
+ext.fit(train_df)
+X_train, _ = ext.transform(train_df)
+X_dev, _ = ext.transform(dev_df)
+scaler = StandardScaler()
+X_tr = scaler.fit_transform(X_train)
+X_dv = scaler.transform(X_dev)
