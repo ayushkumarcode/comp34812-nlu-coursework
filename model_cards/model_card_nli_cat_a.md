@@ -12,8 +12,8 @@ This model performs binary NLI using handcrafted features extracted from premise
 
 - **Developed by:** Group 34
 - **Language(s):** English
-- **Model type:** Gradient boosted trees (XGBoost)
-- **Model architecture:** Feature extraction pipeline + XGBoost classifier
+- **Model type:** Stacking ensemble (XGBoost + LightGBM + LR)
+- **Model architecture:** Feature pipeline + StackingClassifier (XGB+LGBM+LR→LR meta)
 - **Finetuned from model:** N/A (trained from scratch)
 
 ### Model Resources
@@ -55,11 +55,11 @@ COMP34812 NLI dev set: 6,736 pairs. Primary: macro_f1.
 
 | Metric | Value |
 |--------|-------|
-| **macro_f1** | **0.6999** |
-| accuracy | 0.7013 |
-| **MCC** | **0.4016** |
+| **macro_f1** | **0.7023** |
+| accuracy | 0.7029 |
+| **MCC** | **0.4059** |
 
-Beats SVM (+0.115) and LSTM (+0.040).
+Beats SVM (+0.118) and LSTM (+0.042).
 
 ## Technical Specifications
 
