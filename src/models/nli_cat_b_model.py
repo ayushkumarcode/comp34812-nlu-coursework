@@ -169,9 +169,11 @@ class ESIM(nn.Module):
         attn_mask = p_mask_exp * h_mask_exp
         attn = attn.masked_fill(attn_mask == 0, float('-inf'))
 
-        # Soft alignment
+        # Soft alignment (handle all-masked rows to prevent NaN)
         p_attn_weights = F.softmax(attn, dim=2)  # attend to hypothesis
+        p_attn_weights = p_attn_weights.nan_to_num(0.0)
         h_attn_weights = F.softmax(attn.transpose(1, 2), dim=2)  # attend to premise
+        h_attn_weights = h_attn_weights.nan_to_num(0.0)
 
         p_aligned = torch.bmm(p_attn_weights, h_enc)  # (batch, p_len, 2H)
         h_aligned = torch.bmm(h_attn_weights, p_enc)  # (batch, h_len, 2H)
