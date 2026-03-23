@@ -53,3 +53,27 @@ extractor._feature_names = feature_names
 X_test, _ = extractor.transform(test_df)
 print(f"Feature matrix: {X_test.shape}")
 
+predictions = predict(X_test, scaler, ensemble)
+probabilities = predict_proba(X_test, scaler, ensemble)
+print(f"Predictions: {len(predictions)}")
+print(f"Class distribution: {np.bincount(predictions)}")
+
+# %% [markdown]
+# ## 4. Save Predictions
+
+# %%
+save_predictions(predictions, 'predictions/Group_34_A.csv')
+print("Predictions saved to predictions/Group_34_A.csv")
+
+# %% [markdown]
+# ## 5. Example Predictions
+
+# %%
+for i in range(min(5, len(test_df))):
+    premise = test_df.iloc[i]['premise'][:100] + "..."
+    hypothesis = test_df.iloc[i]['hypothesis'][:100]
+    label = "Entailed" if predictions[i] == 1 else "Not Entailed"
+    print(f"\nPair {i+1}:")
+    print(f"  Premise:    {premise}")
+    print(f"  Hypothesis: {hypothesis}")
+    print(f"  Prediction: {label} (prob={probabilities[i]:.3f})")
