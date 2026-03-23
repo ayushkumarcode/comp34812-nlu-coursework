@@ -62,11 +62,11 @@ def train_epoch(model, dataloader, optimizer, device, epoch,
             topic_labels = batch['topic'].to(device)
             loss_topic = topic_loss_fn(topic_logits, topic_labels)
 
-        # Total loss (gradual introduction)
+        # Total loss — weights control introduction
         loss = loss_bce
-        if epoch >= 5:  # BCE-only warmup for first 4 epochs
+        if contrastive_weight > 0:
             loss = loss + contrastive_weight * loss_contrastive
-        if topic_weight > 0 and epoch >= 3:
+        if topic_weight > 0:
             loss = loss + topic_weight * loss_topic
 
         loss.backward()
@@ -168,34 +168,36 @@ def main():
     topic_loss_fn = nn.CrossEntropyLoss()
 
     # Optimizer and scheduler
-    optimizer = AdamW(model.parameters(), lr=5e-4, weight_decay=1e-4)
-    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=2, eta_min=1e-6)
+    optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=1e-6)
 
     # Training loop
     print("\n[5/5] Training...")
     best_f1 = 0.0
     patience_counter = 0
-    max_epochs = 50
-    patience = 7
+    max_epochs = 80
+    patience = 12
     save_dir = PROJECT_ROOT / 'models'
     save_dir.mkdir(exist_ok=True)
 
     for epoch in range(1, max_epochs + 1):
         t0 = time.time()
 
-        # Ramp GRL lambda
-        if epoch <= 5:
-            grl_lambda = 0.1 * epoch / 5
+        # Ramp GRL lambda slowly
+        if epoch <= 10:
+            grl_lambda = 0.05 * epoch / 10
         else:
-            grl_lambda = 0.1
+            grl_lambda = 0.05
         model.grl.lambda_val = grl_lambda
 
-        # Train
+        # Train — BCE-only for stability, add contrastive after epoch 15
+        c_weight = 0.05 if epoch >= 15 else 0.0
+        t_weight = 0.02 if epoch >= 10 else 0.0
         train_loss, train_f1 = train_epoch(
             model, train_loader, optimizer, device, epoch,
             bce_loss_fn, contrastive_loss_fn, topic_loss_fn,
-            contrastive_weight=0.1,
-            topic_weight=0.05,
+            contrastive_weight=c_weight,
+            topic_weight=t_weight,
         )
         scheduler.step()
 
