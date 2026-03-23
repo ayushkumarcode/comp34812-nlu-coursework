@@ -148,3 +148,18 @@ def _sol2(t):
     if t == 'nli':
         return 'Cat C — DeBERTa-v3-base cross-encoder with GRL.'
     return 'Cat B — Siamese char-CNN + BiLSTM + GRL.'
+
+
+def _results(t):
+    return '[Results to be filled after training]'
+
+def _errors(t):
+    return '[Error analysis to be added]'
+
+def _limits(t):
+    return 'Closed-mode. May not generalize to other domains.'
+
+
+if __name__ == '__main__':
+    task = sys.argv[1] if len(sys.argv) > 1 else 'nli'
+    create_poster(task=task)
