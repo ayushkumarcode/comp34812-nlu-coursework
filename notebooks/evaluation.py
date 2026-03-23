@@ -59,7 +59,7 @@ sns.set_palette('Set2')
 
 # %%
 # Change these paths based on your track selection
-TASK = 'av'  # or 'nli'
+TASK = 'nli'  # Change to 'av' for AV track
 
 # Load ground truth
 y_true = np.array(load_solution_labels(task=TASK))
@@ -71,9 +71,9 @@ baselines = load_baseline_predictions(task=TASK)
 print(f"Baselines loaded: {list(baselines.keys())}")
 
 # Load our predictions
-# Modify these paths to match your actual prediction files
-sol1_path = f'predictions/Group_34_A.csv'
-sol2_path = f'predictions/Group_34_B.csv'
+# Paths to prediction files (update category letters as needed)
+sol1_path = f'predictions/{TASK}_Group_34_A.csv'  # Cat A
+sol2_path = f'predictions/{TASK}_Group_34_C.csv'  # Cat C (or B)
 
 def load_preds(path):
     preds = []
