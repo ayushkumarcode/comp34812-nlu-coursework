@@ -26,3 +26,24 @@ from src.models.nli_cat_b_model import ESIM
 from src.models.nli_cat_b_dataset import NLIVocabulary, NLIESIMDataset
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Device: {device}")
+
+# %% [markdown]
+# ## 1. Load Trained Model
+
+# %%
+checkpoint = torch.load('models/nli_cat_b_best.pt',
+                         map_location=device, weights_only=False)
+vocab = checkpoint['vocab']
+config = checkpoint['config']
+
+model = ESIM(
+    vocab_size=vocab.vocab_size,
+    embedding_dim=config['emb_dim'],
+    hidden_size=config['hidden_size'],
+    char_vocab_size=vocab.char_vocab_size,
+    knowledge_dim=5, dropout=0.0,
+).to(device)
+model.load_state_dict(checkpoint['model_state_dict'])
+model.eval()
+print(f"Model loaded. Vocab: {vocab.vocab_size} words")
