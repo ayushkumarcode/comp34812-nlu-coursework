@@ -295,3 +295,20 @@ two solutions agree on predictions. When they disagree, we examine which
 model is more often correct. This reveals their complementary strengths
 and suggests potential for ensemble combinations in future work.
 """)
+
+# %% [markdown]
+# ## 11. Per-Class Error Rate Analysis
+#
+# We examine which class each model struggles with most,
+# revealing systematic biases in the predictions.
+
+# %%
+for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    tn, fp, fn, tp = cm.ravel()
+    fpr = fp / (fp + tn) if (fp + tn) > 0 else 0
+    fnr = fn / (fn + tp) if (fn + tp) > 0 else 0
+    print(f"{sol_name}:")
+    print(f"  False Positive Rate: {fpr:.4f} ({fp} out of {fp+tn} negatives)")
+    print(f"  False Negative Rate: {fnr:.4f} ({fn} out of {fn+tp} positives)")
+    print()
