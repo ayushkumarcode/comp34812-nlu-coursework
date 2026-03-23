@@ -43,3 +43,17 @@ metrics = compute_all_metrics(y_dev, y_pred)
 print_metrics(metrics, "NLI Cat A (XGBoost) — Dev")
 
 pred_path = PROJECT_ROOT / 'predictions' / 'nli_Group_34_A.csv'
+pred_path.parent.mkdir(exist_ok=True)
+save_predictions(y_pred, pred_path)
+
+save_dir = PROJECT_ROOT / 'models'
+save_dir.mkdir(exist_ok=True)
+joblib.dump(scaler, save_dir / 'nli_cat_a_scaler.joblib')
+joblib.dump(model, save_dir / 'nli_cat_a_ensemble.joblib')
+joblib.dump(fnames, save_dir / 'nli_cat_a_feature_names.joblib')
+
+baselines = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
+for name, bl in baselines.items():
+    gap = metrics['macro_f1'] - bl
+    print(f"  vs {name}: {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
+print("Done!")
