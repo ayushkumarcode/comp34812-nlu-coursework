@@ -43,3 +43,20 @@ print_metrics(metrics, "NLI Cat A — Dev Results")
 
 pred_path = PROJECT_ROOT / 'predictions' / 'nli_Group_34_A.csv'
 pred_path.parent.mkdir(exist_ok=True)
+save_predictions(y_pred, pred_path)
+print(f"Saved to {pred_path}")
+
+import joblib
+save_dir = PROJECT_ROOT / 'models'
+save_dir.mkdir(exist_ok=True)
+joblib.dump(scaler, save_dir / 'nli_cat_a_scaler.joblib')
+joblib.dump(ensemble, save_dir / 'nli_cat_a_ensemble.joblib')
+joblib.dump(extractor.tfidf, save_dir / 'nli_cat_a_tfidf.joblib')
+joblib.dump(feature_names, save_dir / 'nli_cat_a_feature_names.joblib')
+print("Models saved.")
+
+baselines = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
+for name, bl in baselines.items():
+    gap = metrics['macro_f1'] - bl
+    print(f"  vs {name}: {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
+print("Done!")
