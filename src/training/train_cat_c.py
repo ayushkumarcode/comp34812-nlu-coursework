@@ -230,8 +230,9 @@ def train_nli(args):
     dev_df = load_nli_data(split='dev')
     dev_labels = load_solution_labels(task='nli')
 
-    train_dataset = NLIDeBERTaDataset(train_df, tokenizer)
-    dev_dataset = NLIDeBERTaDataset(dev_df, tokenizer)
+    max_len = getattr(args, 'max_len', 128)
+    train_dataset = NLIDeBERTaDataset(train_df, tokenizer, max_len=max_len)
+    dev_dataset = NLIDeBERTaDataset(dev_df, tokenizer, max_len=max_len)
     dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4)
@@ -240,7 +241,9 @@ def train_nli(args):
     model = NLIDeBERTaCrossEncoder(model_name=args.model_name).to(device)
     bce_loss = nn.BCEWithLogitsLoss()
 
-    optimizer = AdamW(model.parameters(), lr=2e-5, weight_decay=0.01)
+    lr = getattr(args, 'lr', 2e-5)
+    optimizer = AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    print(f"LR: {lr}, max_len: {getattr(args, 'max_len', 128)}")
     scaler = GradScaler('cuda')
 
     best_f1 = 0
@@ -260,10 +263,14 @@ def train_nli(args):
             labels = batch['label'].to(device)
 
             optimizer.zero_grad()
+            no_adv = getattr(args, 'no_adversarial', False)
             with autocast('cuda'):
-                logits, adv_logits = model(ids, mask, hyp_ids, hyp_mask)
+                if no_adv:
+                    logits, _ = model(ids, mask)
+                else:
+                    logits, adv_logits = model(ids, mask, hyp_ids, hyp_mask)
                 loss = bce_loss(logits.squeeze(-1), labels)
-                if adv_logits is not None:
+                if not no_adv and adv_logits is not None:
                     loss_adv = bce_loss(adv_logits.squeeze(-1), labels)
                     loss = loss + 0.1 * loss_adv
 
@@ -336,6 +343,10 @@ def main():
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--epochs', type=int, default=25)
     parser.add_argument('--patience', type=int, default=5)
+    parser.add_argument('--lr', type=float, default=2e-5)
+    parser.add_argument('--max_len', type=int, default=128)
+    parser.add_argument('--no_adversarial', action='store_true')
+    parser.add_argument('--label_smoothing', type=float, default=0.0)
     args = parser.parse_args()
 
     if args.task == 'av':
