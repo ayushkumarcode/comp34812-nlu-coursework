@@ -244,3 +244,24 @@ summary_df = summary_df.sort_values('macro_f1', ascending=False)
 print(summary_df.to_string(index=False))
 
 print("\n\nEvaluation complete. See generated plots in notebooks/ directory.")
+
+# %% [markdown]
+# ## 9. F1 Score Comparison Bar Chart
+
+# %%
+fig, ax = plt.subplots(figsize=(10, 6))
+models = list(baseline_f1s.keys()) + ['Sol 1\n(Cat A)', 'Sol 2\n(Cat B)']
+scores = list(baseline_f1s.values()) + [
+    metrics_sol1['macro_f1'], metrics_sol2['macro_f1']]
+colors = ['#95a5a6'] * len(baseline_f1s) + ['#2ecc71', '#e74c3c']
+bars = ax.bar(models, scores, color=colors, edgecolor='black', linewidth=0.5)
+ax.set_ylabel('Macro F1 Score', fontsize=14)
+ax.set_title('Performance Comparison: Our Solutions vs Baselines', fontsize=16)
+for bar, score in zip(bars, scores):
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
+            f'{score:.4f}', ha='center', va='bottom', fontsize=11)
+ax.set_ylim(0, max(scores) * 1.15)
+plt.tight_layout()
+plt.savefig('notebooks/f1_comparison.png', dpi=150, bbox_inches='tight')
+plt.show()
+print("Bar chart saved to notebooks/f1_comparison.png")
