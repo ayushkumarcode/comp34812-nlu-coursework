@@ -69,28 +69,28 @@ Fine-tuned DeBERTa-v3-base as cross-encoder:
 ### Requirements
 
 ```
-pip install torch scikit-learn xgboost lightgbm spacy numpy pandas tqdm joblib transformers
-python -m spacy download en_core_web_md
+pip install torch scikit-learn xgboost lightgbm spacy numpy pandas tqdm joblib transformers sentencepiece
+python -m spacy download en_core_web_sm
 ```
 
 ### Training
 
 ```bash
 # Solution 1 (Category A) — CPU
-python -m src.training.run_av_cat_a
+python -m src.training.run_nli_cat_a
 
-# Solution 2 (Category B) — GPU required
-python -m src.training.train_av_cat_b
+# Solution 2 (Category C) — GPU required
+python -m src.training.train_cat_c --task nli --batch_size 32
 ```
 
 ### Inference
 
-See `notebooks/demo_cat_a.py` and `notebooks/demo_cat_b.py` for demo code.
+See `notebooks/demo_nli_cat_a.py` and `notebooks/demo_nli_cat_c.py`.
 
 ## Trained Models
 
-Models larger than 10MB are stored on OneDrive:
-- [Link to be added after training]
+Models >10MB stored on GitHub (this repository):
+- `nli_cat_c_best.pt` (1.4GB) — DeBERTa cross-encoder
 
 ## Data Sources
 
