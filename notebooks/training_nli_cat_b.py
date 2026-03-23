@@ -54,3 +54,22 @@ train_df = load_nli_data(split='train')
 dev_df = load_nli_data(split='dev')
 dev_labels = load_solution_labels(task='nli')
 print(f"Train: {len(train_df)}, Dev: {len(dev_df)}")
+
+# %%
+vocab = NLIVocabulary(min_word_freq=2)
+all_texts = list(train_df['premise']) + list(train_df['hypothesis'])
+vocab.build_word_vocab(all_texts)
+
+# %% [markdown]
+# ## 2. Create Datasets and Model
+# The ESIM model uses word+char embeddings, BiLSTM encoding,
+# soft cross-attention alignment, knowledge enhancement (WordNet),
+# composition BiLSTM, and avg+max pooling for classification.
+
+# %%
+train_dataset = NLIESIMDataset(train_df, vocab, PREMISE_MAX, HYPOTHESIS_MAX, compute_wordnet=USE_WORDNET)
+dev_dataset = NLIESIMDataset(dev_df, vocab, PREMISE_MAX, HYPOTHESIS_MAX, compute_wordnet=USE_WORDNET)
+dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
