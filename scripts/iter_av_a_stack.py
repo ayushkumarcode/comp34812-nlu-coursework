@@ -33,3 +33,12 @@ base = [
                              num_leaves=63, verbose=-1, random_state=42, n_jobs=1)),
     ('lr', LogisticRegression(C=1.0, max_iter=2000, random_state=42)),
 ]
+ens = StackingClassifier(estimators=base,
+    final_estimator=LogisticRegression(C=1.0, max_iter=1000, random_state=42),
+    cv=5, passthrough=False, n_jobs=1)
+ens.fit(X_tr, y_train)
+y_pred = ens.predict(X_dv)
+metrics = compute_all_metrics(y_dev, y_pred)
+print_metrics(metrics, "AV Cat A (XGB+LGBM stack)")
+save_predictions(y_pred, PROJECT_ROOT / 'predictions' / 'av_Group_34_A_stack.csv')
+print("Done!")
