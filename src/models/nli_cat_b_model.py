@@ -178,9 +178,7 @@ class ESIM(nn.Module):
 
         # ===== KNOWLEDGE ENHANCEMENT =====
         if wordnet_relations is not None:
-            # Weighted knowledge for premise words
-            k_p = torch.bmm(p_attn_weights, wordnet_relations.sum(dim=3, keepdim=True).squeeze(-1).float())
-            # Actually: weight the relation vectors
+            # Weight relation vectors by attention
             # wordnet_relations: (batch, p_len, h_len, 5)
             # p_attn_weights: (batch, p_len, h_len)
             k_p = torch.einsum('bph,bphk->bpk',
