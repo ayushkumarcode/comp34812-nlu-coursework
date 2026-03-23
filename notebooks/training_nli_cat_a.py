@@ -28,3 +28,31 @@ from src.data_utils import load_nli_data, load_solution_labels, save_predictions
 from src.nli_pipeline import NLIFeatureExtractor
 from src.training.train_nli_ensemble import train_ensemble, save_ensemble, predict
 from src.scorer import compute_all_metrics, print_metrics
+
+# %% [markdown]
+# ## 1. Load Data
+
+# %%
+train_df = load_nli_data(split='train')
+dev_df = load_nli_data(split='dev')
+y_train = train_df['label'].values
+y_dev = np.array(load_solution_labels(task='nli'))
+
+print(f"Train: {len(train_df)} pairs")
+print(f"Dev: {len(dev_df)} pairs")
+print(f"Train label dist: {np.bincount(y_train)}")
+
+# %% [markdown]
+# ## 2. Feature Extraction
+#
+# ~280 features: lexical overlap, semantic similarity,
+# negation/contradiction, syntactic, alignment, natural logic,
+# cross-sentence, TF-IDF+SVD, interaction terms.
+
+# %%
+extractor = NLIFeatureExtractor(use_spacy=True)
+extractor.fit(train_df)
+
+X_train, feature_names = extractor.transform(train_df)
+X_dev, _ = extractor.transform(dev_df)
+print(f"Train: {X_train.shape}, Dev: {X_dev.shape}")
