@@ -114,3 +114,21 @@ def main():
             scaler.step(optimizer)
             scaler.update()
             total_loss += loss.item()
+
+        # Evaluate
+        encoder.eval()
+        classifier.eval()
+        preds, labels_all = [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                outputs = encoder(input_ids=ids, attention_mask=mask)
+                cls_repr = outputs.last_hidden_state[:, 0, :]
+                logits = classifier(cls_repr)
+                pred = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+                preds.extend(pred.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(labels_all, preds, average='macro', zero_division=0)
+        print(f"Epoch {epoch:3d} | Loss: {total_loss/len(train_loader):.4f} | Dev F1: {dev_f1:.4f}")
