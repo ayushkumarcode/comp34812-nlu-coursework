@@ -55,3 +55,21 @@ def evaluate_track(task, sol1_path, sol2_path):
         results[name] = {'f1': f1, 'mcc': mcc, 'gap': gap, 'cat': cat}
         print(f"  {name} (Cat {cat}): F1={f1:.4f}, gap over {bl_name}={gap:+.4f}")
     return results
+
+
+def main():
+    pred_dir = Path('predictions')
+    print("=" * 60)
+    print("  Track Decision Framework")
+    print("=" * 60)
+
+    # Evaluate AV track
+    print("\n--- AV Track ---")
+    av = evaluate_track('av',
+        str(pred_dir / 'av_Group_34_A.csv'),
+        str(pred_dir / 'av_Group_34_B.csv'))
+
+    # Evaluate NLI track
+    print("\n--- NLI Track ---")
+    nli = evaluate_track('nli',
+        str(pred_dir / 'nli_Group_34_A.csv'),
