@@ -26,3 +26,30 @@ This model performs binary NLI using handcrafted features extracted from premise
 ### Training Data
 
 COMP34812 NLI shared task training set: 24,432 premise-hypothesis pairs. Near-balanced (48.2% label 0, 51.8% label 1). Closed mode.
+
+### Training Procedure
+
+#### Training Hyperparameters
+
+- **n_estimators:** 1000
+- **max_depth:** 7
+- **learning_rate:** 0.05
+- **subsample:** 0.8
+- **colsample_bytree:** 0.8
+- **Feature count:** 213
+- **Feature scaling:** StandardScaler
+
+#### Speeds, Sizes, Times
+
+- **Feature extraction:** ~10 min
+- **Training:** ~5 min on 1 CPU
+- **Model size:** ~15MB
+
+## Evaluation
+
+### Testing Data & Metrics
+
+COMP34812 NLI dev set: 6,736 pairs. Primary: macro_f1.
+
+### Results
+
