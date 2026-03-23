@@ -32,3 +32,25 @@ from src.models.nli_cat_b_model import ESIM
 from src.models.nli_cat_b_dataset import NLIVocabulary, NLIESIMDataset
 from src.data_utils import load_nli_data, load_solution_labels, save_predictions
 from src.scorer import compute_all_metrics, print_metrics
+
+# %% [markdown]
+# ## Hyperparameters
+
+# %%
+HIDDEN_SIZE = 300
+BATCH_SIZE = 32
+MAX_EPOCHS = 40
+PATIENCE = 7
+LR = 4e-4
+PREMISE_MAX = 64
+HYPOTHESIS_MAX = 32
+USE_WORDNET = True
+
+# %% [markdown]
+# ## 1. Load Data and Build Vocabulary
+
+# %%
+train_df = load_nli_data(split='train')
+dev_df = load_nli_data(split='dev')
+dev_labels = load_solution_labels(task='nli')
+print(f"Train: {len(train_df)}, Dev: {len(dev_df)}")
