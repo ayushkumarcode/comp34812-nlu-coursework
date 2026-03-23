@@ -36,3 +36,21 @@ def f1_bar_chart(results, baselines, task='av', save=True):
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
                 f'{score:.4f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
     ax.set_ylabel('Macro F1 Score', fontsize=14)
+    task_name = 'Authorship Verification' if task == 'av' else 'NLI'
+    ax.set_title(f'{task_name} — F1 Comparison', fontsize=16)
+    ax.set_ylim(0, max(scores) * 1.15)
+    plt.tight_layout()
+    if save:
+        path = POSTER_DIR / 'f1_chart.png'
+        plt.savefig(str(path), dpi=200, bbox_inches='tight')
+        print(f"Saved to {path}")
+    return fig
+
+
+if __name__ == '__main__':
+    # Test with AV results
+    f1_bar_chart(
+        results={'Sol 1\n(Cat A)': 0.72, 'Sol 2\n(Cat B)': 0.7123},
+        baselines={'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854},
+        task='av',
+    )
