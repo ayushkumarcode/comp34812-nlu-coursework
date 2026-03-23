@@ -68,3 +68,25 @@ def main():
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
     dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    # Simple cross-encoder: DeBERTa + classification head
+    encoder = AutoModel.from_pretrained(MODEL_NAME).to(device)
+    classifier = nn.Sequential(
+        nn.Dropout(0.1),
+        nn.Linear(encoder.config.hidden_size, 256),
+        nn.GELU(),
+        nn.Dropout(0.2),
+        nn.Linear(256, 1),
+    ).to(device)
+
+    bce_loss = nn.BCEWithLogitsLoss()
+    optimizer = AdamW([
+        {'params': encoder.parameters(), 'lr': LR},
+        {'params': classifier.parameters(), 'lr': 5e-4},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1 = 0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
