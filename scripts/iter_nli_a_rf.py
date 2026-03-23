@@ -21,3 +21,13 @@ X_dev, _ = ext.transform(dev_df)
 scaler = StandardScaler()
 X_tr = scaler.fit_transform(X_train)
 X_dv = scaler.transform(X_dev)
+
+model = RandomForestClassifier(n_estimators=1000, max_depth=20, min_samples_split=5,
+                                min_samples_leaf=2, class_weight='balanced',
+                                random_state=42, n_jobs=1)
+model.fit(X_tr, y_train)
+y_pred = model.predict(X_dv)
+metrics = compute_all_metrics(y_dev, y_pred)
+print_metrics(metrics, "NLI Cat A (RF)")
+save_predictions(y_pred, PROJECT_ROOT / 'predictions' / 'nli_Group_34_A_rf.csv')
+print("Done!")
