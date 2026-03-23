@@ -85,3 +85,23 @@ predictions = np.array(all_preds)
 probabilities = np.array(all_probs)
 print(f"Predictions: {len(predictions)}")
 print(f"Class distribution: {np.bincount(predictions)}")
+
+# %% [markdown]
+# ## 4. Save Predictions
+
+# %%
+save_predictions(predictions, 'predictions/Group_34_B.csv')
+print("Predictions saved to predictions/Group_34_B.csv")
+
+# %% [markdown]
+# ## 5. Example Predictions
+
+# %%
+for i in range(min(5, len(test_df))):
+    premise = test_df.iloc[i]['premise'][:100] + "..."
+    hypothesis = test_df.iloc[i]['hypothesis'][:80]
+    label = "Entailed" if predictions[i] == 1 else "Not Entailed"
+    print(f"\nPair {i+1}:")
+    print(f"  Premise:    {premise}")
+    print(f"  Hypothesis: {hypothesis}")
+    print(f"  Prediction: {label} (prob={probabilities[i]:.3f})")
