@@ -72,3 +72,28 @@ Primary: macro_f1. Secondary: accuracy, MCC.
 | **MCC** | **0.8339** |
 
 Beats SVM (+0.332), LSTM (+0.256), BERT (+0.097). All p < 0.001.
+
+## Technical Specifications
+
+### Hardware
+
+- Training: NVIDIA A2 GPU (15GB VRAM), CSF3 HPC cluster
+- Inference: Any GPU with >= 4GB VRAM, or CPU (slower)
+
+### Software
+
+- Python 3.11, PyTorch 2.5.1+cu121
+- Transformers 4.44.0, sentencepiece 0.2.1
+
+## Bias, Risks, and Limitations
+
+- Trained on closed-mode data only; may not generalize to other NLI domains
+- Hypothesis-only bias partially mitigated by GRL adversarial debiasing, but not eliminated
+- English only; no multilingual capability
+- May inherit biases present in DeBERTa-v3 pre-training data
+
+## Additional Information
+
+- Gradient Reversal Layer: Ganin & Lempitsky (2015) "Unsupervised Domain Adaptation by Backpropagation"
+- Hypothesis-only bias: McCoy et al. (2019) "Right for the Wrong Reasons"
+- DeBERTa-v3: He et al. (2021) "DeBERTaV3"
