@@ -26,3 +26,16 @@ cp notebooks/training_*_cat_b.py submission/notebooks/
 cp notebooks/evaluation.py submission/notebooks/
 
 # Copy source code
+cp -r src submission/
+
+# Copy README and poster
+cp README.md submission/
+cp poster/poster.pptx submission/ 2>/dev/null
+
+echo "Contents:"
+find submission -type f | sort
+
+echo "Creating zip..."
+cd submission && zip -r ../Group_34_submission.zip . \
+  -x '*.pyc' -x '__pycache__/*'
+echo "Done: Group_34_submission.zip"
