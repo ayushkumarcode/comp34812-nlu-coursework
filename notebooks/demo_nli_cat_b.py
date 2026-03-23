@@ -47,3 +47,19 @@ model = ESIM(
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 print(f"Model loaded. Vocab: {vocab.vocab_size} words")
+
+# %% [markdown]
+# ## 2. Prepare Test Data
+
+# %%
+from torch.utils.data import DataLoader
+
+test_df = load_nli_data(split='dev')
+test_dataset = NLIESIMDataset(
+    test_df, vocab,
+    premise_max_len=config['premise_max'],
+    hypothesis_max_len=config['hypothesis_max'],
+    compute_wordnet=False,
+)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+print(f"Test data: {len(test_df)} pairs")
