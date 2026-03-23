@@ -94,8 +94,8 @@ Models larger than 10MB are stored on OneDrive:
 
 ## Data Sources
 
-- Training data: COMP34812 AV shared task (provided by course)
-- Pre-trained models: spaCy en_core_web_md (general-purpose English NLP model)
+- Training data: COMP34812 NLI shared task (provided by course)
+- Pre-trained models: DeBERTa-v3-base (Microsoft), GloVe 6B 300d, spaCy en_core_web_sm
 - No external datasets used (closed mode)
 
 ## Code Attribution
