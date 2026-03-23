@@ -149,6 +149,16 @@ def save_ensemble(scaler, ensemble, feature_extractor, save_dir='models'):
     print(f"NLI models saved to {save_dir}/")
 
 
+def load_ensemble(save_dir='models'):
+    """Load trained NLI ensemble and preprocessing objects."""
+    save_dir = Path(save_dir)
+    scaler = joblib.load(save_dir / 'nli_cat_a_scaler.joblib')
+    ensemble = joblib.load(save_dir / 'nli_cat_a_ensemble.joblib')
+    tfidf = joblib.load(save_dir / 'nli_cat_a_tfidf.joblib')
+    feature_names = joblib.load(save_dir / 'nli_cat_a_feature_names.joblib')
+    return scaler, ensemble, tfidf, feature_names
+
+
 def predict(X, scaler, ensemble):
     """Generate predictions."""
     X_scaled = scaler.transform(X)
