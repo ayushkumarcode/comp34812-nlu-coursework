@@ -90,3 +90,27 @@ def main():
     patience_counter = 0
     save_dir = PROJECT_ROOT / 'models'
     save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        encoder.train()
+        classifier.train()
+        total_loss = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                outputs = encoder(input_ids=ids, attention_mask=mask)
+                cls_repr = outputs.last_hidden_state[:, 0, :]
+                logits = classifier(cls_repr)
+                loss = bce_loss(logits.squeeze(-1), labels)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(list(encoder.parameters()) + list(classifier.parameters()), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
