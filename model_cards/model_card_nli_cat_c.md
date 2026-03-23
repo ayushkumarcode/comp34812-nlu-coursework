@@ -27,3 +27,24 @@ This model performs binary NLI: given a premise and hypothesis, it predicts whet
 ### Training Data
 
 COMP34812 NLI shared task training set: 24,432 premise-hypothesis pairs with binary labels (0=not entailed, 1=entailed). Near-balanced distribution (48.2% label 0, 51.8% label 1). Closed mode — no external datasets used.
+
+### Training Procedure
+
+#### Training Hyperparameters
+
+- **Optimizer:** AdamW (lr=2e-5, weight_decay=0.01)
+- **Batch size:** 32
+- **Max sequence length:** 128 tokens (premise + hypothesis)
+- **Max hypothesis length:** 48 tokens (for adversarial head)
+- **Epochs:** 25 (early stopping, patience=5)
+- **Best epoch:** 5
+- **Loss:** BCEWithLogitsLoss + 0.1 * adversarial BCE
+- **Mixed precision:** Yes (torch.amp)
+- **Gradient clipping:** max_norm=1.0
+- **GRL lambda:** 0.1
+
+#### Speeds, Sizes, Times
+
+- **Training time:** ~10 minutes on NVIDIA A2 (15GB)
+- **Model size:** ~370MB (includes adversarial encoder)
+- **Inference speed:** ~200 samples/second on GPU
