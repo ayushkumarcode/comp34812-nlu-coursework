@@ -6,6 +6,7 @@ Handles word/char tokenization, vocabulary building, and WordNet relations.
 import re
 import numpy as np
 import torch
+import torch.nn as nn
 from torch.utils.data import Dataset
 from collections import Counter
 
