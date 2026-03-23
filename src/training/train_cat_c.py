@@ -185,7 +185,35 @@ def train_av(args):
                 print(f"Early stopping at epoch {epoch}")
                 break
 
+    # Final evaluation with best model
     print(f"\nBest AV Cat C dev F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(save_dir / 'av_cat_c_best.pt', weights_only=True))
+    model.eval()
+    final_preds, final_labels = [], []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids1 = batch['input_ids_1'].to(device)
+            mask1 = batch['attention_mask_1'].to(device)
+            ids2 = batch['input_ids_2'].to(device)
+            mask2 = batch['attention_mask_2'].to(device)
+            logits, _, _ = model(ids1, mask1, ids2, mask2)
+            pred = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+            final_preds.extend(pred.cpu().numpy())
+            final_labels.extend(batch['label'].numpy())
+
+    final_metrics = compute_all_metrics(np.array(final_labels), np.array(final_preds))
+    print_metrics(final_metrics, "AV Cat C — Final Dev Results")
+
+    pred_path = PROJECT_ROOT / 'predictions' / 'av_Group_34_C.csv'
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
+    print(f"Predictions saved to {pred_path}")
+
+    baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
+    for name, baseline_f1 in baselines.items():
+        gap = final_metrics['macro_f1'] - baseline_f1
+        status = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {name} ({baseline_f1:.4f}): {status} by {gap:+.4f}")
 
 
 def train_nli(args):
