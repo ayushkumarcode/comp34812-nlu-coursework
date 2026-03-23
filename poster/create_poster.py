@@ -93,3 +93,17 @@ def create_poster(task='av'):
     p.font.color.rgb = WHITE
     p.font.bold = True
     p.alignment = PP_ALIGN.CENTER
+
+    p2 = tf.add_paragraph()
+    p2.text = 'COMP34812 — Group 34'
+    p2.font.size = Pt(22)
+    p2.font.color.rgb = RGBColor(0xCC, 0xCC, 0xCC)
+    p2.alignment = PP_ALIGN.CENTER
+
+    prs.save('poster/poster.pptx')
+    print("Poster saved to poster/poster.pptx")
+
+
+if __name__ == '__main__':
+    task = sys.argv[1] if len(sys.argv) > 1 else 'av'
+    create_poster(task=task)
