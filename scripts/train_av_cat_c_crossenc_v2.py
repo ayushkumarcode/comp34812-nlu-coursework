@@ -53,3 +53,23 @@ class AVCrossEncoderDatasetV2(Dataset):
         if self.topic_labels is not None:
             item['topic'] = torch.tensor(self.topic_labels[idx], dtype=torch.long)
         return item
+
+
+class AVCrossEncoderV2(nn.Module):
+    """Cross-encoder with ScalarMix layer weighting + GRL topic head."""
+
+    def __init__(self, encoder, num_topics=10, grl_lambda=0.05):
+        super().__init__()
+        self.encoder = encoder
+        hidden_size = encoder.config.hidden_size
+        num_layers = encoder.config.num_hidden_layers
+        self.scalar_mix = ScalarMix(num_layers, style_bias=True)
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1), nn.Linear(hidden_size, 256),
+            nn.GELU(), nn.Dropout(0.2), nn.Linear(256, 1),
+        )
+        self.grl = GRL(grl_lambda)
+        self.topic_head = nn.Sequential(
+            nn.Linear(hidden_size, 64), nn.ReLU(),
+            nn.Dropout(0.1), nn.Linear(64, num_topics),
+        )
