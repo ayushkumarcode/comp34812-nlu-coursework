@@ -194,3 +194,31 @@ def main():
               f"(task={total_task/n_batches:.4f}, "
               f"kl={total_kl/n_batches:.4f}) | Dev F1: {dev_f1:.4f}")
 
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save(model.state_dict(),
+                       save_dir / 'nli_cat_c_rdrop_best.pt')
+            print(f"  -> Best model saved (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
+
+    # Final evaluation with best model
+    print(f"\nBest NLI Cat C (R-Drop) dev F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        save_dir / 'nli_cat_c_rdrop_best.pt', weights_only=True))
+    model.eval()
+    final_preds, final_labels = [], []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            pred = (torch.sigmoid(logits) > 0.5).long()
+            final_preds.extend(pred.cpu().numpy())
+            final_labels.extend(batch['label'].numpy())
+
+    final_metrics = compute_all_metrics(
