@@ -26,3 +26,31 @@ from src.scorer import compute_all_metrics, print_metrics
 
 
 class NLIDeBERTaDataset(Dataset):
+    """Dataset for NLI cross-encoder DeBERTa."""
+
+    def __init__(self, df, tokenizer, max_len=128):
+        self.premises = list(df['premise'])
+        self.hypotheses = list(df['hypothesis'])
+        self.labels = df['label'].values.astype(np.float32)
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        enc = self.tokenizer(
+            self.premises[idx], self.hypotheses[idx],
+            truncation=True, max_length=self.max_len,
+            padding='max_length', return_tensors='pt'
+        )
+        return {
+            'input_ids': enc['input_ids'].squeeze(0),
+            'attention_mask': enc['attention_mask'].squeeze(0),
+            'label': torch.tensor(self.labels[idx], dtype=torch.float),
+        }
+
+
+class NLIDeBERTaCrossEncoder(nn.Module):
+    """Cross-encoder DeBERTa for NLI (no adversarial head — clean version)."""
+
