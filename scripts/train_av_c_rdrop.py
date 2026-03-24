@@ -138,3 +138,31 @@ def main():
     save_dir = PROJECT_ROOT / 'models'
     save_dir.mkdir(exist_ok=True)
 
+    for epoch in range(1, EPOCHS + 1):
+        model.train()
+        total_loss, total_task, total_kl = 0, 0, 0
+        n_batches = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                # Two forward passes with different dropout masks (R-Drop)
+                logits1 = model(ids, mask).squeeze(-1)
+                logits2 = model(ids, mask).squeeze(-1)
+                loss, task_loss, kl_loss = compute_rdrop_loss(
+                    logits1, logits2, labels, bce_loss, alpha=ALPHA)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+
+            total_loss += loss.item()
+            total_task += task_loss.item()
+            total_kl += kl_loss.item()
+            n_batches += 1
