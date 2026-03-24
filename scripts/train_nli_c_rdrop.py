@@ -166,3 +166,31 @@ def main():
                 loss, task_loss, kl_loss = compute_rdrop_loss(
                     logits1, logits2, labels, bce_loss, alpha=ALPHA)
 
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+
+            total_loss += loss.item()
+            total_task += task_loss.item()
+            total_kl += kl_loss.item()
+            n_batches += 1
+
+        # Evaluate
+        model.eval()
+        preds, labels_all = [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
+                pred = (torch.sigmoid(logits) > 0.5).long()
+                preds.extend(pred.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(labels_all, preds, average='macro', zero_division=0)
+        print(f"Epoch {epoch:3d} | Loss: {total_loss/n_batches:.4f} "
+              f"(task={total_task/n_batches:.4f}, "
+              f"kl={total_kl/n_batches:.4f}) | Dev F1: {dev_f1:.4f}")
+
