@@ -110,3 +110,31 @@ class FGM:
                 param.data = self.backup[name]
         self.backup = {}
 
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    LR = 1e-5
+    BATCH_SIZE = 16
+    MAX_LEN = 128
+    EPOCHS = 15
+    PATIENCE = 7
+    FGM_EPSILON = 1.0
+
+    print(f"\n=== NLI Cat C + FGM Adversarial Training (eps={FGM_EPSILON}) ===")
+    print(f"LR={LR}, BS={BATCH_SIZE}, MaxLen={MAX_LEN}")
+    print(f"Epochs={EPOCHS}, Patience={PATIENCE}\n")
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    train_df = load_nli_data(split='train')
+    dev_df = load_nli_data(split='dev')
+    dev_labels = load_solution_labels(task='nli')
+
+    train_dataset = NLIDeBERTaDataset(train_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset = NLIDeBERTaDataset(dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
