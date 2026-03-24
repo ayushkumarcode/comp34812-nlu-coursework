@@ -113,3 +113,30 @@ def main():
     all_dev_texts = list(dev_df['text_1']) + list(dev_df['text_2'])
     dev_topic_all = generate_topic_labels(all_dev_texts, n_clusters=NUM_TOPICS)
     dev_topic_labels = dev_topic_all[:len(dev_df)]
+
+    train_dataset = AVCrossEncoderDatasetV2(
+        train_df, tokenizer, max_len=MAX_LEN, topic_labels=train_topic_labels)
+    dev_dataset = AVCrossEncoderDatasetV2(
+        dev_df, tokenizer, max_len=MAX_LEN, topic_labels=dev_topic_labels)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    encoder = AutoModel.from_pretrained(MODEL_NAME, output_hidden_states=True)
+    model = AVCrossEncoderV2(encoder, num_topics=NUM_TOPICS, grl_lambda=GRL_LAMBDA).to(device)
+
+    bce_loss = nn.BCEWithLogitsLoss()
+    ce_loss = nn.CrossEntropyLoss()
+    optimizer = AdamW([
+        {'params': model.encoder.parameters(), 'lr': LR},
+        {'params': model.scalar_mix.parameters(), 'lr': 1e-3},
+        {'params': model.classifier.parameters(), 'lr': 5e-4},
+        {'params': model.topic_head.parameters(), 'lr': 5e-4},
+        {'params': model.grl.parameters(), 'lr': 0.0},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1, patience_counter = 0, 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
