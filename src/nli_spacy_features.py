@@ -348,6 +348,22 @@ def _classify_relation(p_token, h_token):
                 if ant.name() in h_lemmas:
                     return 'alternation'
 
+    # Check hypernymy (p is hypernym of h = forward entailment)
+    for sp in p_synsets:
+        for sh in h_synsets:
+            if sp in sh.hypernyms() or sp in sh.closure(lambda s: s.hypernyms(), depth=3):
+                return 'forward_entailment'
+            if sh in sp.hypernyms() or sh in sp.closure(lambda s: s.hypernyms(), depth=3):
+                return 'reverse_entailment'
+
+    # Check co-hyponymy (share a common hypernym)
+    for sp in p_synsets:
+        for sh in h_synsets:
+            p_hypers = set(sp.hypernyms())
+            h_hypers = set(sh.hypernyms())
+            if p_hypers & h_hypers:
+                return 'cover'
+
     return 'independence'
 
 
