@@ -82,3 +82,31 @@ class FGM:
         # After loss.backward():
         fgm.attack()
         # Forward + backward with perturbed embeddings
+        loss_adv.backward()
+        fgm.restore()
+        optimizer.step()
+    """
+
+    def __init__(self, model, epsilon=1.0, emb_name='word_embeddings'):
+        self.model = model
+        self.epsilon = epsilon
+        self.emb_name = emb_name
+        self.backup = {}
+
+    def attack(self):
+        """Add adversarial perturbation to word embedding weights."""
+        for name, param in self.model.named_parameters():
+            if self.emb_name in name and param.requires_grad and param.grad is not None:
+                self.backup[name] = param.data.clone()
+                norm = param.grad.norm()
+                if norm != 0 and not torch.isnan(norm):
+                    r_adv = self.epsilon * param.grad / norm
+                    param.data.add_(r_adv)
+
+    def restore(self):
+        """Restore original embedding weights."""
+        for name, param in self.model.named_parameters():
+            if name in self.backup:
+                param.data = self.backup[name]
+        self.backup = {}
+
