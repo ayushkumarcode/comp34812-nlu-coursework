@@ -82,3 +82,31 @@ def compute_rdrop_loss(logits1, logits2, labels, bce_loss, alpha=1.0):
         logits2: Second forward pass logits (batch,)
         labels: Ground truth labels (batch,)
         bce_loss: BCEWithLogitsLoss instance
+        alpha: Weight for KL divergence term
+
+    Returns:
+        Total loss, task_loss, kl_loss
+    """
+    loss1 = bce_loss(logits1, labels)
+    loss2 = bce_loss(logits2, labels)
+    task_loss = (loss1 + loss2) / 2
+
+    # R-Drop KL divergence for binary classification
+    p1 = torch.sigmoid(logits1)
+    p2 = torch.sigmoid(logits2)
+    # Stack to get [p, 1-p] distributions
+    dist1 = torch.stack([p1, 1 - p1], dim=-1).clamp(min=1e-7)
+    dist2 = torch.stack([p2, 1 - p2], dim=-1).clamp(min=1e-7)
+    # Symmetric KL divergence
+    kl_loss = (F.kl_div(dist1.log(), dist2, reduction='batchmean') +
+               F.kl_div(dist2.log(), dist1, reduction='batchmean')) / 2
+
+    total_loss = task_loss + alpha * kl_loss
+    return total_loss, task_loss, kl_loss
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
