@@ -293,8 +293,8 @@ def natural_logic_features(p_doc, h_doc):
     rel_counts = Counter(relations)
 
     feats['natlog_equiv_ratio'] = rel_counts.get('equiv', 0) / n_rels
-    feats['natlog_fwd_ratio'] = rel_counts.get('forward', 0) / n_rels
-    feats['natlog_rev_ratio'] = rel_counts.get('reverse', 0) / n_rels
+    feats['natlog_fwd_ratio'] = rel_counts.get('forward_entailment', 0) / n_rels
+    feats['natlog_rev_ratio'] = rel_counts.get('reverse_entailment', 0) / n_rels
     feats['natlog_alt_ratio'] = rel_counts.get('alternation', 0) / n_rels
     feats['natlog_indep_ratio'] = rel_counts.get('independence', 0) / n_rels
     feats['natlog_cover_ratio'] = rel_counts.get('cover', 0) / n_rels
@@ -302,10 +302,12 @@ def natural_logic_features(p_doc, h_doc):
     # Entailment and contradiction scores
     feats['entailment_score'] = (
         rel_counts.get('equiv', 0) * 1.0 +
-        rel_counts.get('forward', 0) * 0.8
+        rel_counts.get('forward_entailment', 0) * 0.8 +
+        rel_counts.get('reverse_entailment', 0) * 0.5
     ) / n_rels
     feats['contradiction_score'] = (
         rel_counts.get('alternation', 0) * 1.0 +
+        rel_counts.get('cover', 0) * 0.5 +
         rel_counts.get('independence', 0) * 0.3
     ) / n_rels
 
