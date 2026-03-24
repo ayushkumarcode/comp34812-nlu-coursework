@@ -73,3 +73,14 @@ class AVCrossEncoderV2(nn.Module):
             nn.Linear(hidden_size, 64), nn.ReLU(),
             nn.Dropout(0.1), nn.Linear(64, num_topics),
         )
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        hidden_states = outputs.hidden_states[1:]  # skip embedding layer
+        cls_per_layer = [h[:, 0, :] for h in hidden_states]
+        normed_w = F.softmax(self.scalar_mix.weights, dim=0)
+        cls_repr = sum(w * c for w, c in zip(normed_w, cls_per_layer))
+        logits = self.classifier(cls_repr)
+        topic_input = self.grl(cls_repr)
+        topic_logits = self.topic_head(topic_input)
+        return logits, topic_logits
