@@ -194,3 +194,31 @@ def main():
             patience_counter += 1
             if patience_counter >= PATIENCE:
                 print(f"Early stopping at epoch {epoch}")
+                break
+
+    # Final evaluation with best model
+    print(f"\nBest AV Cat C (R-Drop) dev F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        save_dir / 'av_cat_c_rdrop_best.pt', weights_only=True))
+    model.eval()
+    final_preds = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            pred = (torch.sigmoid(logits) > 0.5).long()
+            final_preds.extend(pred.cpu().numpy())
+
+    y_dev = np.array(dev_labels)
+    final_metrics = compute_all_metrics(y_dev, np.array(final_preds))
+    print_metrics(final_metrics, "AV Cat C (R-Drop) — Final Dev Results")
+
+    pred_path = PROJECT_ROOT / 'predictions' / 'av_Group_34_C_rdrop.csv'
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
+    print(f"Predictions saved to {pred_path}")
+
+    baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
+    for name, baseline_f1 in baselines.items():
+        gap = final_metrics['macro_f1'] - baseline_f1
