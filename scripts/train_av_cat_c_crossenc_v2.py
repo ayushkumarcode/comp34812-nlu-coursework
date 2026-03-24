@@ -219,3 +219,21 @@ def main():
     pred_path.parent.mkdir(exist_ok=True)
     save_predictions(final_preds, pred_path)
     print(f"Predictions saved to {pred_path}")
+
+    # Print ScalarMix final weights
+    final_w = F.softmax(model.scalar_mix.weights, dim=0).cpu().detach()
+    print("\nScalarMix final layer weights:")
+    for i, w in enumerate(final_w):
+        bar = '#' * int(w * 80)
+        print(f"  Layer {i+1:2d}: {w:.4f} {bar}")
+
+    baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
+    for name, baseline_f1 in baselines.items():
+        gap = final_metrics['macro_f1'] - baseline_f1
+        status = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {name} ({baseline_f1:.4f}): {status} by {gap:+.4f}")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
