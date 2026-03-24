@@ -84,3 +84,32 @@ class AVCrossEncoderV2(nn.Module):
         topic_input = self.grl(cls_repr)
         topic_logits = self.topic_head(topic_input)
         return logits, topic_logits
+
+
+def main():
+    from transformers import AutoTokenizer, AutoModel
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    MAX_LEN, BATCH_SIZE, EPOCHS = 384, 8, 25
+    PATIENCE, LR = 7, 2e-5
+    NUM_TOPICS, GRL_LAMBDA, TOPIC_LOSS_WEIGHT = 10, 0.05, 0.1
+
+    # Generate topic pseudo-labels via TF-IDF + KMeans
+    print("Generating topic pseudo-labels for training data...")
+    all_train_texts = list(train_df['text_1']) + list(train_df['text_2'])
+    all_topic_labels = generate_topic_labels(all_train_texts, n_clusters=NUM_TOPICS)
+    train_topic_labels = all_topic_labels[:len(train_df)]
+
+    print("Generating topic pseudo-labels for dev data...")
+    all_dev_texts = list(dev_df['text_1']) + list(dev_df['text_2'])
+    dev_topic_all = generate_topic_labels(all_dev_texts, n_clusters=NUM_TOPICS)
+    dev_topic_labels = dev_topic_all[:len(dev_df)]
