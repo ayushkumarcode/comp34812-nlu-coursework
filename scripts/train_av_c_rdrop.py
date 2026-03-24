@@ -222,3 +222,10 @@ def main():
     baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
     for name, baseline_f1 in baselines.items():
         gap = final_metrics['macro_f1'] - baseline_f1
+        status = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {name} ({baseline_f1:.4f}): {status} by {gap:+.4f}")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
