@@ -313,12 +313,34 @@ def natural_logic_features(p_doc, h_doc):
 
 
 def _classify_relation(p_token, h_token):
-    """Classify the natural logic relation between two tokens."""
-    if p_token.text.lower() == h_token.text.lower():
+    """Classify lexical relation between aligned word pair using WordNet."""
+    try:
+        from nltk.corpus import wordnet as wn
+    except ImportError:
+        return 'independence'
+
+    p_word = p_token.lemma_.lower()
+    h_word = h_token.lemma_.lower()
+
+    if p_word == h_word:
         return 'equiv'
-    if p_token.lemma_.lower() == h_token.lemma_.lower():
+
+    p_synsets = wn.synsets(p_word)
+    h_synsets = wn.synsets(h_word)
+
+    if not p_synsets or not h_synsets:
+        return 'independence'
+
+    # Check synonymy (shared lemma names across synsets)
+    p_lemmas = set()
+    h_lemmas = set()
+    for s in p_synsets:
+        p_lemmas.update(l.name() for l in s.lemmas())
+    for s in h_synsets:
+        h_lemmas.update(l.name() for l in s.lemmas())
+    if p_lemmas & h_lemmas:
         return 'equiv'
-    # Without WordNet in this basic version, default to independence
+
     return 'independence'
 
 
