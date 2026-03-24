@@ -167,3 +167,31 @@ def main():
             total_loss += loss.item()
             total_main += main_loss.item()
             total_topic += topic_loss.item()
+
+        n_batches = len(train_loader)
+        model.eval()
+        preds, labels_all = [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits, _ = model(ids, mask)
+                pred = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+                preds.extend(pred.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(labels_all, preds, average='macro', zero_division=0)
+        print(f"Epoch {epoch:3d} | Loss: {total_loss/n_batches:.4f} "
+              f"(main={total_main/n_batches:.4f}, "
+              f"topic={total_topic/n_batches:.4f}) | Dev F1: {dev_f1:.4f}")
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save(model.state_dict(), save_dir / 'av_cat_c_crossenc_v2_best.pt')
+            print(f"  -> Best model saved (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
