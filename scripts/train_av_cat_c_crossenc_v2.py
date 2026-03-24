@@ -140,3 +140,30 @@ def main():
     best_f1, patience_counter = 0, 0
     save_dir = PROJECT_ROOT / 'models'
     save_dir.mkdir(exist_ok=True)
+
+    print(f"\nTraining AV Cat C Cross-Encoder v2 (ScalarMix + GRL)")
+    print(f"  Epochs: {EPOCHS}, Batch: {BATCH_SIZE}, LR: {LR}")
+    print(f"  Topics: {NUM_TOPICS}, GRL lambda: {GRL_LAMBDA}\n")
+
+    for epoch in range(1, EPOCHS + 1):
+        model.train()
+        total_loss, total_main, total_topic = 0, 0, 0
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+            topics = batch['topic'].to(device)
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                logits, topic_logits = model(ids, mask)
+                main_loss = bce_loss(logits.squeeze(-1), labels)
+                topic_loss = ce_loss(topic_logits, topics)
+                loss = main_loss + TOPIC_LOSS_WEIGHT * topic_loss
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+            total_main += main_loss.item()
+            total_topic += topic_loss.item()
