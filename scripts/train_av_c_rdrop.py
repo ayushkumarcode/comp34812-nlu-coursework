@@ -54,3 +54,31 @@ class AVCrossEncoder(nn.Module):
     """Simple cross-encoder: DeBERTa + classification head."""
     def __init__(self, model_name='microsoft/deberta-v3-base'):
         super().__init__()
+        from transformers import AutoModel
+        self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1),
+            nn.Linear(hidden_size, 256),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        cls_repr = outputs.last_hidden_state[:, 0, :]
+        logits = self.classifier(cls_repr)
+        return logits
+
+
+def compute_rdrop_loss(logits1, logits2, labels, bce_loss, alpha=1.0):
+    """Compute R-Drop loss: task loss + symmetric KL divergence."""
+    loss1 = bce_loss(logits1, labels)
+    loss2 = bce_loss(logits2, labels)
+    task_loss = (loss1 + loss2) / 2
+
+    # R-Drop KL divergence for binary classification
+    p1 = torch.sigmoid(logits1)
+    p2 = torch.sigmoid(logits2)
+    dist1 = torch.stack([p1, 1 - p1], dim=-1).clamp(min=1e-7)
