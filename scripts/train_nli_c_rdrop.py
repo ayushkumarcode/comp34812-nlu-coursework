@@ -222,3 +222,21 @@ def main():
             final_labels.extend(batch['label'].numpy())
 
     final_metrics = compute_all_metrics(
+        np.array(final_labels), np.array(final_preds))
+    print_metrics(final_metrics, "NLI Cat C (R-Drop) — Final Dev Results")
+
+    pred_path = PROJECT_ROOT / 'predictions' / 'nli_Group_34_C_rdrop.csv'
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
+    print(f"Predictions saved to {pred_path}")
+
+    baselines = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
+    for name, baseline_f1 in baselines.items():
+        gap = final_metrics['macro_f1'] - baseline_f1
+        status = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {name} ({baseline_f1:.4f}): {status} by {gap:+.4f}")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
