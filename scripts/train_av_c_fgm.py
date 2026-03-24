@@ -166,3 +166,31 @@ def main():
                 loss = bce_loss(logits, labels)
 
             scaler.scale(loss).backward()
+
+            # FGM adversarial attack on embeddings
+            scaler.unscale_(optimizer)
+            fgm.attack()
+
+            with autocast('cuda'):
+                logits_adv = model(ids, mask).squeeze(-1)
+                loss_adv = bce_loss(logits_adv, labels)
+
+            scaler.scale(loss_adv).backward()
+            fgm.restore()
+
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+
+            total_loss += loss.item()
+            total_adv_loss += loss_adv.item()
+            n_batches += 1
+
+        # Evaluate
+        model.eval()
+        preds, labels_all = [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
