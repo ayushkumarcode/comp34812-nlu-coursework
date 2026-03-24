@@ -341,6 +341,13 @@ def _classify_relation(p_token, h_token):
     if p_lemmas & h_lemmas:
         return 'equiv'
 
+    # Check antonymy
+    for s in p_synsets:
+        for l in s.lemmas():
+            for ant in l.antonyms():
+                if ant.name() in h_lemmas:
+                    return 'alternation'
+
     return 'independence'
 
 
