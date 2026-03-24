@@ -250,3 +250,8 @@ def main():
         gap = final_metrics['macro_f1'] - baseline_f1
         status = "BEATS" if gap > 0 else "BELOW"
         print(f"  vs {name} ({baseline_f1:.4f}): {status} by {gap:+.4f}")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
