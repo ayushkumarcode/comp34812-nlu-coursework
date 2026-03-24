@@ -82,3 +82,31 @@ def compute_rdrop_loss(logits1, logits2, labels, bce_loss, alpha=1.0):
     p1 = torch.sigmoid(logits1)
     p2 = torch.sigmoid(logits2)
     dist1 = torch.stack([p1, 1 - p1], dim=-1).clamp(min=1e-7)
+    dist2 = torch.stack([p2, 1 - p2], dim=-1).clamp(min=1e-7)
+    kl_loss = (F.kl_div(dist1.log(), dist2, reduction='batchmean') +
+               F.kl_div(dist2.log(), dist1, reduction='batchmean')) / 2
+
+    total_loss = task_loss + alpha * kl_loss
+    return total_loss, task_loss, kl_loss
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    LR = 2e-5
+    BATCH_SIZE = 8
+    MAX_LEN = 384
+    EPOCHS = 25
+    PATIENCE = 7
+    ALPHA = 1.0
+
+    print(f"\n=== AV Cat C + R-Drop (alpha={ALPHA}) ===")
+    print(f"LR={LR}, BS={BATCH_SIZE}, MaxLen={MAX_LEN}")
+    print(f"Epochs={EPOCHS}, Patience={PATIENCE}\n")
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
