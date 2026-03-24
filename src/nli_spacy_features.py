@@ -281,13 +281,33 @@ def natural_logic_features(p_doc, h_doc):
             'entailment_score': 0.0, 'contradiction_score': 0.0,
         }
 
-    # Classify relations for matched pairs
+    # Classify relations for aligned pairs (content words only)
+    content_pos = {'NOUN', 'VERB', 'ADJ', 'ADV'}
+    p_content = [t for t in p_tokens if t.pos_ in content_pos]
+
     relations = []
+    h_aligned = set()
+    # First pass: exact/lemma matches (all tokens)
     for pt in p_tokens:
-        for ht in h_tokens:
+        for j, ht in enumerate(h_tokens):
+            if j in h_aligned:
+                continue
             if pt.text.lower() == ht.text.lower() or pt.lemma_.lower() == ht.lemma_.lower():
                 rel = _classify_relation(pt, ht)
                 relations.append(rel)
+                h_aligned.add(j)
+                break
+    # Second pass: WordNet relations for unaligned content words
+    for ht_idx, ht in enumerate(h_tokens):
+        if ht_idx in h_aligned or ht.pos_ not in content_pos:
+            continue
+        best_rel = 'independence'
+        for pt in p_content:
+            rel = _classify_relation(pt, ht)
+            if rel != 'independence':
+                best_rel = rel
+                break
+        relations.append(best_rel)
 
     n_rels = max(len(relations), 1)
     rel_counts = Counter(relations)
