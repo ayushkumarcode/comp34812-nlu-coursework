@@ -82,3 +82,31 @@ class FGM:
         self.backup = {}
 
     def attack(self):
+        """Add adversarial perturbation to word embedding weights."""
+        for name, param in self.model.named_parameters():
+            if self.emb_name in name and param.requires_grad and param.grad is not None:
+                self.backup[name] = param.data.clone()
+                norm = param.grad.norm()
+                if norm != 0 and not torch.isnan(norm):
+                    r_adv = self.epsilon * param.grad / norm
+                    param.data.add_(r_adv)
+
+    def restore(self):
+        """Restore original embedding weights."""
+        for name, param in self.model.named_parameters():
+            if name in self.backup:
+                param.data = self.backup[name]
+        self.backup = {}
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    LR = 2e-5
+    BATCH_SIZE = 8
+    MAX_LEN = 384
+    EPOCHS = 25
