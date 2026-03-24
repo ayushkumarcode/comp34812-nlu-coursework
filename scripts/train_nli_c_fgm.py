@@ -222,3 +222,31 @@ def main():
                 break
 
     # Final evaluation with best model
+    print(f"\nBest NLI Cat C (FGM) dev F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        save_dir / 'nli_cat_c_fgm_best.pt', weights_only=True))
+    model.eval()
+    final_preds, final_labels = [], []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            pred = (torch.sigmoid(logits) > 0.5).long()
+            final_preds.extend(pred.cpu().numpy())
+            final_labels.extend(batch['label'].numpy())
+
+    final_metrics = compute_all_metrics(
+        np.array(final_labels), np.array(final_preds))
+    print_metrics(final_metrics, "NLI Cat C (FGM) — Final Dev Results")
+
+    pred_path = PROJECT_ROOT / 'predictions' / 'nli_Group_34_C_fgm.csv'
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
+    print(f"Predictions saved to {pred_path}")
+
+    baselines = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
+    for name, baseline_f1 in baselines.items():
+        gap = final_metrics['macro_f1'] - baseline_f1
+        status = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {name} ({baseline_f1:.4f}): {status} by {gap:+.4f}")
