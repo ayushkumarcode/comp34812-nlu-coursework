@@ -54,3 +54,31 @@ class NLIDeBERTaDataset(Dataset):
 class NLIDeBERTaCrossEncoder(nn.Module):
     """Cross-encoder DeBERTa for NLI (no adversarial head — clean version)."""
 
+    def __init__(self, model_name='microsoft/deberta-v3-base'):
+        super().__init__()
+        from transformers import AutoModel
+        self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1),
+            nn.Linear(hidden_size, 256),
+            nn.Tanh(),
+            nn.Dropout(0.1),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        cls_repr = outputs.last_hidden_state[:, 0, :]
+        logits = self.classifier(cls_repr)
+        return logits
+
+
+def compute_rdrop_loss(logits1, logits2, labels, bce_loss, alpha=1.0):
+    """Compute R-Drop loss: task loss + symmetric KL divergence.
+
+    Args:
+        logits1: First forward pass logits (batch,)
+        logits2: Second forward pass logits (batch,)
+        labels: Ground truth labels (batch,)
+        bce_loss: BCEWithLogitsLoss instance
