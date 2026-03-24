@@ -195,3 +195,27 @@ def main():
             if patience_counter >= PATIENCE:
                 print(f"Early stopping at epoch {epoch}")
                 break
+
+    # Final evaluation
+    print(f"\nBest AV Cat C (cross-encoder v2) dev F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        save_dir / 'av_cat_c_crossenc_v2_best.pt', weights_only=True))
+    model.eval()
+
+    final_preds = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits, _ = model(ids, mask)
+            pred = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+            final_preds.extend(pred.cpu().numpy())
+
+    y_dev = np.array(dev_labels)
+    final_metrics = compute_all_metrics(y_dev, np.array(final_preds))
+    print_metrics(final_metrics, "AV Cat C (Cross-Encoder v2) — Final Dev")
+
+    pred_path = PROJECT_ROOT / 'predictions' / 'av_Group_34_C_crossenc_v2.csv'
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
+    print(f"Predictions saved to {pred_path}")
