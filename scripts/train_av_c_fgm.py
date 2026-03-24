@@ -110,3 +110,31 @@ def main():
     BATCH_SIZE = 8
     MAX_LEN = 384
     EPOCHS = 25
+    PATIENCE = 7
+    FGM_EPSILON = 1.0
+
+    print(f"\n=== AV Cat C + FGM Adversarial Training (eps={FGM_EPSILON}) ===")
+    print(f"LR={LR}, BS={BATCH_SIZE}, MaxLen={MAX_LEN}")
+    print(f"Epochs={EPOCHS}, Patience={PATIENCE}\n")
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    train_dataset = AVCrossEncoderDataset(
+        train_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset = AVCrossEncoderDataset(
+        dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+    dev_loader = DataLoader(
+        dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    model = AVCrossEncoder(model_name=MODEL_NAME).to(device)
+    bce_loss = nn.BCEWithLogitsLoss()
+    optimizer = AdamW([
+        {'params': model.encoder.parameters(), 'lr': LR},
