@@ -54,3 +54,31 @@ class NLIDeBERTaDataset(Dataset):
 class NLIDeBERTaCrossEncoder(nn.Module):
     """Cross-encoder DeBERTa for NLI (no adversarial head — clean version)."""
 
+    def __init__(self, model_name='microsoft/deberta-v3-base'):
+        super().__init__()
+        from transformers import AutoModel
+        self.encoder = AutoModel.from_pretrained(model_name)
+        hidden_size = self.encoder.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1),
+            nn.Linear(hidden_size, 256),
+            nn.Tanh(),
+            nn.Dropout(0.1),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        cls_repr = outputs.last_hidden_state[:, 0, :]
+        logits = self.classifier(cls_repr)
+        return logits
+
+
+class FGM:
+    """Fast Gradient Method for adversarial training on embeddings.
+
+    Usage:
+        fgm = FGM(model)
+        # After loss.backward():
+        fgm.attack()
+        # Forward + backward with perturbed embeddings
