@@ -138,3 +138,31 @@ def main():
     dev_loader = DataLoader(
         dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
+    model = NLIDeBERTaCrossEncoder(model_name=MODEL_NAME).to(device)
+    bce_loss = nn.BCEWithLogitsLoss()
+    optimizer = AdamW(model.parameters(), lr=LR, weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1 = 0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        model.train()
+        total_loss, total_task, total_kl = 0, 0, 0
+        n_batches = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                # Two forward passes with different dropout masks (R-Drop)
+                logits1 = model(ids, mask).squeeze(-1)
+                logits2 = model(ids, mask).squeeze(-1)
+                loss, task_loss, kl_loss = compute_rdrop_loss(
+                    logits1, logits2, labels, bce_loss, alpha=ALPHA)
+
