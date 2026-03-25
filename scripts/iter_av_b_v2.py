@@ -82,3 +82,31 @@ def evaluate(model, dataloader, device):
 def main():
     print("=" * 60)
     print("  AV Cat B v2 — Lower LR, Longer Warmup")
+    print("=" * 60)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    print("\n[1/5] Loading data...")
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    print("\n[2/5] Generating topic labels...")
+    all_texts = list(train_df['text_1']) + list(train_df['text_2'])
+    topic_labels_all = generate_topic_labels(all_texts, n_clusters=10)
+    train_topic = topic_labels_all[:len(train_df)]
+    num_topics = int(topic_labels_all.max()) + 1
+
+    print("\n[3/5] Creating datasets...")
+    train_dataset = AVCharDataset(
+        train_df, max_len=1500, augment=True, topic_labels=train_topic)
+    dev_dataset = AVCharDataset(
+        dev_df, max_len=1500, augment=False, topic_labels=None)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True,
+                               num_workers=4, pin_memory=True)
+    dev_loader = DataLoader(dev_dataset, batch_size=64, shuffle=False,
+                             num_workers=4, pin_memory=True)
+
