@@ -54,3 +54,31 @@ class AVCEDataset(Dataset):
             ),
         }
 
+
+class AVCE(nn.Module):
+    """DeBERTa cross-encoder for AV."""
+    def __init__(self, mn='microsoft/deberta-v3-base'):
+        super().__init__()
+        from transformers import AutoModel
+        self.encoder = AutoModel.from_pretrained(mn)
+        hs = self.encoder.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1), nn.Linear(hs, 256),
+            nn.GELU(), nn.Dropout(0.2),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        out = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask
+        )
+        return self.classifier(out.last_hidden_state[:, 0])
+
+
+class AWP:
+    """Adversarial Weight Perturbation."""
+    def __init__(self, model, adv_lr=1e-2, adv_eps=1e-2):
+        self.model = model
+        self.adv_lr = adv_lr
+        self.adv_eps = adv_eps
