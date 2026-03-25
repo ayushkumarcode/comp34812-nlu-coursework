@@ -138,3 +138,31 @@ def main():
     )
 
     model = AVCE(mn=MN).to(device)
+    optimizer = AdamW([
+        {'params': model.encoder.parameters(), 'lr': LR},
+        {'params': model.classifier.parameters(),
+         'lr': 5e-4},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1, pat = 0, 0
+    sd = PROJECT_ROOT / 'models'
+    sd.mkdir(exist_ok=True)
+
+    for ep in range(1, EPOCHS + 1):
+        model.train()
+        tl_sum, tk_sum, kl_sum, nb = 0, 0, 0, 0
+        for batch in tl:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                l1 = model(ids, mask).squeeze(-1)
+                l2 = model(ids, mask).squeeze(-1)
+                loss, task, kl = rdrop_loss_smooth(
+                    l1, l2, labels,
+                    alpha=ALPHA, smoothing=SMOOTH
+                )
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
