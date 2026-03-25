@@ -250,3 +250,31 @@ def main():
             print(f"  -> Best (F1={best_f1:.4f})")
         else:
             pat += 1
+            if pat >= PAT:
+                print(f"Early stop at ep {ep}")
+                break
+
+    # Final eval + threshold
+    print(f"\nBest F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        sd / 'av_cat_c_rdrop_awp_best.pt',
+        weights_only=True
+    ))
+    model.eval()
+    all_probs = []
+    with torch.no_grad():
+        for batch in dl:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            all_probs.extend(
+                torch.sigmoid(logits).cpu().numpy()
+            )
+    all_probs = np.array(all_probs)
+    y_dev = np.array(dev_labels)
+
+    bf, bt = 0, 0.5
+    for t in np.arange(0.30, 0.70, 0.005):
+        f1 = f1_score(
+            y_dev, (all_probs > t).astype(int),
+            average='macro'
