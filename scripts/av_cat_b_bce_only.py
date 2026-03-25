@@ -26,3 +26,31 @@ from src.data_utils import (
     load_av_data, load_solution_labels, save_predictions
 )
 from src.scorer import compute_all_metrics, print_metrics
+
+
+def evaluate(model, dataloader, device):
+    """Evaluate model on a dataset."""
+    model.eval()
+    all_preds, all_probs, all_labels = [], [], []
+    with torch.no_grad():
+        for batch in dataloader:
+            c1 = batch['char_ids_1'].to(device)
+            c2 = batch['char_ids_2'].to(device)
+            labels = batch['label']
+            logits, _ = model(c1, c2)
+            probs = torch.sigmoid(logits.squeeze(-1))
+            preds = (probs > 0.5).long()
+            all_preds.extend(preds.cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
+            all_labels.extend(labels.numpy())
+    return (np.array(all_preds),
+            np.array(all_probs),
+            np.array(all_labels))
+
+
+def main():
+    print("=" * 60)
+    print("  AV Cat B — BCE-Only Training")
+    print("=" * 60)
+
+    device = torch.device(
