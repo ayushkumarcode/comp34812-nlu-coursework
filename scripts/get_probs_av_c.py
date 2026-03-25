@@ -110,3 +110,31 @@ def main():
     np.save(str(prob_path), probs)
     print(f"Probabilities saved to {prob_path}")
 
+    # Sweep thresholds
+    print("\n=== Threshold Sweep ===")
+    best_f1 = 0
+    best_thresh = 0.5
+    default_f1 = None
+
+    for thresh in np.arange(0.30, 0.71, 0.01):
+        preds = (probs > thresh).astype(int)
+        f1 = f1_score(y_true, preds, average='macro', zero_division=0)
+        if abs(thresh - 0.5) < 0.005:
+            default_f1 = f1
+            print(f"  thresh=0.50: F1={f1:.4f}  <-- default")
+        if f1 > best_f1:
+            best_f1 = f1
+            best_thresh = thresh
+
+    print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_f1:.4f}")
+    if default_f1 is not None:
+        print(f"Improvement over 0.50: {best_f1 - default_f1:+.4f}")
+
+    # Save predictions with optimal threshold
+    preds = (probs > best_thresh).astype(int)
+    pred_path = PROJECT_ROOT / 'predictions' / 'av_Group_34_C_thresh.csv'
+    save_predictions(preds, pred_path)
+    print(f"Optimized predictions saved to {pred_path}")
+
+    # Detailed sweep around the optimum
+    print("\n=== Detailed sweep around optimum ===")
