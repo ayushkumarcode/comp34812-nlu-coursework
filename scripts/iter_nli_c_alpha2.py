@@ -26,3 +26,31 @@ class D(Dataset):
         return {'ids': e['input_ids'].squeeze(0), 'mask': e['attention_mask'].squeeze(0), 'label': torch.tensor(self.l[i], dtype=torch.float)}
 
 class M(nn.Module):
+    def __init__(self, mn='microsoft/deberta-v3-base'):
+        super().__init__()
+        from transformers import AutoModel
+        self.enc = AutoModel.from_pretrained(mn)
+        hs = self.enc.config.hidden_size
+        self.cls = nn.Sequential(nn.Dropout(0.1), nn.Linear(hs, 256), nn.Tanh(), nn.Dropout(0.1), nn.Linear(256, 1))
+    def forward(self, ids, mask):
+        return self.cls(self.enc(input_ids=ids, attention_mask=mask).last_hidden_state[:, 0, :])
+
+def rdrop(l1, l2, labels, alpha=2.0):
+    bce = nn.BCEWithLogitsLoss()
+    tl = (bce(l1, labels) + bce(l2, labels)) / 2
+    p1, p2 = torch.sigmoid(l1), torch.sigmoid(l2)
+    d1 = torch.stack([p1, 1-p1], -1).clamp(1e-7)
+    d2 = torch.stack([p2, 1-p2], -1).clamp(1e-7)
+    kl = (F.kl_div(d1.log(), d2, reduction='batchmean') + F.kl_div(d2.log(), d1, reduction='batchmean')) / 2
+    return tl + alpha * kl, tl, kl
+
+def main():
+    from transformers import AutoTokenizer, get_linear_schedule_with_warmup
+    dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {dev}")
+    MN, LR, BS, ML, EP, PAT, ALPHA = 'microsoft/deberta-v3-base', 1e-5, 16, 128, 20, 10, 2.0
+    print(f"\n=== NLI Cat C + R-Drop (alpha={ALPHA}) ===\nLR={LR}, BS={BS}, ML={ML}, EP={EP}\n")
+    tok = AutoTokenizer.from_pretrained(MN, use_fast=False)
+    tdf, ddf = load_nli_data(split='train'), load_nli_data(split='dev')
+    dl = load_solution_labels(task='nli')
+    tds, dds = D(tdf, tok, ML), D(ddf, tok, ML)
