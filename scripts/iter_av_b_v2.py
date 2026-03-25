@@ -138,3 +138,31 @@ def main():
         else:
             grl_lambda = 0.05
         model.grl.lambda_val = grl_lambda
+
+        # Longer warmup: BCE-only for 20 epochs
+        c_weight = 0.05 if epoch >= 25 else 0.0
+        t_weight = 0.02 if epoch >= 15 else 0.0
+        train_loss, train_f1 = train_epoch(
+            model, train_loader, optimizer, device, epoch,
+            bce_loss_fn, contrastive_loss_fn, topic_loss_fn,
+            contrastive_weight=c_weight, topic_weight=t_weight)
+        scheduler.step()
+
+        dev_preds, dev_probs, dev_true = evaluate(model, dev_loader, device)
+        dev_f1 = f1_score(dev_true, dev_preds, average='macro', zero_division=0)
+
+        elapsed = time.time() - t0
+        print(f"Epoch {epoch:3d} | Loss: {train_loss:.4f} | "
+              f"Train F1: {train_f1:.4f} | Dev F1: {dev_f1:.4f} | "
+              f"GRL: {grl_lambda:.3f} | Time: {elapsed:.1f}s")
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save(model.state_dict(), save_dir / 'av_cat_b_v2_best.pt')
+            np.save(save_dir / 'av_cat_b_v2_probs.npy', dev_probs)
+            print(f"  -> New best (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch}")
