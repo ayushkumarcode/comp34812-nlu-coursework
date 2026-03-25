@@ -26,3 +26,31 @@ prob_files = {
     'lr1e5': 'av_cat_c_lr1e5_probs.npy',
     'awp': 'av_cat_c_awp_probs.npy',
     'maxlen256': 'av_cat_c_maxlen256_probs.npy',
+    'cosine': 'av_cat_c_cosine_probs.npy',
+}
+
+probs = {}
+for name, fname in prob_files.items():
+    fpath = pred_dir / fname
+    if fpath.exists():
+        probs[name] = np.load(fpath)
+        print(f"Loaded {name}: {fpath}")
+    else:
+        print(f"Not found: {fpath}")
+
+if len(probs) < 2:
+    print("Need at least 2 prob files for ensemble")
+    sys.exit(1)
+
+# Individual results
+print("\n=== Individual Model Results ===")
+for name, p in probs.items():
+    bf, bt = 0, 0.5
+    for t in np.arange(0.30, 0.70, 0.005):
+        f1 = f1_score(
+            y_dev, (p > t).astype(int),
+            average='macro'
+        )
+        if f1 > bf:
+            bf = f1
+            bt = t
