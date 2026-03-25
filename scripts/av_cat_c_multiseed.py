@@ -110,3 +110,31 @@ def train_one_seed(seed, train_df, dev_df, dev_labels,
     total_steps = EPOCHS * len(tl)
     warmup = total_steps // 10
     sched = get_cosine_warmup(optimizer, warmup, total_steps)
+    scaler = GradScaler('cuda')
+
+    y_dev = np.array(dev_labels)
+    best_f1, pat = 0, 0
+    best_probs = None
+
+    print(f"\n--- Seed {seed} ---")
+    for ep in range(1, EPOCHS + 1):
+        encoder.train()
+        classifier.train()
+        tl_sum, nb = 0, 0
+        for batch in tl:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                o1 = encoder(input_ids=ids,
+                             attention_mask=mask)
+                l1 = classifier(
+                    o1.last_hidden_state[:, 0]
+                ).squeeze(-1)
+                o2 = encoder(input_ids=ids,
+                             attention_mask=mask)
+                l2 = classifier(
+                    o2.last_hidden_state[:, 0]
+                ).squeeze(-1)
+                loss1 = smooth_bce(l1, labels, SMOOTH)
