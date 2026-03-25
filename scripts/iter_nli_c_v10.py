@@ -138,3 +138,31 @@ def main():
                 logits1 = model(ids, mask).squeeze(-1)
                 logits2 = model(ids, mask).squeeze(-1)
                 loss, task_l, kl_l = compute_rdrop_loss(
+                    logits1, logits2, labels, bce_loss, alpha=ALPHA)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            scheduler.step()
+
+            total_loss += loss.item()
+            total_task += task_l.item()
+            total_kl += kl_l.item()
+            n_batches += 1
+
+        # Evaluate
+        model.eval()
+        preds, probs_all, labels_all = [], [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
+                probs = torch.sigmoid(logits)
+                pred = (probs > 0.5).long()
+                preds.extend(pred.cpu().numpy())
+                probs_all.extend(probs.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
