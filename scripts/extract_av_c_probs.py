@@ -166,3 +166,23 @@ def main():
             for combo in combinations(names, r):
                 avg = np.mean(
                     [all_probs[n] for n in combo],
+                    axis=0
+                )
+                bf, bt = 0, 0.5
+                for t in np.arange(0.30, 0.70, 0.005):
+                    f1 = f1_score(
+                        y_dev, (avg > t).astype(int),
+                        average='macro'
+                    )
+                    if f1 > bf:
+                        bf = f1
+                        bt = t
+                cn = "+".join(combo)
+                if bf >= 0.82:
+                    print(f"  {cn}: F1={bf:.4f} (t={bt:.3f})")
+
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
