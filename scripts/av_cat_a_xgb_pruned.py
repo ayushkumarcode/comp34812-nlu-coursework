@@ -54,3 +54,31 @@ for pct in [25, 50, 75]:
     threshold = np.percentile(imp, pct)
     mask = imp >= threshold
     n_kept = mask.sum()
+    X_tr_p = X_tr[:, mask]
+    X_dv_p = X_dv[:, mask]
+    print(f"\n--- Pruning {pct}% (keeping {n_kept}) ---")
+
+    # Retrain with better hyperparams
+    model = XGBClassifier(
+        n_estimators=2000, max_depth=5,
+        learning_rate=0.01,
+        subsample=0.7, colsample_bytree=0.6,
+        reg_alpha=0.1, reg_lambda=1.0,
+        min_child_weight=5,
+        eval_metric='logloss',
+        random_state=42, n_jobs=-1,
+    )
+    model.fit(X_tr_p, y_train)
+    y_pred = model.predict(X_dv_p)
+    f1 = f1_score(y_dev, y_pred, average='macro')
+    print(f"  macro_f1 = {f1:.4f}")
+
+# Step 2: Deep+regularized XGBoost on all features
+print("\n--- Deep Regularized XGBoost (all features) ---")
+model2 = XGBClassifier(
+    n_estimators=3000, max_depth=3,
+    learning_rate=0.01,
+    subsample=0.6, colsample_bytree=0.5,
+    reg_alpha=0.5, reg_lambda=2.0,
+    min_child_weight=10, gamma=0.1,
+    eval_metric='logloss',
