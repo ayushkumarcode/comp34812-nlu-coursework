@@ -26,3 +26,31 @@ print(f"Device: {device}")
 
 
 # ---- Dataset class (must match train_av_cat_c_crossenc.py exactly) ----
+class AVCrossEncoderDataset(Dataset):
+    """AV dataset for cross-encoder: tokenize text_1 + text_2 as pair."""
+    def __init__(self, df, tokenizer, max_len=384):
+        self.texts_1 = list(df['text_1'])
+        self.texts_2 = list(df['text_2'])
+        self.labels = df['label'].values.astype(np.float32)
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        enc = self.tokenizer(
+            self.texts_1[idx], self.texts_2[idx],
+            truncation=True, max_length=self.max_len,
+            padding='max_length', return_tensors='pt'
+        )
+        return {
+            'input_ids': enc['input_ids'].squeeze(0),
+            'attention_mask': enc['attention_mask'].squeeze(0),
+            'label': torch.tensor(self.labels[idx], dtype=torch.float),
+        }
+
+
+def main():
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    MAX_LEN = 384
