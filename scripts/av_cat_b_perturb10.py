@@ -194,3 +194,31 @@ def main():
             total_loss += loss.item()
 
         scheduler.step()
+        preds, probs, true = evaluate(
+            model, dev_loader, device
+        )
+        dev_f1 = f1_score(
+            true, preds, average='macro', zero_division=0
+        )
+        elapsed = time.time() - t0
+        print(
+            f"Epoch {epoch:3d} | "
+            f"Loss: {total_loss/len(train_loader):.4f} | "
+            f"Dev F1: {dev_f1:.4f} | "
+            f"Time: {elapsed:.1f}s"
+        )
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save(
+                model.state_dict(),
+                save_dir / 'av_cat_b_perturb10_best.pt'
+            )
+            print(f"  -> New best (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch}")
+                break
+
