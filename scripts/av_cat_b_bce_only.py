@@ -54,3 +54,31 @@ def main():
     print("=" * 60)
 
     device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    # No topic labels needed for BCE-only
+    train_dataset = AVCharDataset(
+        train_df, max_len=1500, augment=True,
+        topic_labels=None
+    )
+    dev_dataset = AVCharDataset(
+        dev_df, max_len=1500, augment=False,
+        topic_labels=None
+    )
+    dev_dataset.labels = np.array(
+        dev_labels, dtype=np.float32
+    )
+
+    train_loader = DataLoader(
+        train_dataset, batch_size=64, shuffle=True,
+        num_workers=4, pin_memory=True
+    )
+    dev_loader = DataLoader(
+        dev_dataset, batch_size=64, shuffle=False,
+        num_workers=4, pin_memory=True
