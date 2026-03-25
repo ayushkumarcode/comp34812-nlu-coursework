@@ -110,3 +110,31 @@ def main():
 
             optimizer.zero_grad()
             with autocast('cuda'):
+                outputs = encoder(input_ids=ids, attention_mask=mask)
+                cls_repr = outputs.last_hidden_state[:, 0, :]
+                logits = classifier(cls_repr)
+                loss = bce_loss(logits.squeeze(-1), labels)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(
+                list(encoder.parameters()) + list(classifier.parameters()), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+            n_batches += 1
+
+        # Evaluate
+        encoder.eval()
+        classifier.eval()
+        preds, probs_all, labels_all = [], [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                outputs = encoder(input_ids=ids, attention_mask=mask)
+                cls_repr = outputs.last_hidden_state[:, 0, :]
+                logits = classifier(cls_repr).squeeze(-1)
+                probs = torch.sigmoid(logits)
+                pred = (probs > 0.5).long()
+                preds.extend(pred.cpu().numpy())
