@@ -54,3 +54,31 @@ def train_epoch(model, dataloader, optimizer, device, epoch,
             loss = loss + topic_weight * topic_loss_fn(topic_logits, topic_labels)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+        optimizer.step()
+        total_loss += loss.item()
+        preds = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+        all_preds.extend(preds.cpu().numpy())
+        all_labels.extend(labels.cpu().numpy())
+    return total_loss / len(dataloader), f1_score(all_labels, all_preds, average='macro', zero_division=0)
+
+
+def evaluate(model, dataloader, device):
+    model.eval()
+    all_preds, all_probs, all_labels = [], [], []
+    with torch.no_grad():
+        for batch in dataloader:
+            char_1 = batch['char_ids_1'].to(device)
+            char_2 = batch['char_ids_2'].to(device)
+            labels = batch['label']
+            logits, _ = model(char_1, char_2)
+            probs = torch.sigmoid(logits.squeeze(-1))
+            preds = (probs > 0.5).long()
+            all_preds.extend(preds.cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
+            all_labels.extend(labels.numpy())
+    return np.array(all_preds), np.array(all_probs), np.array(all_labels)
+
+
+def main():
+    print("=" * 60)
+    print("  AV Cat B v2 — Lower LR, Longer Warmup")
