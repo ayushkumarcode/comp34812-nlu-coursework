@@ -110,3 +110,31 @@ print(f"  F1={bf3:.4f} (t={bt3:.3f})")
 results['xgb_shallow'] = bf3
 
 # Config 4: sklearn GBM
+print("\n--- sklearn GBM ---")
+m4 = GradientBoostingClassifier(
+    n_estimators=500, max_depth=4,
+    learning_rate=0.05,
+    subsample=0.8, min_samples_leaf=20,
+    random_state=42,
+)
+m4.fit(X_tr, y_train)
+p4 = m4.predict_proba(X_dv)[:, 1]
+bf4, bt4 = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(y_dev, (p4 > t).astype(int),
+                  average='macro')
+    if f1 > bf4: bf4, bt4 = f1, t
+print(f"  F1={bf4:.4f} (t={bt4:.3f})")
+results['sklearn_gbm'] = bf4
+
+# Prob ensemble
+print("\n--- Ensemble (avg probs) ---")
+pavg = (p1 + p2 + p3 + p4) / 4
+bf_e, bt_e = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(y_dev, (pavg > t).astype(int),
+                  average='macro')
+    if f1 > bf_e: bf_e, bt_e = f1, t
+print(f"  F1={bf_e:.4f} (t={bt_e:.3f})")
+results['ensemble_4'] = bf_e
+
