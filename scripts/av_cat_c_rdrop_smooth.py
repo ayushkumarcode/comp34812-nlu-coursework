@@ -166,3 +166,31 @@ def main():
                 )
             scaler.scale(loss).backward()
             scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), 1.0
+            )
+            scaler.step(optimizer)
+            scaler.update()
+            tl_sum += loss.item()
+            tk_sum += task.item()
+            kl_sum += kl.item()
+            nb += 1
+
+        model.eval()
+        preds, labs = [], []
+        with torch.no_grad():
+            for batch in dl:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
+                p = (torch.sigmoid(logits) > 0.5).long()
+                preds.extend(p.cpu().numpy())
+                labs.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(
+            labs, preds, average='macro', zero_division=0
+        )
+        print(
+            f"Ep {ep:3d} | "
+            f"L:{tl_sum/nb:.4f} "
+            f"(task={tk_sum/nb:.4f} kl={kl_sum/nb:.4f})"
