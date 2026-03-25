@@ -26,3 +26,31 @@ from src.scorer import compute_all_metrics, print_metrics
 
 device = torch.device(
     'cuda' if torch.cuda.is_available() else 'cpu'
+)
+print(f"Device: {device}")
+
+
+class AV_MLP(nn.Module):
+    """3-layer MLP for AV binary classification."""
+    def __init__(self, input_dim, hidden_dims=(512, 256),
+                 dropout=0.3):
+        super().__init__()
+        layers = []
+        prev = input_dim
+        for h in hidden_dims:
+            layers.extend([
+                nn.Linear(prev, h),
+                nn.BatchNorm1d(h),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+            ])
+            prev = h
+        layers.append(nn.Linear(prev, 1))
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.net(x).squeeze(-1)
+
+
+def rdrop_loss(logits1, logits2, labels, alpha=1.0):
+    """R-Drop loss for binary classification."""
