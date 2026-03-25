@@ -194,3 +194,15 @@ pred_path = (
     / 'av_Group_34_A_cached_search.csv'
 )
 pred_path.parent.mkdir(exist_ok=True)
+save_predictions(final, pred_path)
+
+metrics = compute_all_metrics(y_dv, final)
+print_metrics(metrics, "AV Cat A Cached Search Best")
+
+for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+              ('BERT', 0.7854)]:
+    gap = best_f1 - bl
+    s = "BEATS" if gap > 0 else "BELOW"
+    print(f"  vs {n}: {s} by {gap:+.4f}")
+print(f"Current best AV Cat A: 0.7340")
+print("Done!")
