@@ -54,3 +54,31 @@ class AVCEDataset(Dataset):
 def get_cosine_warmup(opt, warmup, total):
     def fn(step):
         if step < warmup:
+            return float(step) / max(1, warmup)
+        prog = (step - warmup) / max(1, total - warmup)
+        return max(0.0, 0.5 * (1 + math.cos(math.pi * prog)))
+    return torch.optim.lr_scheduler.LambdaLR(opt, fn)
+
+
+def smooth_bce(logits, labels, s=0.05):
+    sl = labels * (1 - s) + 0.5 * s
+    return F.binary_cross_entropy_with_logits(logits, sl)
+
+
+def train_one_seed(seed, train_df, dev_df, dev_labels,
+                   tok, device, save_dir, pred_dir):
+    from transformers import AutoModel
+
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+    MN = 'microsoft/deberta-v3-base'
+    ML, BS, LR = 384, 8, 2e-5
+    EPOCHS, PAT = 25, 7
+    ALPHA, SMOOTH = 0.5, 0.05
+
+    train_ds = AVCEDataset(train_df, tok, max_len=ML)
+    dev_ds = AVCEDataset(dev_df, tok, max_len=ML)
+    dev_ds.labels = np.array(dev_labels, dtype=np.float32)
+
