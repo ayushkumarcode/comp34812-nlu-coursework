@@ -82,3 +82,31 @@ def main():
 
     MODEL_NAME = 'microsoft/deberta-v3-base'
     LR, BS, MAX_LEN = 2e-5, 16, 256
+    EPOCHS, PATIENCE = 30, 7
+
+    print(f"\n=== AV Cat C max_len=256 ===")
+    print(f"LR={LR}, BS={BS}, MaxLen={MAX_LEN}")
+    print(f"Epochs={EPOCHS}, Patience={PATIENCE}\n")
+
+    tok = AutoTokenizer.from_pretrained(
+        MODEL_NAME, use_fast=False
+    )
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    train_ds = AVCEDataset(
+        train_df, tok, max_len=MAX_LEN
+    )
+    dev_ds = AVCEDataset(
+        dev_df, tok, max_len=MAX_LEN
+    )
+    dev_ds.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(
+        train_ds, batch_size=BS, shuffle=True,
+        num_workers=4
+    )
+    dev_loader = DataLoader(
+        dev_ds, batch_size=BS, shuffle=False,
