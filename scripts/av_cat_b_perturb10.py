@@ -166,3 +166,31 @@ def main():
             grl_lam = 0.05
         model.grl.lambda_val = grl_lam
 
+        c_weight = 0.05 if epoch >= 15 else 0.0
+        t_weight = 0.02 if epoch >= 10 else 0.0
+
+        for batch in train_loader:
+            c1 = batch['char_ids_1'].to(device)
+            c2 = batch['char_ids_2'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+            logits, tl, (v1, v2, _, _) = model(
+                c1, c2, return_embeddings=True
+            )
+            loss = bce_fn(logits.squeeze(-1), labels)
+            if c_weight > 0:
+                ct = labels * 2 - 1
+                loss = loss + c_weight * contrastive_fn(
+                    v1, v2, ct
+                )
+            if t_weight > 0 and 'topic' in batch:
+                tlab = batch['topic'].to(device)
+                loss = loss + t_weight * topic_fn(tl, tlab)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), max_norm=5.0
+            )
+            optimizer.step()
+            total_loss += loss.item()
+
+        scheduler.step()
