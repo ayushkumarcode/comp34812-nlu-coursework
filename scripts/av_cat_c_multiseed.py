@@ -166,3 +166,31 @@ def train_one_seed(seed, train_df, dev_df, dev_labels,
             for batch in dl:
                 ids = batch['input_ids'].to(device)
                 mask = batch['attention_mask'].to(device)
+                o = encoder(input_ids=ids,
+                            attention_mask=mask)
+                logits = classifier(
+                    o.last_hidden_state[:, 0]
+                ).squeeze(-1)
+                probs.extend(
+                    torch.sigmoid(logits).cpu().numpy()
+                )
+        probs = np.array(probs)
+        bf, bt = 0, 0.5
+        for t in np.arange(0.35, 0.65, 0.01):
+            f1 = f1_score(
+                y_dev, (probs > t).astype(int),
+                average='macro'
+            )
+            if f1 > bf: bf, bt = f1, t
+        print(
+            f"  Ep {ep:3d} | Loss: {tl_sum/nb:.4f} | "
+            f"F1@{bt:.2f}={bf:.4f}"
+        )
+        if bf > best_f1:
+            best_f1 = bf
+            pat = 0
+            best_probs = probs.copy()
+            torch.save({
+                'encoder': encoder.state_dict(),
+                'classifier': classifier.state_dict(),
+            }, save_dir / f'av_cat_c_seed{seed}_best.pt')
