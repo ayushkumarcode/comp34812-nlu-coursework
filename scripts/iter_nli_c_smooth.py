@@ -110,3 +110,31 @@ def main():
     dev_labels = load_solution_labels(task='nli')
 
     train_dataset = NLIDeBERTaDataset(train_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset = NLIDeBERTaDataset(dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    model = NLIDeBERTaCrossEncoder(model_name=MODEL_NAME).to(device)
+    optimizer = AdamW(model.parameters(), lr=LR, weight_decay=0.01)
+
+    total_steps = len(train_loader) * EPOCHS
+    warmup_steps = int(total_steps * WARMUP_RATIO)
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer, num_warmup_steps=warmup_steps, num_training_steps=total_steps)
+
+    scaler = GradScaler('cuda')
+
+    best_f1 = 0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        model.train()
+        total_loss, total_task, total_kl = 0, 0, 0
+        n_batches = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
