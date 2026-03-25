@@ -138,3 +138,31 @@ def main():
         grl_lambda=0.0,
     ).to(device)
 
+    bce_fn = nn.BCEWithLogitsLoss()
+    contrastive_fn = nn.CosineEmbeddingLoss(margin=0.3)
+    topic_fn = nn.CrossEntropyLoss()
+
+    optimizer = AdamW(
+        model.parameters(), lr=2e-4, weight_decay=1e-4
+    )
+    scheduler = CosineAnnealingWarmRestarts(
+        optimizer, T_0=10, T_mult=2, eta_min=1e-6
+    )
+
+    best_f1, patience_counter = 0.0, 0
+    max_epochs, patience = 80, 12
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, max_epochs + 1):
+        t0 = time.time()
+        model.train()
+        total_loss = 0
+
+        # Ramp GRL
+        if epoch <= 10:
+            grl_lam = 0.05 * epoch / 10
+        else:
+            grl_lam = 0.05
+        model.grl.lambda_val = grl_lam
+
