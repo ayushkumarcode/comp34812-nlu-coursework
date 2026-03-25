@@ -82,3 +82,31 @@ def main():
     )
 
     print("Extracting features...")
+    ext = AVFeatureExtractor(
+        use_spacy=True, n_svd_components=100
+    )
+    ext.fit(train_df)
+    X_train, fnames = ext.transform(train_df)
+    X_dev, _ = ext.transform(dev_df)
+    print(f"Features: {X_train.shape[1]}")
+
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train).astype(np.float32)
+    X_dev = scaler.transform(X_dev).astype(np.float32)
+
+    X_tr = torch.tensor(X_train).to(device)
+    y_tr = torch.tensor(y_train).to(device)
+    X_dv = torch.tensor(X_dev).to(device)
+
+    train_ds = TensorDataset(X_tr, y_tr)
+    train_loader = DataLoader(
+        train_ds, batch_size=256, shuffle=True
+    )
+
+    configs = [
+        {'hidden': (512, 256), 'drop': 0.3,
+         'lr': 1e-3, 'alpha': 1.0},
+        {'hidden': (512, 256, 128), 'drop': 0.3,
+         'lr': 1e-3, 'alpha': 1.0},
+        {'hidden': (512, 256), 'drop': 0.4,
+         'lr': 1e-3, 'alpha': 0.5},
