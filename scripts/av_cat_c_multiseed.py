@@ -82,3 +82,31 @@ def train_one_seed(seed, train_df, dev_df, dev_labels,
     dev_ds = AVCEDataset(dev_df, tok, max_len=ML)
     dev_ds.labels = np.array(dev_labels, dtype=np.float32)
 
+    tl = DataLoader(
+        train_ds, batch_size=BS, shuffle=True,
+        num_workers=4
+    )
+    dl = DataLoader(
+        dev_ds, batch_size=BS, shuffle=False,
+        num_workers=4
+    )
+
+    encoder = AutoModel.from_pretrained(MN).to(device)
+    hs = encoder.config.hidden_size
+    classifier = nn.Sequential(
+        nn.Dropout(0.1), nn.Linear(hs, 256),
+        nn.GELU(), nn.Dropout(0.2),
+        nn.Linear(256, 1),
+    ).to(device)
+
+    all_params = (
+        list(encoder.parameters())
+        + list(classifier.parameters())
+    )
+    optimizer = AdamW([
+        {'params': encoder.parameters(), 'lr': LR},
+        {'params': classifier.parameters(), 'lr': 5e-4},
+    ], weight_decay=0.01)
+    total_steps = EPOCHS * len(tl)
+    warmup = total_steps // 10
+    sched = get_cosine_warmup(optimizer, warmup, total_steps)
