@@ -194,3 +194,23 @@ def main():
 
         if best_f1 > best_overall_f1:
             best_overall_f1 = best_f1
+            model.load_state_dict(best_state)
+            model.to(device).eval()
+            with torch.no_grad():
+                fp = torch.sigmoid(model(X_dv)).cpu().numpy()
+            bt = 0.5
+            bf = 0
+            for t in np.arange(0.30, 0.70, 0.005):
+                f1 = f1_score(
+                    y_dev, (fp > t).astype(int),
+                    average='macro'
+                )
+                if f1 > bf:
+                    bf = f1
+                    bt = t
+            best_preds = (fp > bt).astype(int)
+            print(f"  NEW BEST: F1={bf:.4f} thresh={bt:.3f}")
+
+    pred_path = (
+        PROJECT_ROOT / 'predictions'
+        / 'av_Group_34_A_mlp_rdrop.csv'
