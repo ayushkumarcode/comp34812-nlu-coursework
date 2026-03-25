@@ -110,3 +110,31 @@ for i, c in enumerate(configs_lgbm):
     for t in np.arange(0.35, 0.65, 0.005):
         f1 = f1_score(
             y_dv, (p > t).astype(int),
+            average='macro'
+        )
+        if f1 > bf: bf, bt = f1, t
+    print(f"  F1={bf:.4f} (t={bt:.3f})")
+    results[name] = (bf, p, bt)
+
+# 3. Extra Trees
+print("\n--- ExtraTrees ---")
+m_et = ExtraTreesClassifier(
+    n_estimators=1000, max_depth=20,
+    min_samples_leaf=5,
+    random_state=42, n_jobs=-1,
+)
+m_et.fit(X_tr, y_tr)
+p_et = m_et.predict_proba(X_dv)[:, 1]
+bf_et, bt_et = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(
+        y_dv, (p_et > t).astype(int),
+        average='macro'
+    )
+    if f1 > bf_et: bf_et, bt_et = f1, t
+print(f"  F1={bf_et:.4f} (t={bt_et:.3f})")
+results['extra_trees'] = (bf_et, p_et, bt_et)
+
+# 4. Probability ensemble
+print("\n=== Prob Ensembles ===")
+all_probs = {n: v[1] for n, v in results.items()}
