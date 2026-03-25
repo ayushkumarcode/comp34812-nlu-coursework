@@ -110,3 +110,8 @@ def main():
     print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_tf1:.4f}")
     fp = (dpr >= best_thresh).astype(int)
     m = compute_all_metrics(dt, fp)
+    print_metrics(m, "AV Cat B v3 — Final")
+    save_predictions(fp, PROJECT_ROOT / 'predictions' / 'av_Group_34_B_v3.csv')
+    print("Done!")
+
+if __name__ == '__main__': main()
