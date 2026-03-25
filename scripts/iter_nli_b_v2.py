@@ -26,3 +26,31 @@ from src.models.nli_cat_b_dataset import (
 )
 from src.data_utils import load_nli_data, load_solution_labels, save_predictions
 from src.scorer import compute_all_metrics, print_metrics
+
+
+def train_epoch(model, dataloader, optimizer, criterion, device,
+                use_wordnet=False):
+    model.train()
+    total_loss = 0
+    all_preds, all_labels = [], []
+    for batch in dataloader:
+        p_word = batch['premise_word_ids'].to(device)
+        p_char = batch['premise_char_ids'].to(device)
+        h_word = batch['hypothesis_word_ids'].to(device)
+        h_char = batch['hypothesis_char_ids'].to(device)
+        labels = batch['label'].to(device)
+        wordnet = None
+        if use_wordnet and 'wordnet_relations' in batch:
+            wordnet = batch['wordnet_relations'].to(device)
+        optimizer.zero_grad()
+        logits = model(p_word, p_char, h_word, h_char, wordnet)
+        loss = criterion(logits.squeeze(-1), labels)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+        optimizer.step()
+        total_loss += loss.item()
+        preds = (torch.sigmoid(logits.squeeze(-1)) > 0.5).long()
+        all_preds.extend(preds.cpu().numpy())
+        all_labels.extend(labels.cpu().numpy())
+    return total_loss / len(dataloader), f1_score(all_labels, all_preds, average='macro', zero_division=0)
+
