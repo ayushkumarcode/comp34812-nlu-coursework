@@ -82,3 +82,31 @@ def compute_rdrop_loss_smooth(logits1, logits2, labels, alpha=0.5, smooth=0.05):
     return task_loss + alpha * kl, task_loss, kl
 
 
+def main():
+    from transformers import AutoTokenizer, get_linear_schedule_with_warmup
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    LR = 1e-5
+    BATCH_SIZE = 16
+    MAX_LEN = 128
+    EPOCHS = 20
+    PATIENCE = 10
+    ALPHA = 0.5
+    SMOOTH = 0.05
+    WARMUP_RATIO = 0.1
+
+    print(f"\n=== NLI Cat C + R-Drop + Label Smoothing ===")
+    print(f"LR={LR}, BS={BATCH_SIZE}, MaxLen={MAX_LEN}")
+    print(f"Alpha={ALPHA}, Smooth={SMOOTH}")
+    print(f"Epochs={EPOCHS}, Patience={PATIENCE}\n")
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    train_df = load_nli_data(split='train')
+    dev_df = load_nli_data(split='dev')
+    dev_labels = load_solution_labels(task='nli')
+
+    train_dataset = NLIDeBERTaDataset(train_df, tokenizer, max_len=MAX_LEN)
