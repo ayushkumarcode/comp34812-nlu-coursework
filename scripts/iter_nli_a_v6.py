@@ -54,3 +54,31 @@ base = [
     ('lgbm', LGBMClassifier(n_estimators=3000, max_depth=4, learning_rate=0.005,
                               num_leaves=15, min_child_samples=30,
                               reg_alpha=0.1, reg_lambda=2.0,
+                              verbose=-1, random_state=42, n_jobs=1)),
+    ('et', ExtraTreesClassifier(n_estimators=1000, max_depth=15,
+                                 min_samples_leaf=5,
+                                 random_state=42, n_jobs=1)),
+]
+ens = StackingClassifier(
+    estimators=base,
+    final_estimator=LogisticRegression(C=0.5, max_iter=2000, random_state=42),
+    cv=5, passthrough=True, n_jobs=1,
+)
+ens.fit(X_tr_s, y_train)
+y_proba = ens.predict_proba(X_dv_s)[:, 1]
+y_pred = ens.predict(X_dv_s)
+
+metrics = compute_all_metrics(y_dev, y_pred)
+print_metrics(metrics, "NLI Cat A (v6 XGB+LGBM+ET @0.5)")
+
+# Threshold search
+print("\nThreshold search:")
+best_thresh, best_f1 = 0.5, metrics['macro_f1']
+for t in np.arange(0.35, 0.65, 0.01):
+    preds_t = (y_proba >= t).astype(int)
+    f1_t = f1_score(y_dev, preds_t, average='macro', zero_division=0)
+    if f1_t > best_f1:
+        best_thresh, best_f1 = t, f1_t
+    print(f"  thresh={t:.2f}: F1={f1_t:.4f}")
+
+print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_f1:.4f}")
