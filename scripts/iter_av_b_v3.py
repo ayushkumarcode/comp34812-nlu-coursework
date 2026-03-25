@@ -54,3 +54,31 @@ def main():
     print("=" * 60)
     print("  AV Cat B v3 — LR=2e-4, no contrastive")
     print("=" * 60)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+    all_texts = list(train_df['text_1']) + list(train_df['text_2'])
+    topic_all = generate_topic_labels(all_texts, n_clusters=10)
+    train_topic = topic_all[:len(train_df)]
+    num_topics = int(topic_all.max()) + 1
+    train_ds = AVCharDataset(train_df, max_len=1500, augment=True, topic_labels=train_topic)
+    dev_ds = AVCharDataset(dev_df, max_len=1500, augment=False, topic_labels=None)
+    dev_ds.labels = np.array(dev_labels, dtype=np.float32)
+    train_dl = DataLoader(train_ds, batch_size=64, shuffle=True, num_workers=4, pin_memory=True)
+    dev_dl = DataLoader(dev_ds, batch_size=64, shuffle=False, num_workers=4, pin_memory=True)
+    model = AVCatBModel(vocab_size=VOCAB_SIZE, char_emb_dim=32, cnn_filters=128,
+                         lstm_hidden=128, proj_dim=128, num_topics=num_topics,
+                         grl_lambda=0.0).to(device)
+    bce_fn = nn.BCEWithLogitsLoss()
+    topic_fn = nn.CrossEntropyLoss()
+    opt = AdamW(model.parameters(), lr=2e-4, weight_decay=1e-4)
+    sched = CosineAnnealingWarmRestarts(opt, T_0=30, T_mult=2)
+    best_f1, patience_cnt = 0.0, 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+    for epoch in range(1, 121):
+        if epoch <= 20: grl_lambda = 0.05 * epoch / 20
+        else: grl_lambda = 0.05
+        model.grl.lambda_val = grl_lambda
