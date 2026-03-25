@@ -54,3 +54,31 @@ base = [
     ('lgbm', LGBMClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
                               num_leaves=31, min_child_samples=20,
                               reg_alpha=0.1, reg_lambda=1.0,
+                              verbose=-1, random_state=42, n_jobs=1)),
+    ('rf', RandomForestClassifier(n_estimators=500, max_depth=15,
+                                   min_samples_leaf=5,
+                                   random_state=42, n_jobs=1)),
+]
+ens = StackingClassifier(
+    estimators=base,
+    final_estimator=LogisticRegression(C=1.0, max_iter=2000, random_state=42),
+    cv=5, passthrough=True, n_jobs=1,
+)
+ens.fit(X_tr_sel, y_train)
+y_pred = ens.predict(X_dv_sel)
+
+metrics = compute_all_metrics(y_dev, y_pred)
+print_metrics(metrics, "NLI Cat A (stack v4 — pruned XGB+LGBM+RF)")
+
+save_predictions(y_pred, PROJECT_ROOT / 'predictions' / 'nli_Group_34_A_stack_v4.csv')
+for n, bl in {'SVM': 0.5846, 'LSTM': 0.6603}.items():
+    print(f"  vs {n}: {'+' if metrics['macro_f1']>bl else ''}{metrics['macro_f1']-bl:.4f}")
+
+# Also try without pruning for comparison
+print("\nStep 3: Training XGB+LGBM+RF stack (ALL features)...")
+ens2 = StackingClassifier(
+    estimators=[
+        ('xgb', XGBClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
+                               subsample=0.7, colsample_bytree=0.6, reg_alpha=0.1,
+                               reg_lambda=1.0, min_child_weight=5,
+                               eval_metric='logloss', random_state=42, n_jobs=1)),
