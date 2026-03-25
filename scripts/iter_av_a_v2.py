@@ -26,3 +26,31 @@ train_df = load_av_data(split='train')
 dev_df = load_av_data(split='dev')
 y_train = train_df['label'].values
 y_dev = np.array(load_solution_labels(task='av'))
+
+print("Extracting features...")
+ext = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
+ext.fit(train_df)
+X_train, fnames = ext.transform(train_df)
+X_dev, _ = ext.transform(dev_df)
+print(f"Train: {X_train.shape}, Dev: {X_dev.shape}")
+
+scaler = StandardScaler()
+X_tr = scaler.fit_transform(X_train)
+X_dv = scaler.transform(X_dev)
+
+# Feature importance pruning
+print("Feature selection via XGBoost importance...")
+sel = XGBClassifier(n_estimators=500, max_depth=7, learning_rate=0.05,
+                     eval_metric='logloss', random_state=42, n_jobs=1)
+sel.fit(X_tr, y_train)
+imp = sel.feature_importances_
+mask = imp >= np.median(imp)
+print(f"  Keeping {mask.sum()}/{len(mask)} features")
+X_tr_s, X_dv_s = X_tr[:, mask], X_dv[:, mask]
+
+print("Training XGB+LGBM+RF stack (pruned features)...")
+base = [
+    ('xgb', XGBClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
+                           subsample=0.7, colsample_bytree=0.6,
+                           reg_alpha=0.1, reg_lambda=1.0, min_child_weight=5,
+                           eval_metric='logloss', random_state=42, n_jobs=1)),
