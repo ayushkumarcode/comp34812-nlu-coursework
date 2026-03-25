@@ -138,3 +138,31 @@ def main():
             model.load_state_dict(state)
         except Exception as e:
             print(f"  Failed to load: {e}")
+            continue
+        probs = extract_probs(model, dl, device)
+        np.save(out_path, probs)
+        all_probs[name] = probs
+
+        # Quick eval
+        bf, bt = 0, 0.5
+        for t in np.arange(0.30, 0.70, 0.005):
+            f1 = f1_score(
+                y_dev, (probs > t).astype(int),
+                average='macro'
+            )
+            if f1 > bf:
+                bf = f1
+                bt = t
+        print(f"  {name}: F1={bf:.4f} (t={bt:.3f})")
+        del model
+        torch.cuda.empty_cache()
+
+    # Try ensemble
+    if len(all_probs) >= 2:
+        print("\n=== Ensemble Results ===")
+        from itertools import combinations
+        names = list(all_probs.keys())
+        for r in range(2, len(names) + 1):
+            for combo in combinations(names, r):
+                avg = np.mean(
+                    [all_probs[n] for n in combo],
