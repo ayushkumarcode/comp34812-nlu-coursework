@@ -26,3 +26,31 @@ from src.scorer import compute_all_metrics, print_metrics
 
 
 class AVCrossEncoderDataset(Dataset):
+    def __init__(self, df, tokenizer, max_len=384):
+        self.texts_1 = list(df['text_1'])
+        self.texts_2 = list(df['text_2'])
+        self.labels = df['label'].values.astype(np.float32)
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        enc = self.tokenizer(
+            self.texts_1[idx], self.texts_2[idx],
+            truncation=True, max_length=self.max_len,
+            padding='max_length', return_tensors='pt'
+        )
+        return {
+            'input_ids': enc['input_ids'].squeeze(0),
+            'attention_mask': enc['attention_mask'].squeeze(0),
+            'label': torch.tensor(self.labels[idx], dtype=torch.float),
+        }
+
+
+def compute_rdrop_loss(logits1, logits2, labels, bce_fn, alpha=1.0):
+    loss1 = bce_fn(logits1, labels)
+    loss2 = bce_fn(logits2, labels)
+    task_loss = (loss1 + loss2) / 2
+    p1 = torch.sigmoid(logits1)
