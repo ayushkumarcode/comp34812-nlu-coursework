@@ -54,3 +54,31 @@ for name, p in probs.items():
         if f1 > bf:
             bf = f1
             bt = t
+    print(f"  {name:15s}: F1={bf:.4f} (t={bt:.3f})")
+
+# Try all combinations of 2+ models
+from itertools import combinations
+
+print("\n=== Ensemble Results ===")
+names = list(probs.keys())
+best_ens_f1 = 0
+best_ens_preds = None
+best_ens_name = ""
+
+for r in range(2, len(names) + 1):
+    for combo in combinations(names, r):
+        avg_p = np.mean(
+            [probs[n] for n in combo], axis=0
+        )
+        bf, bt = 0, 0.5
+        for t in np.arange(0.30, 0.70, 0.005):
+            f1 = f1_score(
+                y_dev, (avg_p > t).astype(int),
+                average='macro'
+            )
+            if f1 > bf:
+                bf = f1
+                bt = t
+        ens_name = "+".join(combo)
+        if bf > best_ens_f1:
+            best_ens_f1 = bf
