@@ -110,3 +110,31 @@ def main():
         nn.Dropout(0.1), nn.Linear(hs, 256),
         nn.GELU(), nn.Dropout(0.2),
         nn.Linear(256, 1),
+    ).to(device)
+
+    all_params = (
+        list(encoder.parameters())
+        + list(classifier.parameters())
+    )
+    optimizer = AdamW([
+        {'params': encoder.parameters(), 'lr': LR},
+        {'params': classifier.parameters(), 'lr': 5e-4},
+    ], weight_decay=0.01)
+
+    total_steps = EPOCHS * len(tl)
+    warmup = total_steps // 10
+    sched = get_cosine_warmup(
+        optimizer, warmup, total_steps
+    )
+    scaler = GradScaler('cuda')
+
+    best_f1, pat = 0, 0
+    sd = PROJECT_ROOT / 'models'
+    sd.mkdir(exist_ok=True)
+    pd = PROJECT_ROOT / 'predictions'
+    pd.mkdir(exist_ok=True)
+
+    for ep in range(1, EPOCHS + 1):
+        encoder.train()
+        classifier.train()
+        tl_sum, nb = 0, 0
