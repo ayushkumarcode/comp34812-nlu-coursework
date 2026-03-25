@@ -82,3 +82,31 @@ def main():
     print("  NLI Cat B v2 — ESIM + KIM (LR=2e-4, patience=10)")
     print("=" * 60)
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    HIDDEN_SIZE = 300
+    BATCH_SIZE = 32
+    MAX_EPOCHS = 60
+    PATIENCE = 10
+    LR = 2e-4
+    PREMISE_MAX = 64
+    HYPOTHESIS_MAX = 32
+    USE_WORDNET = True
+    GLOVE_PATH = str(Path.home() / 'scratch' / 'nlu-project' / 'glove.6B.300d.txt')
+
+    print("\n[1/6] Loading data...")
+    train_df = load_nli_data(split='train')
+    dev_df = load_nli_data(split='dev')
+    dev_labels = load_solution_labels(task='nli')
+
+    print("\n[2/6] Building vocabulary...")
+    vocab = NLIVocabulary(min_word_freq=2)
+    all_texts = list(train_df['premise']) + list(train_df['hypothesis'])
+    vocab.build_word_vocab(all_texts)
+
+    import os
+    pretrained_emb = None
+    if os.path.exists(GLOVE_PATH):
+        pretrained_emb = load_glove_embeddings(vocab, GLOVE_PATH, dim=300)
+    emb_dim = pretrained_emb.shape[1] if pretrained_emb is not None else 300
