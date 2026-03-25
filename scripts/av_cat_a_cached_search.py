@@ -166,3 +166,31 @@ for t in np.arange(0.35, 0.65, 0.005):
         average='macro'
     )
     if f1 > bf3: bf3, bt3 = f1, t
+print(f"  Top-3: {top3}: F1={bf3:.4f}")
+
+# Print summary
+print("\n=== Summary ===")
+for n in sorted(results, key=lambda x: results[x][0],
+                reverse=True):
+    print(f"  {n:25s}: F1={results[n][0]:.4f}")
+print(f"  Ensemble-all: F1={bf_all:.4f}")
+print(f"  Ensemble-top3: F1={bf3:.4f}")
+
+# Save best
+best_f1 = max(bf_all, bf3,
+              max(v[0] for v in results.values()))
+if bf3 >= bf_all and bf3 >= max(
+    v[0] for v in results.values()
+):
+    final = (pavg3 > bt3).astype(int)
+elif bf_all >= max(v[0] for v in results.values()):
+    final = (pavg > bt_all).astype(int)
+else:
+    bn = max(results, key=lambda n: results[n][0])
+    final = (results[bn][1] > results[bn][2]).astype(int)
+
+pred_path = (
+    PROJECT_ROOT / 'predictions'
+    / 'av_Group_34_A_cached_search.csv'
+)
+pred_path.parent.mkdir(exist_ok=True)
