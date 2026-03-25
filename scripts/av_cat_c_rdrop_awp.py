@@ -222,3 +222,31 @@ def main():
         model.eval()
         preds, labs = [], []
         with torch.no_grad():
+            for batch in dl:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
+                p = (torch.sigmoid(logits) > 0.5).long()
+                preds.extend(p.cpu().numpy())
+                labs.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(
+            labs, preds, average='macro', zero_division=0
+        )
+        awp_s = "AWP" if ep >= AWP_START else "no-awp"
+        print(
+            f"Ep {ep:3d} | "
+            f"Loss: {tl_sum/nb:.4f} ({awp_s}) | "
+            f"Dev F1: {dev_f1:.4f}"
+        )
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            pat = 0
+            torch.save(
+                model.state_dict(),
+                sd / 'av_cat_c_rdrop_awp_best.pt'
+            )
+            print(f"  -> Best (F1={best_f1:.4f})")
+        else:
+            pat += 1
