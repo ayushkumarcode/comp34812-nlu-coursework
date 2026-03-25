@@ -82,3 +82,9 @@ def main():
         f1 = f1_score(y_true, preds, average='macro', zero_division=0)
         marker = " <-- BEST" if abs(thresh - best_thresh) < 0.005 else ""
         print(f"  thresh={thresh:.2f}: F1={f1:.4f}{marker}")
+
+    print("\nDone!")
+
+
+if __name__ == '__main__':
+    main()
