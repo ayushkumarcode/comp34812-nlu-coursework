@@ -222,3 +222,8 @@ def main():
     for name, bl in baselines.items():
         gap = metrics['macro_f1'] - bl
         print(f"  vs {name} ({bl:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
