@@ -82,3 +82,31 @@ def smooth_bce(logits, labels, smoothing=0.05):
     )
 
 
+def rdrop_loss_smooth(
+    logits1, logits2, labels, alpha=1.0,
+    smoothing=0.05
+):
+    """R-Drop loss with label smoothing."""
+    loss1 = smooth_bce(logits1, labels, smoothing)
+    loss2 = smooth_bce(logits2, labels, smoothing)
+    task = (loss1 + loss2) / 2
+
+    p1 = torch.sigmoid(logits1)
+    p2 = torch.sigmoid(logits2)
+    d1 = torch.stack([p1, 1 - p1], dim=-1).clamp(1e-7)
+    d2 = torch.stack([p2, 1 - p2], dim=-1).clamp(1e-7)
+    kl = (
+        F.kl_div(d1.log(), d2, reduction='batchmean')
+        + F.kl_div(d2.log(), d1, reduction='batchmean')
+    ) / 2
+    return task + alpha * kl, task, kl
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
