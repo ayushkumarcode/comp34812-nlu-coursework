@@ -194,3 +194,31 @@ def main():
     print(f"\n[6/6] Final evaluation (best F1={best_f1:.4f})...")
     checkpoint = torch.load(save_dir / 'nli_cat_b_v2_best.pt', weights_only=False)
     model.load_state_dict(checkpoint['model_state_dict'])
+
+    dev_preds, dev_probs, dev_true = evaluate(
+        model, dev_loader, device, use_wordnet=USE_WORDNET)
+
+    # Threshold search
+    print("\nThreshold search:")
+    best_thresh, best_thresh_f1 = 0.5, 0
+    for t in np.arange(0.30, 0.72, 0.02):
+        preds_t = (dev_probs >= t).astype(int)
+        f1_t = f1_score(dev_true, preds_t, average='macro', zero_division=0)
+        if f1_t > best_thresh_f1:
+            best_thresh, best_thresh_f1 = t, f1_t
+        print(f"  thresh={t:.2f}: F1={f1_t:.4f}")
+
+    print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_thresh_f1:.4f}")
+    final_preds = (dev_probs >= best_thresh).astype(int)
+
+    metrics = compute_all_metrics(dev_true, final_preds)
+    print_metrics(metrics, "NLI Cat B v2 — Final Dev Results")
+
+    pred_path = PROJECT_ROOT / 'predictions' / 'nli_Group_34_B_v2.csv'
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
+
+    baselines = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
+    for name, bl in baselines.items():
+        gap = metrics['macro_f1'] - bl
+        print(f"  vs {name} ({bl:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
