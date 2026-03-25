@@ -138,3 +138,31 @@ results['extra_trees'] = (bf_et, p_et, bt_et)
 # 4. Probability ensemble
 print("\n=== Prob Ensembles ===")
 all_probs = {n: v[1] for n, v in results.items()}
+names = list(all_probs.keys())
+
+# Average all
+pavg = np.mean(
+    [all_probs[n] for n in names], axis=0
+)
+bf_all, bt_all = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(
+        y_dv, (pavg > t).astype(int),
+        average='macro'
+    )
+    if f1 > bf_all: bf_all, bt_all = f1, t
+print(f"  All-avg: F1={bf_all:.4f} (t={bt_all:.3f})")
+
+# Top-3 average
+top3 = sorted(results, key=lambda n: results[n][0],
+              reverse=True)[:3]
+pavg3 = np.mean(
+    [all_probs[n] for n in top3], axis=0
+)
+bf3, bt3 = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(
+        y_dv, (pavg3 > t).astype(int),
+        average='macro'
+    )
+    if f1 > bf3: bf3, bt3 = f1, t
