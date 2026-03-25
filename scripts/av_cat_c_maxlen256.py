@@ -110,3 +110,31 @@ def main():
     )
     dev_loader = DataLoader(
         dev_ds, batch_size=BS, shuffle=False,
+        num_workers=4
+    )
+
+    model = AVCE(mn=MODEL_NAME).to(device)
+    bce = nn.BCEWithLogitsLoss()
+    optimizer = AdamW([
+        {'params': model.encoder.parameters(), 'lr': LR},
+        {'params': model.classifier.parameters(),
+         'lr': 5e-4},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1, pat = 0, 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        model.train()
+        total_loss, n_b = 0, 0
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                logits = model(ids, mask).squeeze(-1)
+                loss = bce(logits, labels)
+            scaler.scale(loss).backward()
