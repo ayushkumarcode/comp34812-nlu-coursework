@@ -214,3 +214,22 @@ def main():
     pred_path = (
         PROJECT_ROOT / 'predictions'
         / 'av_Group_34_A_mlp_rdrop.csv'
+    )
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(best_preds, pred_path)
+    print(f"\nSaved to {pred_path}")
+
+    metrics = compute_all_metrics(y_dev, best_preds)
+    print_metrics(metrics, "AV Cat A MLP+R-Drop — Final")
+
+    for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+                  ('BERT', 0.7854)]:
+        gap = metrics['macro_f1'] - bl
+        s = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {n} ({bl:.4f}): {s} by {gap:+.4f}")
+    print(f"Current best AV Cat A: 0.7340")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
