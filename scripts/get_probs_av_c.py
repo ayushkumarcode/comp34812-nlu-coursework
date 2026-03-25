@@ -54,3 +54,31 @@ class AVCrossEncoderDataset(Dataset):
 def main():
     MODEL_NAME = 'microsoft/deberta-v3-base'
     MAX_LEN = 384
+    BATCH_SIZE = 8
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    # Build model (must match train_av_cat_c_crossenc.py architecture exactly)
+    encoder = AutoModel.from_pretrained(MODEL_NAME).to(device)
+    classifier = nn.Sequential(
+        nn.Dropout(0.1),
+        nn.Linear(encoder.config.hidden_size, 256),
+        nn.GELU(),
+        nn.Dropout(0.2),
+        nn.Linear(256, 1),
+    ).to(device)
+
+    # Load checkpoint (dict with encoder_state_dict and classifier_state_dict)
+    checkpoint_path = PROJECT_ROOT / 'models' / 'av_cat_c_crossenc_best.pt'
+    print(f"Loading checkpoint: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    encoder.load_state_dict(checkpoint['encoder_state_dict'])
+    classifier.load_state_dict(checkpoint['classifier_state_dict'])
+    encoder.eval()
+    classifier.eval()
+    print("Model loaded successfully.")
+
+    # Load dev data
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+    y_true = np.array(dev_labels)
