@@ -82,3 +82,31 @@ def main():
     checkpoint_path = PROJECT_ROOT / 'models' / 'nli_cat_c_rdrop_best.pt'
     print(f"Loading checkpoint: {checkpoint_path}")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    model.load_state_dict(checkpoint)
+    model.eval()
+    print("Model loaded successfully.")
+
+    # Load dev data
+    dev_df = load_nli_data(split='dev')
+    dev_labels = load_solution_labels(task='nli')
+    y_true = np.array(dev_labels)
+
+    dev_dataset = NLIDeBERTaDataset(dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    # Run inference and collect probabilities
+    all_probs = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            probs = torch.sigmoid(logits)
+            all_probs.extend(probs.cpu().numpy())
+
+    probs = np.array(all_probs)
+    print(f"Collected {len(probs)} probabilities.")
+    print(f"Prob stats: min={probs.min():.4f}, max={probs.max():.4f}, "
+          f"mean={probs.mean():.4f}, std={probs.std():.4f}")
+
