@@ -82,3 +82,9 @@ for t in np.arange(0.35, 0.65, 0.01):
     print(f"  thresh={t:.2f}: F1={f1_t:.4f}")
 
 print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_f1:.4f}")
+final_preds = (y_proba >= best_thresh).astype(int)
+metrics_final = compute_all_metrics(y_dev, final_preds)
+print_metrics(metrics_final, "NLI Cat A (v6) — Final w/ Threshold")
+
+save_predictions(final_preds, PROJECT_ROOT / 'predictions' / 'nli_Group_34_A_stack_v6.csv')
+print("Done!")
