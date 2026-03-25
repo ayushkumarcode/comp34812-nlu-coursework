@@ -194,3 +194,31 @@ def main():
         for batch in dev_loader:
             ids = batch['input_ids'].to(device)
             mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            all_probs.extend(
+                torch.sigmoid(logits).cpu().numpy()
+            )
+    all_probs = np.array(all_probs)
+    y_dev = np.array(dev_labels)
+
+    bf, bt = 0, 0.5
+    for t in np.arange(0.30, 0.70, 0.005):
+        f1 = f1_score(
+            y_dev, (all_probs > t).astype(int),
+            average='macro'
+        )
+        if f1 > bf:
+            bf = f1
+            bt = t
+    final_preds = (all_probs > bt).astype(int)
+    print(f"Threshold: F1={bf:.4f} t={bt:.3f}")
+
+    metrics = compute_all_metrics(y_dev, final_preds)
+    print_metrics(metrics, "AV Cat C maxlen=256 — Final")
+
+    pred_path = (
+        PROJECT_ROOT / 'predictions'
+        / 'av_Group_34_C_maxlen256.csv'
+    )
+    pred_path.parent.mkdir(exist_ok=True)
+    save_predictions(final_preds, pred_path)
