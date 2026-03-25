@@ -82,3 +82,31 @@ m2.fit(X_tr, y_train)
 p2 = m2.predict_proba(X_dv)[:, 1]
 bf2, bt2 = 0, 0.5
 for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(y_dev, (p2 > t).astype(int),
+                  average='macro')
+    if f1 > bf2: bf2, bt2 = f1, t
+print(f"  F1={bf2:.4f} (t={bt2:.3f})")
+results['lgbm_goss'] = bf2
+
+# Config 3: XGB shallow + heavy reg
+print("\n--- XGB shallow+reg ---")
+m3 = XGBClassifier(
+    n_estimators=3000, max_depth=3,
+    learning_rate=0.01,
+    subsample=0.6, colsample_bytree=0.5,
+    reg_alpha=1.0, reg_lambda=3.0,
+    min_child_weight=10, gamma=0.2,
+    eval_metric='logloss',
+    random_state=42, n_jobs=-1,
+)
+m3.fit(X_tr, y_train)
+p3 = m3.predict_proba(X_dv)[:, 1]
+bf3, bt3 = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(y_dev, (p3 > t).astype(int),
+                  average='macro')
+    if f1 > bf3: bf3, bt3 = f1, t
+print(f"  F1={bf3:.4f} (t={bt3:.3f})")
+results['xgb_shallow'] = bf3
+
+# Config 4: sklearn GBM
