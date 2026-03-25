@@ -138,3 +138,31 @@ def main():
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = Adam(model.parameters(), lr=LR, weight_decay=1e-5)
+    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5,
+                                   patience=3, min_lr=1e-6)
+
+    print("\n[5/6] Training...")
+    best_f1 = 0.0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, MAX_EPOCHS + 1):
+        t0 = time.time()
+        if epoch == 6 and pretrained_emb is not None:
+            model.unfreeze_embeddings()
+            print("  -> Word embeddings unfrozen")
+
+        train_loss, train_f1 = train_epoch(
+            model, train_loader, optimizer, criterion, device,
+            use_wordnet=USE_WORDNET)
+
+        dev_preds, dev_probs, dev_true = evaluate(
+            model, dev_loader, device, use_wordnet=USE_WORDNET)
+        dev_f1 = f1_score(dev_true, dev_preds, average='macro', zero_division=0)
+        scheduler.step(dev_f1)
+
+        lr = optimizer.param_groups[0]['lr']
+        elapsed = time.time() - t0
+        print(f"Epoch {epoch:3d} | Loss: {train_loss:.4f} | "
+              f"Train F1: {train_f1:.4f} | Dev F1: {dev_f1:.4f} | "
