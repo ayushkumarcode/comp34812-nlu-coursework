@@ -82,3 +82,31 @@ def evaluate(model, dataloader, device):
             all_probs.extend(probs.cpu().numpy())
             all_labels.extend(labels.numpy())
     return (np.array(all_preds),
+            np.array(all_probs),
+            np.array(all_labels))
+
+
+def main():
+    print("=" * 60)
+    print("  AV Cat B — Perturb 0.10 Training")
+    print("=" * 60)
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    # Generate topic labels for contrastive/GRL
+    all_texts = (
+        list(train_df['text_1']) + list(train_df['text_2'])
+    )
+    topic_all = generate_topic_labels(
+        all_texts, n_clusters=10
+    )
+    train_topic = topic_all[:len(train_df)]
+    num_topics = int(topic_all.max()) + 1
+
