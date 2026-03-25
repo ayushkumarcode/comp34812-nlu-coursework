@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p serial
 #SBATCH --mem=5G
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=1
 #SBATCH --time=4:00:00
 #SBATCH --job-name=av_a_mlp
 #SBATCH --output=logs/av_a_mlp_rdrop_%j.out
