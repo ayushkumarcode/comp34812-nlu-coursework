@@ -54,3 +54,31 @@ base = [
         XGBClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
                        subsample=0.7, colsample_bytree=0.6,
                        reg_alpha=0.1, reg_lambda=1.0, min_child_weight=5,
+                       eval_metric='logloss', random_state=42, n_jobs=1),
+        cv=3, method='isotonic')),
+    ('lgbm', CalibratedClassifierCV(
+        LGBMClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
+                        num_leaves=31, min_child_samples=20,
+                        reg_alpha=0.1, reg_lambda=1.0,
+                        verbose=-1, random_state=42, n_jobs=1),
+        cv=3, method='isotonic')),
+    ('gbm', GradientBoostingClassifier(
+        n_estimators=500, max_depth=5, learning_rate=0.05,
+        subsample=0.8, random_state=42)),
+]
+ens = StackingClassifier(
+    estimators=base,
+    final_estimator=LogisticRegression(C=1.0, max_iter=2000, random_state=42),
+    cv=5, passthrough=True, n_jobs=1,
+)
+ens.fit(X_tr_s, y_train)
+y_proba = ens.predict_proba(X_dv_s)[:, 1]
+y_pred = ens.predict(X_dv_s)
+
+metrics = compute_all_metrics(y_dev, y_pred)
+print_metrics(metrics, "NLI Cat A (v5 calibrated stack @0.5)")
+
+# Threshold search
+print("\nThreshold search:")
+best_thresh, best_f1 = 0.5, metrics['macro_f1']
+for t in np.arange(0.35, 0.65, 0.01):
