@@ -26,3 +26,31 @@ ext.fit(train_df)
 X_train, fnames = ext.transform(train_df)
 X_dev, _ = ext.transform(dev_df)
 
+scaler = StandardScaler()
+X_tr = scaler.fit_transform(X_train)
+X_dv = scaler.transform(X_dev)
+
+# Step 1: Feature importance pruning with XGBoost
+print("Step 1: Feature importance pruning...")
+xgb_sel = XGBClassifier(n_estimators=500, max_depth=7, learning_rate=0.05,
+                         subsample=0.7, colsample_bytree=0.7,
+                         eval_metric='logloss', random_state=42, n_jobs=-1)
+xgb_sel.fit(X_tr, y_train)
+importances = xgb_sel.feature_importances_
+# Keep features with above-median importance
+median_imp = np.median(importances)
+mask = importances >= median_imp
+print(f"  Keeping {mask.sum()}/{len(mask)} features (median threshold={median_imp:.6f})")
+X_tr_sel = X_tr[:, mask]
+X_dv_sel = X_dv[:, mask]
+
+# Step 2: Stack with selected features
+print("Step 2: Training XGB+LGBM+RF stack (selected features)...")
+base = [
+    ('xgb', XGBClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
+                           subsample=0.7, colsample_bytree=0.6, reg_alpha=0.1,
+                           reg_lambda=1.0, min_child_weight=5,
+                           eval_metric='logloss', random_state=42, n_jobs=1)),
+    ('lgbm', LGBMClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
+                              num_leaves=31, min_child_samples=20,
+                              reg_alpha=0.1, reg_lambda=1.0,
