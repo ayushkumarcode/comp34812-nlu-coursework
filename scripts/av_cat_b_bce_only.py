@@ -166,3 +166,31 @@ def main():
     print(f"\nBest dev F1: {best_f1:.4f}")
     model.load_state_dict(torch.load(
         save_dir / 'av_cat_b_bce_only_best.pt',
+        weights_only=True
+    ))
+    preds, probs, true = evaluate(
+        model, dev_loader, device
+    )
+    y_dev = np.array(dev_labels)
+
+    best_tf1, best_t = 0, 0.5
+    for t in np.arange(0.30, 0.70, 0.005):
+        f1 = f1_score(
+            y_dev, (probs > t).astype(int),
+            average='macro'
+        )
+        if f1 > best_tf1:
+            best_tf1 = f1
+            best_t = t
+
+    final_preds = (probs > best_t).astype(int)
+    print(f"Threshold optimized: F1={best_tf1:.4f} t={best_t:.3f}")
+
+    metrics = compute_all_metrics(y_dev, final_preds)
+    print_metrics(metrics, "AV Cat B BCE-Only — Final")
+
+    pred_path = (
+        PROJECT_ROOT / 'predictions'
+        / 'av_Group_34_B_bce_only.csv'
+    )
+    pred_path.parent.mkdir(exist_ok=True)
