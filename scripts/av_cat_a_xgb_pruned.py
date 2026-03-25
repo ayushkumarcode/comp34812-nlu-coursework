@@ -110,3 +110,31 @@ pred_path = (
 )
 pred_path.parent.mkdir(exist_ok=True)
 save_predictions(final_preds, pred_path)
+
+# Also save pruned version
+print("\n--- Best Pruned + XGB ---")
+mask50 = imp >= np.percentile(imp, 50)
+X_tr_50 = X_tr[:, mask50]
+X_dv_50 = X_dv[:, mask50]
+m3 = XGBClassifier(
+    n_estimators=3000, max_depth=3,
+    learning_rate=0.01,
+    subsample=0.6, colsample_bytree=0.5,
+    reg_alpha=0.5, reg_lambda=2.0,
+    min_child_weight=10,
+    eval_metric='logloss',
+    random_state=42, n_jobs=-1,
+)
+m3.fit(X_tr_50, y_train)
+p3 = m3.predict_proba(X_dv_50)[:, 1]
+bf3, bt3 = 0, 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    f1 = f1_score(y_dev, (p3 > t).astype(int), average='macro')
+    if f1 > bf3:
+        bf3 = f1
+        bt3 = t
+print(f"  Best: F1={bf3:.4f} at thresh={bt3:.3f}")
+fp3 = (p3 > bt3).astype(int)
+save_predictions(
+    fp3,
+    PROJECT_ROOT / 'predictions'
