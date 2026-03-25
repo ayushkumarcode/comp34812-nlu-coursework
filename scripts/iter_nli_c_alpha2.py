@@ -54,3 +54,31 @@ def main():
     tdf, ddf = load_nli_data(split='train'), load_nli_data(split='dev')
     dl = load_solution_labels(task='nli')
     tds, dds = D(tdf, tok, ML), D(ddf, tok, ML)
+    dds.l = np.array(dl, dtype=np.float32)
+    tl = DataLoader(tds, batch_size=BS, shuffle=True, num_workers=4)
+    dll = DataLoader(dds, batch_size=BS, shuffle=False, num_workers=4)
+    model = M(mn=MN).to(dev)
+    opt = AdamW(model.parameters(), lr=LR, weight_decay=0.01)
+    ts = len(tl) * EP
+    sched = get_linear_schedule_with_warmup(opt, int(ts*0.1), ts)
+    sc = GradScaler('cuda')
+    bf1, pc = 0, 0
+    sd = PROJECT_ROOT / 'models'; sd.mkdir(exist_ok=True)
+    for ep in range(1, EP+1):
+        model.train()
+        ttl, ttk, nb = 0, 0, 0
+        for b in tl:
+            ids, mask, labels = b['ids'].to(dev), b['mask'].to(dev), b['label'].to(dev)
+            opt.zero_grad()
+            with autocast('cuda'):
+                l1, l2 = model(ids, mask).squeeze(-1), model(ids, mask).squeeze(-1)
+                loss, tl2, kl = rdrop(l1, l2, labels, ALPHA)
+            sc.scale(loss).backward()
+            sc.unscale_(opt); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            sc.step(opt); sc.update(); sched.step()
+            ttl += tl2.item(); ttk += kl.item(); nb += 1
+        model.eval()
+        ps, prs, ls = [], [], []
+        with torch.no_grad():
+            for b in dll:
+                ids, mask = b['ids'].to(dev), b['mask'].to(dev)
