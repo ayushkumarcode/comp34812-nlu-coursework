@@ -138,3 +138,31 @@ def train_one_seed(seed, train_df, dev_df, dev_labels,
                     o2.last_hidden_state[:, 0]
                 ).squeeze(-1)
                 loss1 = smooth_bce(l1, labels, SMOOTH)
+                loss2 = smooth_bce(l2, labels, SMOOTH)
+                task = (loss1 + loss2) / 2
+                p1, p2 = torch.sigmoid(l1), torch.sigmoid(l2)
+                d1 = torch.stack([p1, 1-p1], -1).clamp(1e-7)
+                d2 = torch.stack([p2, 1-p2], -1).clamp(1e-7)
+                kl = (
+                    F.kl_div(d1.log(), d2,
+                             reduction='batchmean')
+                    + F.kl_div(d2.log(), d1,
+                               reduction='batchmean')
+                ) / 2
+                loss = task + ALPHA * kl
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(all_params, 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            sched.step()
+            tl_sum += loss.item()
+            nb += 1
+
+        encoder.eval()
+        classifier.eval()
+        probs = []
+        with torch.no_grad():
+            for batch in dl:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
