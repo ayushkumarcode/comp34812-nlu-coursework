@@ -82,3 +82,31 @@ def main():
         if epoch <= 20: grl_lambda = 0.05 * epoch / 20
         else: grl_lambda = 0.05
         model.grl.lambda_val = grl_lambda
+        t_weight = 0.02 if epoch >= 15 else 0.0
+        loss, tf1 = train_epoch(model, train_dl, opt, device, bce_fn, topic_fn, t_weight)
+        sched.step()
+        dp, dpr, dt = evaluate(model, dev_dl, device)
+        df1 = f1_score(dt, dp, average='macro', zero_division=0)
+        print(f"Epoch {epoch:3d} | Loss: {loss:.4f} | Train F1: {tf1:.4f} | Dev F1: {df1:.4f}")
+        if df1 > best_f1:
+            best_f1, patience_cnt = df1, 0
+            torch.save(model.state_dict(), save_dir / 'av_cat_b_v3_best.pt')
+            np.save(save_dir / 'av_cat_b_v3_probs.npy', dpr)
+            print(f"  -> New best (F1={best_f1:.4f})")
+        else:
+            patience_cnt += 1
+            if patience_cnt >= 20:
+                print(f"Early stopping at epoch {epoch}")
+                break
+    print(f"\nBest F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(save_dir / 'av_cat_b_v3_best.pt', weights_only=True))
+    dp, dpr, dt = evaluate(model, dev_dl, device)
+    best_thresh, best_tf1 = 0.5, 0
+    for t in np.arange(0.30, 0.80, 0.02):
+        pt = (dpr >= t).astype(int)
+        ft = f1_score(dt, pt, average='macro', zero_division=0)
+        if ft > best_tf1: best_thresh, best_tf1 = t, ft
+        print(f"  thresh={t:.2f}: F1={ft:.4f}")
+    print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_tf1:.4f}")
+    fp = (dpr >= best_thresh).astype(int)
+    m = compute_all_metrics(dt, fp)
