@@ -138,3 +138,27 @@ for t in np.arange(0.35, 0.65, 0.005):
 print(f"  F1={bf_e:.4f} (t={bt_e:.3f})")
 results['ensemble_4'] = bf_e
 
+# Save best
+best_name = max(results, key=results.get)
+best_f1 = results[best_name]
+print(f"\n=== Best: {best_name} F1={best_f1:.4f} ===")
+
+# Save ensemble predictions
+final_preds = (pavg > bt_e).astype(int)
+pred_path = (
+    PROJECT_ROOT / 'predictions'
+    / 'av_Group_34_A_gbm_tune.csv'
+)
+pred_path.parent.mkdir(exist_ok=True)
+save_predictions(final_preds, pred_path)
+
+metrics = compute_all_metrics(y_dev, final_preds)
+print_metrics(metrics, "AV Cat A GBM Ensemble")
+
+for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+              ('BERT', 0.7854)]:
+    gap = best_f1 - bl
+    s = "BEATS" if gap > 0 else "BELOW"
+    print(f"  vs {n}: {s} by {gap:+.4f}")
+print(f"Current best AV Cat A: 0.7340")
+print("Done!")
