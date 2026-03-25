@@ -82,3 +82,9 @@ baselines = {
 for cat in ['A', 'B', 'C']:
     bf = cat_best[cat]
     print(f"\n  Category {cat}: best F1 = {bf:.4f}")
+    for bn, bv in baselines.items():
+        gap = bf - bv
+        s = "BEATS" if gap > 0 else "BELOW"
+        print(f"    vs {bn} ({bv:.4f}): {s} {gap:+.4f}")
+
+print("\nDone!")
