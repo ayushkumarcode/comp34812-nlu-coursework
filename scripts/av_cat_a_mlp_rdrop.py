@@ -138,3 +138,31 @@ def main():
         best_state = None
         patience = 0
 
+        for epoch in range(1, 201):
+            model.train()
+            for xb, yb in train_loader:
+                optimizer.zero_grad()
+                if cfg['alpha'] > 0:
+                    l1 = model(xb)
+                    l2 = model(xb)
+                    loss, _, _ = rdrop_loss(
+                        l1, l2, yb, alpha=cfg['alpha']
+                    )
+                else:
+                    logits = model(xb)
+                    loss = nn.BCEWithLogitsLoss()(logits, yb)
+                loss.backward()
+                optimizer.step()
+            sched.step()
+
+            model.eval()
+            with torch.no_grad():
+                dv_logits = model(X_dv)
+                dv_probs = torch.sigmoid(dv_logits)
+                dv_probs = dv_probs.cpu().numpy()
+
+            best_ep_f1 = 0
+            best_ep_t = 0.5
+            for t in np.arange(0.35, 0.65, 0.01):
+                f1 = f1_score(
+                    y_dev, (dv_probs > t).astype(int),
