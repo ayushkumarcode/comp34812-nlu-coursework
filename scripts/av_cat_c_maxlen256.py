@@ -138,3 +138,31 @@ def main():
                 logits = model(ids, mask).squeeze(-1)
                 loss = bce(logits, labels)
             scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), 1.0
+            )
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+            n_b += 1
+
+        model.eval()
+        preds, labels_all = [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
+                p = (torch.sigmoid(logits) > 0.5).long()
+                preds.extend(p.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(
+            labels_all, preds, average='macro',
+            zero_division=0
+        )
+        print(
+            f"Epoch {epoch:3d} | "
+            f"Loss: {total_loss/n_b:.4f} | "
+            f"Dev F1: {dev_f1:.4f}"
