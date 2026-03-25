@@ -82,3 +82,31 @@ def main():
     from transformers import AutoTokenizer
 
     device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    MN = 'microsoft/deberta-v3-base'
+    tok = AutoTokenizer.from_pretrained(
+        MN, use_fast=False
+    )
+
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+    y_dev = np.array(dev_labels)
+
+    dev_ds = AVCEDataset(dev_df, tok, max_len=384)
+    dev_ds.labels = np.array(
+        dev_labels, dtype=np.float32
+    )
+    dl = DataLoader(
+        dev_ds, batch_size=16, shuffle=False,
+        num_workers=4
+    )
+
+    models_dir = PROJECT_ROOT / 'models'
+    preds_dir = PROJECT_ROOT / 'predictions'
+
+    # Models to extract (simple cross-encoder architecture)
+    checkpoints = {
+        'crossenc': 'av_cat_c_crossenc_best.pt',
