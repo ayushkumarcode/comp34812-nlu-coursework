@@ -110,3 +110,31 @@ def main():
     if os.path.exists(GLOVE_PATH):
         pretrained_emb = load_glove_embeddings(vocab, GLOVE_PATH, dim=300)
     emb_dim = pretrained_emb.shape[1] if pretrained_emb is not None else 300
+
+    print("\n[3/6] Creating datasets...")
+    train_dataset = NLIESIMDataset(
+        train_df, vocab, PREMISE_MAX, HYPOTHESIS_MAX,
+        compute_wordnet=USE_WORDNET)
+    dev_dataset = NLIESIMDataset(
+        dev_df, vocab, PREMISE_MAX, HYPOTHESIS_MAX,
+        compute_wordnet=USE_WORDNET)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
+                               shuffle=True, num_workers=4, pin_memory=True)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE,
+                             shuffle=False, num_workers=4, pin_memory=True)
+
+    print("\n[4/6] Building model...")
+    model = ESIM(
+        vocab_size=vocab.vocab_size,
+        embedding_dim=emb_dim,
+        hidden_size=HIDDEN_SIZE,
+        char_vocab_size=vocab.char_vocab_size,
+        knowledge_dim=5,
+        dropout=0.3,
+        pretrained_embeddings=pretrained_emb,
+    ).to(device)
+
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = Adam(model.parameters(), lr=LR, weight_decay=1e-5)
