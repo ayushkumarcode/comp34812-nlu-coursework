@@ -166,3 +166,31 @@ def main():
                     F.kl_div(d1.log(), d2,
                              reduction='batchmean')
                     + F.kl_div(d2.log(), d1,
+                               reduction='batchmean')
+                ) / 2
+                loss = task + ALPHA * kl
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(all_params, 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            sched.step()
+            tl_sum += loss.item()
+            nb += 1
+
+        encoder.eval()
+        classifier.eval()
+        all_probs = []
+        with torch.no_grad():
+            for batch in dl:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                o = encoder(
+                    input_ids=ids, attention_mask=mask
+                )
+                logits = classifier(
+                    o.last_hidden_state[:, 0]
+                ).squeeze(-1)
+                all_probs.extend(
+                    torch.sigmoid(logits).cpu().numpy()
+                )
