@@ -278,3 +278,28 @@ def main():
         f1 = f1_score(
             y_dev, (all_probs > t).astype(int),
             average='macro'
+        )
+        if f1 > bf:
+            bf = f1
+            bt = t
+    fp = (all_probs > bt).astype(int)
+    print(f"Thresh: F1={bf:.4f} t={bt:.3f}")
+
+    metrics = compute_all_metrics(y_dev, fp)
+    print_metrics(metrics, "AV Cat C R-Drop+AWP")
+
+    pp = PROJECT_ROOT / 'predictions'
+    save_predictions(fp, pp / 'av_Group_34_C_rdrop_awp.csv')
+    np.save(pp / 'av_cat_c_rdrop_awp_probs.npy', all_probs)
+
+    for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+                  ('BERT', 0.7854)]:
+        gap = metrics['macro_f1'] - bl
+        s = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {n}: {s} by {gap:+.4f}")
+    print(f"Current best AV Cat C: 0.8293")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
