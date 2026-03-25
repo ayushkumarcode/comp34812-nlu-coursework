@@ -110,3 +110,31 @@ def main():
 
     print("\nTraining with BCE-only loss...")
 
+    for epoch in range(1, max_epochs + 1):
+        t0 = time.time()
+        model.train()
+        total_loss = 0
+
+        for batch in train_loader:
+            c1 = batch['char_ids_1'].to(device)
+            c2 = batch['char_ids_2'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+            logits, _ = model(c1, c2)
+            loss = bce_loss_fn(
+                logits.squeeze(-1), labels
+            )
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), max_norm=5.0
+            )
+            optimizer.step()
+            total_loss += loss.item()
+
+        scheduler.step()
+
+        preds, probs, true = evaluate(
+            model, dev_loader, device
+        )
+        dev_f1 = f1_score(
+            true, preds, average='macro', zero_division=0
