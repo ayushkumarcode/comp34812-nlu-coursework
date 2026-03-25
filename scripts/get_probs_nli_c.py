@@ -54,3 +54,31 @@ class NLIDeBERTaDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_len = max_len
 
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        enc = self.tokenizer(
+            self.premises[idx], self.hypotheses[idx],
+            truncation=True, max_length=self.max_len,
+            padding='max_length', return_tensors='pt'
+        )
+        return {
+            'input_ids': enc['input_ids'].squeeze(0),
+            'attention_mask': enc['attention_mask'].squeeze(0),
+            'label': torch.tensor(self.labels[idx], dtype=torch.float),
+        }
+
+
+def main():
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    MAX_LEN = 128
+    BATCH_SIZE = 32
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    # Load model
+    model = NLIDeBERTaCrossEncoder(model_name=MODEL_NAME).to(device)
+    checkpoint_path = PROJECT_ROOT / 'models' / 'nli_cat_c_rdrop_best.pt'
+    print(f"Loading checkpoint: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
