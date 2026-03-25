@@ -26,3 +26,31 @@ class AVCEDataset(Dataset):
         self.labels = df['label'].values.astype(np.float32)
         self.tok = tokenizer
         self.max_len = max_len
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        enc = self.tok(
+            self.t1[idx], self.t2[idx],
+            truncation=True, max_length=self.max_len,
+            padding='max_length', return_tensors='pt'
+        )
+        return {
+            'input_ids': enc['input_ids'].squeeze(0),
+            'attention_mask': enc['attention_mask'].squeeze(0),
+            'label': torch.tensor(
+                self.labels[idx], dtype=torch.float
+            ),
+        }
+
+
+class AVCE(nn.Module):
+    def __init__(self, mn='microsoft/deberta-v3-base'):
+        super().__init__()
+        from transformers import AutoModel
+        self.encoder = AutoModel.from_pretrained(mn)
+        hs = self.encoder.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1), nn.Linear(hs, 256),
+            nn.GELU(), nn.Dropout(0.2),
