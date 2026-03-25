@@ -110,3 +110,31 @@ class AWP:
                     param.data.add_(r)
                     self.backup[name] = param.data.clone()
                     self.backup_eps[name] = r
+
+    def restore(self):
+        """Restore original weights."""
+        for name, param in self.model.named_parameters():
+            if name in self.backup_eps:
+                param.data.sub_(self.backup_eps[name])
+        self.backup = {}
+        self.backup_eps = {}
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
+    LR, BS, MAX_LEN = 2e-5, 8, 384
+    EPOCHS, PATIENCE = 25, 7
+    AWP_LR, AWP_EPS = 1e-2, 1e-2
+    AWP_START = 3  # Start AWP after epoch 3
+
+    print(f"\n=== AV Cat C + AWP ===")
+    print(f"LR={LR}, BS={BS}, MaxLen={MAX_LEN}")
+    print(f"AWP_LR={AWP_LR}, AWP_EPS={AWP_EPS}")
+    print(f"AWP starts at epoch {AWP_START}\n")
