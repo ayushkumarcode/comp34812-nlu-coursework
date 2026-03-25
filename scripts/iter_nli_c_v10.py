@@ -166,3 +166,31 @@ def main():
                 probs_all.extend(probs.cpu().numpy())
                 labels_all.extend(batch['label'].numpy())
 
+        dev_f1 = f1_score(labels_all, preds, average='macro', zero_division=0)
+        lr_now = optimizer.param_groups[0]['lr']
+        print(f"Epoch {epoch:3d} | Loss: {total_loss/n_batches:.4f} "
+              f"(task={total_task/n_batches:.4f}, kl={total_kl/n_batches:.4f}) "
+              f"| Dev F1: {dev_f1:.4f} | LR: {lr_now:.2e}")
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save(model.state_dict(), save_dir / 'nli_cat_c_rdrop_v2_best.pt')
+            np.save(save_dir / 'nli_cat_c_rdrop_v2_probs.npy', np.array(probs_all))
+            print(f"  -> Best model saved (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
+
+    # Final eval + threshold search
+    print(f"\nBest NLI Cat C (R-Drop v2) dev F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(save_dir / 'nli_cat_c_rdrop_v2_best.pt', weights_only=True))
+    model.eval()
+
+    final_probs = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
