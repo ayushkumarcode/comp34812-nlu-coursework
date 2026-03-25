@@ -166,3 +166,31 @@ def main():
             f"Epoch {epoch:3d} | "
             f"Loss: {total_loss/n_b:.4f} | "
             f"Dev F1: {dev_f1:.4f}"
+        )
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            pat = 0
+            torch.save(
+                model.state_dict(),
+                save_dir / 'av_cat_c_maxlen256_best.pt'
+            )
+            print(f"  -> Best (F1={best_f1:.4f})")
+        else:
+            pat += 1
+            if pat >= PATIENCE:
+                print(f"Early stop at epoch {epoch}")
+                break
+
+    # Final eval + threshold sweep
+    print(f"\nBest F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        save_dir / 'av_cat_c_maxlen256_best.pt',
+        weights_only=True
+    ))
+    model.eval()
+    all_probs = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
