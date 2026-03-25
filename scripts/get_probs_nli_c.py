@@ -138,3 +138,21 @@ def main():
 
     # Save predictions with optimal threshold
     preds = (probs > best_thresh).astype(int)
+    pred_path = PROJECT_ROOT / 'predictions' / 'nli_Group_34_C_thresh.csv'
+    save_predictions(preds, pred_path)
+    print(f"Optimized predictions saved to {pred_path}")
+
+    # Also print per-threshold results around the optimum
+    print("\n=== Detailed sweep around optimum ===")
+    for thresh in np.arange(max(0.30, best_thresh - 0.05),
+                             min(0.71, best_thresh + 0.06), 0.01):
+        preds = (probs > thresh).astype(int)
+        f1 = f1_score(y_true, preds, average='macro', zero_division=0)
+        marker = " <-- BEST" if abs(thresh - best_thresh) < 0.005 else ""
+        print(f"  thresh={thresh:.2f}: F1={f1:.4f}{marker}")
+
+    print("\nDone!")
+
+
+if __name__ == '__main__':
+    main()
