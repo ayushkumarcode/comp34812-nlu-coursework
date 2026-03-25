@@ -54,3 +54,31 @@ class AVCharDatasetV2(AVCharDataset):
             ),
             'char_ids_2': torch.tensor(
                 ids_2, dtype=torch.long
+            ),
+            'label': torch.tensor(
+                self.labels[idx], dtype=torch.float
+            ),
+        }
+        if self.topic_labels is not None:
+            item['topic'] = torch.tensor(
+                self.topic_labels[idx], dtype=torch.long
+            )
+        return item
+
+
+def evaluate(model, dataloader, device):
+    """Evaluate model on a dataset."""
+    model.eval()
+    all_preds, all_probs, all_labels = [], [], []
+    with torch.no_grad():
+        for batch in dataloader:
+            c1 = batch['char_ids_1'].to(device)
+            c2 = batch['char_ids_2'].to(device)
+            labels = batch['label']
+            logits, _ = model(c1, c2)
+            probs = torch.sigmoid(logits.squeeze(-1))
+            preds = (probs > 0.5).long()
+            all_preds.extend(preds.cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
+            all_labels.extend(labels.numpy())
+    return (np.array(all_preds),
