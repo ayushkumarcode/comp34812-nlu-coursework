@@ -54,3 +54,31 @@ class NLIDeBERTaCrossEncoder(nn.Module):
         hidden_size = self.encoder.config.hidden_size
         self.classifier = nn.Sequential(
             nn.Dropout(0.1),
+            nn.Linear(hidden_size, 256),
+            nn.Tanh(),
+            nn.Dropout(0.1),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        return self.classifier(outputs.last_hidden_state[:, 0, :])
+
+
+def compute_rdrop_loss_smooth(logits1, logits2, labels, alpha=0.5, smooth=0.05):
+    """R-Drop loss with label smoothing for binary classification."""
+    # Smooth labels: y' = y * (1 - smooth) + 0.5 * smooth
+    labels_smooth = labels * (1 - smooth) + 0.5 * smooth
+    loss1 = F.binary_cross_entropy_with_logits(logits1, labels_smooth)
+    loss2 = F.binary_cross_entropy_with_logits(logits2, labels_smooth)
+    task_loss = (loss1 + loss2) / 2
+
+    p1 = torch.sigmoid(logits1)
+    p2 = torch.sigmoid(logits2)
+    dist1 = torch.stack([p1, 1 - p1], dim=-1).clamp(min=1e-7)
+    dist2 = torch.stack([p2, 1 - p2], dim=-1).clamp(min=1e-7)
+    kl = (F.kl_div(dist1.log(), dist2, reduction='batchmean') +
+          F.kl_div(dist2.log(), dist1, reduction='batchmean')) / 2
+    return task_loss + alpha * kl, task_loss, kl
+
+
