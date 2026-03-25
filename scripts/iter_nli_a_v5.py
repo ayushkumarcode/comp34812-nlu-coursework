@@ -82,3 +82,18 @@ print_metrics(metrics, "NLI Cat A (v5 calibrated stack @0.5)")
 print("\nThreshold search:")
 best_thresh, best_f1 = 0.5, metrics['macro_f1']
 for t in np.arange(0.35, 0.65, 0.01):
+    preds_t = (y_proba >= t).astype(int)
+    f1_t = f1_score(y_dev, preds_t, average='macro', zero_division=0)
+    if f1_t > best_f1:
+        best_thresh, best_f1 = t, f1_t
+    print(f"  thresh={t:.2f}: F1={f1_t:.4f}")
+
+print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_f1:.4f}")
+final_preds = (y_proba >= best_thresh).astype(int)
+metrics_final = compute_all_metrics(y_dev, final_preds)
+print_metrics(metrics_final, "NLI Cat A (v5) — Final w/ Threshold")
+
+save_predictions(final_preds, PROJECT_ROOT / 'predictions' / 'nli_Group_34_A_stack_v5.csv')
+for n, bl in {'SVM': 0.5846, 'LSTM': 0.6603}.items():
+    print(f"  vs {n}: {'+' if best_f1>bl else ''}{best_f1-bl:.4f}")
+print("Done!")
