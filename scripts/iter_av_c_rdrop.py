@@ -110,3 +110,31 @@ def main():
     scaler = GradScaler('cuda')
 
     best_f1 = 0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        encoder.train()
+        classifier.train()
+        total_loss, total_task, total_kl = 0, 0, 0
+        n_batches = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                out1 = encoder(input_ids=ids, attention_mask=mask)
+                logits1 = classifier(out1.last_hidden_state[:, 0, :]).squeeze(-1)
+                out2 = encoder(input_ids=ids, attention_mask=mask)
+                logits2 = classifier(out2.last_hidden_state[:, 0, :]).squeeze(-1)
+                loss, task_l, kl_l = compute_rdrop_loss(
+                    logits1, logits2, labels, bce_loss, alpha=ALPHA)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(
+                list(encoder.parameters()) + list(classifier.parameters()), 1.0)
