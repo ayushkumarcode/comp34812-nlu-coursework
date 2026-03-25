@@ -110,3 +110,31 @@ def main():
          'lr': 1e-3, 'alpha': 1.0},
         {'hidden': (512, 256), 'drop': 0.4,
          'lr': 1e-3, 'alpha': 0.5},
+        {'hidden': (256, 128), 'drop': 0.3,
+         'lr': 1e-3, 'alpha': 2.0},
+        {'hidden': (512, 256), 'drop': 0.3,
+         'lr': 1e-3, 'alpha': 0.0},  # no R-Drop
+    ]
+
+    best_overall_f1 = 0
+    best_preds = None
+
+    for ci, cfg in enumerate(configs):
+        print(f"\n--- Config {ci}: {cfg} ---")
+        model = AV_MLP(
+            X_train.shape[1],
+            hidden_dims=cfg['hidden'],
+            dropout=cfg['drop'],
+        ).to(device)
+        optimizer = AdamW(
+            model.parameters(), lr=cfg['lr'],
+            weight_decay=1e-4,
+        )
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=100
+        )
+
+        best_f1 = 0
+        best_state = None
+        patience = 0
+
