@@ -138,3 +138,31 @@ def main():
             scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(
                 list(encoder.parameters()) + list(classifier.parameters()), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+            total_task += task_l.item()
+            total_kl += kl_l.item()
+            n_batches += 1
+
+        # Evaluate
+        encoder.eval()
+        classifier.eval()
+        preds, probs_all, labels_all = [], [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
+                out = encoder(input_ids=ids, attention_mask=mask)
+                logits = classifier(out.last_hidden_state[:, 0, :]).squeeze(-1)
+                probs = torch.sigmoid(logits)
+                pred = (probs > 0.5).long()
+                preds.extend(pred.cpu().numpy())
+                probs_all.extend(probs.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(labels_all, preds, average='macro', zero_division=0)
+        print(f"Epoch {epoch:3d} | Loss: {total_loss/n_batches:.4f} "
+              f"(task={total_task/n_batches:.4f}, kl={total_kl/n_batches:.4f}) "
+              f"| Dev F1: {dev_f1:.4f}")
+
