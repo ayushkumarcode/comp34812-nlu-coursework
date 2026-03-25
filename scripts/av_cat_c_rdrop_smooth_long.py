@@ -250,3 +250,10 @@ def main():
     for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
                   ('BERT', 0.7854)]:
         gap = best_f1 - bl
+        s = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {n}: {s} by {gap:+.4f}")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
