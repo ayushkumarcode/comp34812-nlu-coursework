@@ -54,3 +54,31 @@ for f in sorted(pred_dir.glob('av_*probs*.npy')):
         for t in np.arange(0.30, 0.70, 0.005):
             f1 = f1_score(
                 y_dev, (p > t).astype(int),
+                average='macro'
+            )
+            if f1 > bf:
+                bf = f1
+                bt = t
+        print(
+            f"  {f.name:45s} | "
+            f"F1={bf:.4f} (t={bt:.3f})"
+        )
+    except Exception as e:
+        print(f"  ERROR: {f.name}: {e}")
+
+# Best per category
+print("\n--- Best Per Category ---")
+cat_best = {'A': 0, 'B': 0, 'C': 0}
+for name, f1 in results:
+    cat = 'A' if '_A' in name else (
+        'B' if '_B' in name else 'C'
+    )
+    if f1 > cat_best[cat]:
+        cat_best[cat] = f1
+
+baselines = {
+    'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854
+}
+for cat in ['A', 'B', 'C']:
+    bf = cat_best[cat]
+    print(f"\n  Category {cat}: best F1 = {bf:.4f}")
