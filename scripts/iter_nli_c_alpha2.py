@@ -110,3 +110,10 @@ def main():
         ft = f1_score(yd, pt, average='macro', zero_division=0)
         if ft > btf: bt, btf = t, ft
         print(f"  thresh={t:.2f}: F1={ft:.4f}")
+    print(f"\nBest thresh: {bt:.2f} -> F1={btf:.4f}")
+    fp = (fps >= bt).astype(int)
+    m = compute_all_metrics(yd, fp)
+    print_metrics(m, "NLI Cat C (alpha=2.0) Final")
+    save_predictions(fp, PROJECT_ROOT / 'predictions' / 'nli_Group_34_C_alpha2.csv')
+    print("Done!")
+if __name__ == '__main__': main()
