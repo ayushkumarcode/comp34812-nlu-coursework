@@ -194,3 +194,31 @@ def main():
                 l1 = model(ids, mask).squeeze(-1)
                 l2 = model(ids, mask).squeeze(-1)
                 loss = rdrop_loss(l1, l2, labels, ALPHA)
+            scaler.scale(loss).backward()
+
+            # AWP after warmup
+            if ep >= AWP_START:
+                scaler.unscale_(optimizer)
+                awp.attack_step()
+                with autocast('cuda'):
+                    la1 = model(ids, mask).squeeze(-1)
+                    la2 = model(ids, mask).squeeze(-1)
+                    loss_a = rdrop_loss(
+                        la1, la2, labels, ALPHA
+                    )
+                scaler.scale(loss_a).backward()
+                awp.restore()
+            else:
+                scaler.unscale_(optimizer)
+
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), 1.0
+            )
+            scaler.step(optimizer)
+            scaler.update()
+            tl_sum += loss.item()
+            nb += 1
+
+        model.eval()
+        preds, labs = [], []
+        with torch.no_grad():
