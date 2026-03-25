@@ -26,3 +26,31 @@ from src.scorer import compute_all_metrics, print_metrics
 
 
 class AVCEDataset(Dataset):
+    def __init__(self, df, tokenizer, max_len=384):
+        self.t1 = list(df['text_1'])
+        self.t2 = list(df['text_2'])
+        self.labels = df['label'].values.astype(np.float32)
+        self.tok = tokenizer
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        enc = self.tok(
+            self.t1[idx], self.t2[idx],
+            truncation=True, max_length=self.max_len,
+            padding='max_length', return_tensors='pt'
+        )
+        return {
+            'input_ids': enc['input_ids'].squeeze(0),
+            'attention_mask': enc['attention_mask'].squeeze(0),
+            'label': torch.tensor(
+                self.labels[idx], dtype=torch.float
+            ),
+        }
+
+
+def get_cosine_warmup(opt, warmup, total):
+    def fn(step):
+        if step < warmup:
