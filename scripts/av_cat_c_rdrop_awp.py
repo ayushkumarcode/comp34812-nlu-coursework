@@ -82,3 +82,31 @@ class AWP:
         self.model = model
         self.adv_lr = adv_lr
         self.adv_eps = adv_eps
+        self.backup_eps = {}
+
+    def attack_step(self):
+        e = 1e-6
+        for name, param in self.model.named_parameters():
+            if (param.requires_grad and
+                    param.grad is not None and
+                    'LayerNorm' not in name and
+                    'bias' not in name):
+                norm1 = torch.norm(param.grad)
+                norm2 = torch.norm(param.data)
+                if norm1 != 0 and not torch.isnan(norm1):
+                    r = self.adv_lr * param.grad / (
+                        norm1 + e
+                    ) * (norm2 + e)
+                    r = torch.clamp(
+                        r, -self.adv_eps, self.adv_eps
+                    )
+                    param.data.add_(r)
+                    self.backup_eps[name] = r
+
+    def restore(self):
+        for name, param in self.model.named_parameters():
+            if name in self.backup_eps:
+                param.data.sub_(self.backup_eps[name])
+        self.backup_eps = {}
+
+
