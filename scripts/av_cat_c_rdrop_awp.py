@@ -166,3 +166,31 @@ def main():
         dev_ds, batch_size=BS, shuffle=False,
         num_workers=4
     )
+
+    model = AVCE(mn=MN).to(device)
+    optimizer = AdamW([
+        {'params': model.encoder.parameters(), 'lr': LR},
+        {'params': model.classifier.parameters(),
+         'lr': 5e-4},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+    awp = AWP(model, adv_lr=1e-2, adv_eps=1e-2)
+
+    best_f1, pat = 0, 0
+    sd = PROJECT_ROOT / 'models'
+    sd.mkdir(exist_ok=True)
+
+    for ep in range(1, EPOCHS + 1):
+        model.train()
+        tl_sum, nb = 0, 0
+        for batch in tl:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+
+            # R-Drop: two forward passes
+            with autocast('cuda'):
+                l1 = model(ids, mask).squeeze(-1)
+                l2 = model(ids, mask).squeeze(-1)
+                loss = rdrop_loss(l1, l2, labels, ALPHA)
