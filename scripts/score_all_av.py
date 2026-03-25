@@ -26,3 +26,31 @@ results = []
 for f in sorted(pred_dir.glob('av_*.csv')):
     try:
         preds = []
+        with open(f) as fh:
+            for line in fh:
+                line = line.strip()
+                if line:
+                    preds.append(int(float(line)))
+        if len(preds) != len(y_dev):
+            continue
+        preds = np.array(preds)
+        f1 = f1_score(y_dev, preds, average='macro')
+        results.append((f.name, f1))
+        cat = 'A' if '_A' in f.name else (
+            'B' if '_B' in f.name else 'C'
+        )
+        print(f"  Cat {cat} | {f.name:45s} | F1={f1:.4f}")
+    except Exception as e:
+        print(f"  ERROR: {f.name}: {e}")
+
+# Score NPY probability files
+print("\n--- NPY Probabilities (with threshold) ---")
+for f in sorted(pred_dir.glob('av_*probs*.npy')):
+    try:
+        p = np.load(f)
+        if len(p) != len(y_dev):
+            continue
+        bf, bt = 0, 0.5
+        for t in np.arange(0.30, 0.70, 0.005):
+            f1 = f1_score(
+                y_dev, (p > t).astype(int),
