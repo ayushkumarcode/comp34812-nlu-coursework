@@ -82,3 +82,31 @@ for r in range(2, len(names) + 1):
         ens_name = "+".join(combo)
         if bf > best_ens_f1:
             best_ens_f1 = bf
+            best_ens_preds = (avg_p > bt).astype(int)
+            best_ens_name = ens_name
+        if bf >= 0.83:  # Only print promising ones
+            print(
+                f"  {ens_name:40s}: "
+                f"F1={bf:.4f} (t={bt:.3f})"
+            )
+
+print(f"\n=== BEST ENSEMBLE ===")
+print(f"  {best_ens_name}")
+print(f"  F1={best_ens_f1:.4f}")
+
+metrics = compute_all_metrics(y_dev, best_ens_preds)
+print_metrics(metrics, "AV Cat C Ensemble — Final")
+
+pred_path = (
+    pred_dir / 'av_Group_34_C_ensemble.csv'
+)
+save_predictions(best_ens_preds, pred_path)
+print(f"Saved to {pred_path}")
+
+for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+              ('BERT', 0.7854)]:
+    gap = metrics['macro_f1'] - bl
+    s = "BEATS" if gap > 0 else "BELOW"
+    print(f"  vs {n}: {s} by {gap:+.4f}")
+print(f"Current best AV Cat C: 0.8293")
+print("Done!")
