@@ -54,3 +54,31 @@ class AVCE(nn.Module):
         self.classifier = nn.Sequential(
             nn.Dropout(0.1), nn.Linear(hs, 256),
             nn.GELU(), nn.Dropout(0.2),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        out = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask
+        )
+        return self.classifier(out.last_hidden_state[:, 0])
+
+
+def extract_probs(model, dataloader, device):
+    model.eval()
+    all_probs = []
+    with torch.no_grad():
+        for batch in dataloader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            probs = torch.sigmoid(logits)
+            all_probs.extend(probs.cpu().numpy())
+    return np.array(all_probs)
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device(
