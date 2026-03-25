@@ -222,3 +222,5 @@ def main():
                      PROJECT_ROOT / 'predictions' / 'nli_Group_34_C_smooth.csv')
     print("Done!")
 
+if __name__ == '__main__':
+    main()
