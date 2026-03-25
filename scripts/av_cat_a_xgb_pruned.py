@@ -82,3 +82,31 @@ model2 = XGBClassifier(
     reg_alpha=0.5, reg_lambda=2.0,
     min_child_weight=10, gamma=0.1,
     eval_metric='logloss',
+    random_state=42, n_jobs=-1,
+)
+model2.fit(X_tr, y_train)
+y_pred2 = model2.predict(X_dv)
+y_prob2 = model2.predict_proba(X_dv)[:, 1]
+
+# Threshold sweep
+best_f1 = 0
+best_t = 0.5
+for t in np.arange(0.35, 0.65, 0.005):
+    preds = (y_prob2 > t).astype(int)
+    f1 = f1_score(y_dev, preds, average='macro')
+    if f1 > best_f1:
+        best_f1 = f1
+        best_t = t
+
+final_preds = (y_prob2 > best_t).astype(int)
+print(f"  Best: F1={best_f1:.4f} at thresh={best_t:.3f}")
+
+metrics = compute_all_metrics(y_dev, final_preds)
+print_metrics(metrics, "AV Cat A XGB Deep+Reg")
+
+pred_path = (
+    PROJECT_ROOT / 'predictions'
+    / 'av_Group_34_A_xgb_deep.csv'
+)
+pred_path.parent.mkdir(exist_ok=True)
+save_predictions(final_preds, pred_path)
