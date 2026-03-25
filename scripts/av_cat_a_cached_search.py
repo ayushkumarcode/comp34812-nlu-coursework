@@ -82,3 +82,31 @@ for i, c in enumerate(configs_xgb):
         if f1 > bf: bf, bt = f1, t
     print(f"  F1={bf:.4f} (t={bt:.3f})")
     results[name] = (bf, p, bt)
+
+# 2. LGBM configurations
+configs_lgbm = [
+    {'bt': 'gbdt', 'n': 2000, 'd': 5, 'lr': 0.01,
+     'nl': 31, 'mcs': 20},
+    {'bt': 'dart', 'n': 1500, 'd': 7, 'lr': 0.02,
+     'nl': 63, 'mcs': 10},
+    {'bt': 'goss', 'n': 2000, 'd': 5, 'lr': 0.01,
+     'nl': 31, 'mcs': 20},
+]
+for i, c in enumerate(configs_lgbm):
+    name = f"lgbm_{c['bt']}_{i}"
+    print(f"\n--- {name} ---")
+    m = LGBMClassifier(
+        boosting_type=c['bt'],
+        n_estimators=c['n'],
+        max_depth=c['d'],
+        learning_rate=c['lr'],
+        num_leaves=c['nl'],
+        min_child_samples=c['mcs'],
+        verbose=-1, random_state=42, n_jobs=-1,
+    )
+    m.fit(X_tr, y_tr)
+    p = m.predict_proba(X_dv)[:, 1]
+    bf, bt = 0, 0.5
+    for t in np.arange(0.35, 0.65, 0.005):
+        f1 = f1_score(
+            y_dv, (p > t).astype(int),
