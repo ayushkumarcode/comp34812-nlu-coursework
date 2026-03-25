@@ -222,3 +222,31 @@ def main():
             for batch in dev_loader:
                 ids = batch['input_ids'].to(device)
                 mask = batch['attention_mask'].to(device)
+                logits = model(ids, mask).squeeze(-1)
+                p = (torch.sigmoid(logits) > 0.5).long()
+                preds.extend(p.cpu().numpy())
+                labels_all.extend(batch['label'].numpy())
+
+        dev_f1 = f1_score(
+            labels_all, preds, average='macro',
+            zero_division=0
+        )
+        adv_str = (f"adv={total_adv/n_b:.4f}"
+                   if epoch >= AWP_START else "no-awp")
+        print(
+            f"Epoch {epoch:3d} | "
+            f"Loss: {total_loss/n_b:.4f} ({adv_str}) | "
+            f"Dev F1: {dev_f1:.4f}"
+        )
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            pat = 0
+            torch.save(
+                model.state_dict(),
+                save_dir / 'av_cat_c_awp_best.pt'
+            )
+            print(f"  -> Best (F1={best_f1:.4f})")
+        else:
+            pat += 1
+            if pat >= PATIENCE:
