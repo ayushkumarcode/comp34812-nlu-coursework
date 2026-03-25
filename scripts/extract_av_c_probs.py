@@ -110,3 +110,31 @@ def main():
     # Models to extract (simple cross-encoder architecture)
     checkpoints = {
         'crossenc': 'av_cat_c_crossenc_best.pt',
+        'lr1e5': 'av_cat_c_lr1e5_best.pt',
+        'rdrop': 'av_cat_c_rdrop_best.pt',
+        'rdrop_v2': 'av_cat_c_rdrop_v2_best.pt',
+        'fgm': 'av_cat_c_fgm_best.pt',
+    }
+
+    all_probs = {}
+    for name, ckpt in checkpoints.items():
+        ckpt_path = models_dir / ckpt
+        out_path = preds_dir / f'av_cat_c_{name}_probs.npy'
+        if out_path.exists():
+            print(f"Already exists: {out_path}")
+            p = np.load(out_path)
+            all_probs[name] = p
+            continue
+        if not ckpt_path.exists():
+            print(f"Not found: {ckpt_path}")
+            continue
+        print(f"Loading {name} from {ckpt}")
+        model = AVCE(mn=MN).to(device)
+        try:
+            state = torch.load(
+                ckpt_path, map_location=device,
+                weights_only=True
+            )
+            model.load_state_dict(state)
+        except Exception as e:
+            print(f"  Failed to load: {e}")
