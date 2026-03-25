@@ -250,3 +250,31 @@ def main():
         else:
             pat += 1
             if pat >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
+
+    # Final eval + threshold sweep
+    print(f"\nBest F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        save_dir / 'av_cat_c_awp_best.pt',
+        weights_only=True
+    ))
+    model.eval()
+    all_probs = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            logits = model(ids, mask).squeeze(-1)
+            probs = torch.sigmoid(logits)
+            all_probs.extend(probs.cpu().numpy())
+    all_probs = np.array(all_probs)
+    y_dev = np.array(dev_labels)
+
+    bf, bt = 0, 0.5
+    for t in np.arange(0.30, 0.70, 0.005):
+        f1 = f1_score(
+            y_dev, (all_probs > t).astype(int),
+            average='macro'
+        )
+        if f1 > bf:
