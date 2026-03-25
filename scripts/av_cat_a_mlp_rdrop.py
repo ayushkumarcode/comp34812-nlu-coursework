@@ -166,3 +166,31 @@ def main():
             for t in np.arange(0.35, 0.65, 0.01):
                 f1 = f1_score(
                     y_dev, (dv_probs > t).astype(int),
+                    average='macro'
+                )
+                if f1 > best_ep_f1:
+                    best_ep_f1 = f1
+                    best_ep_t = t
+
+            if best_ep_f1 > best_f1:
+                best_f1 = best_ep_f1
+                best_state = {
+                    k: v.cpu().clone()
+                    for k, v in model.state_dict().items()
+                }
+                patience = 0
+            else:
+                patience += 1
+                if patience >= 30:
+                    break
+
+            if epoch % 50 == 0:
+                print(
+                    f"  Epoch {epoch}: "
+                    f"best_f1={best_f1:.4f}"
+                )
+
+        print(f"  Config {ci} best F1: {best_f1:.4f}")
+
+        if best_f1 > best_overall_f1:
+            best_overall_f1 = best_f1
