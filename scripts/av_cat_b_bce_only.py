@@ -82,3 +82,31 @@ def main():
     dev_loader = DataLoader(
         dev_dataset, batch_size=64, shuffle=False,
         num_workers=4, pin_memory=True
+    )
+
+    model = AVCatBModel(
+        vocab_size=VOCAB_SIZE, char_emb_dim=32,
+        cnn_filters=128, lstm_hidden=128,
+        proj_dim=128, num_topics=10,
+        grl_lambda=0.0,
+    ).to(device)
+    total_params = sum(
+        p.numel() for p in model.parameters()
+    )
+    print(f"  Total parameters: {total_params:,}")
+
+    bce_loss_fn = nn.BCEWithLogitsLoss()
+    optimizer = AdamW(
+        model.parameters(), lr=2e-4, weight_decay=1e-4
+    )
+    scheduler = CosineAnnealingWarmRestarts(
+        optimizer, T_0=10, T_mult=2, eta_min=1e-6
+    )
+
+    best_f1, patience_counter = 0.0, 0
+    max_epochs, patience = 100, 15
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    print("\nTraining with BCE-only loss...")
+
