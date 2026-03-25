@@ -26,3 +26,31 @@ dev_df = load_av_data(split='dev')
 y_train = train_df['label'].values
 y_dev = np.array(load_solution_labels(task='av'))
 
+print("Extracting features...")
+ext = AVFeatureExtractor(
+    use_spacy=True, n_svd_components=100
+)
+ext.fit(train_df)
+X_train, fnames = ext.transform(train_df)
+X_dev, _ = ext.transform(dev_df)
+print(f"Features: {X_train.shape[1]}")
+
+scaler = StandardScaler()
+X_tr = scaler.fit_transform(X_train)
+X_dv = scaler.transform(X_dev)
+
+# Step 1: Get feature importances from initial XGB
+print("\nStep 1: Initial XGBoost for feature selection")
+sel = XGBClassifier(
+    n_estimators=500, max_depth=7,
+    learning_rate=0.05,
+    eval_metric='logloss', random_state=42, n_jobs=-1
+)
+sel.fit(X_tr, y_train)
+imp = sel.feature_importances_
+
+# Try different pruning thresholds
+for pct in [25, 50, 75]:
+    threshold = np.percentile(imp, pct)
+    mask = imp >= threshold
+    n_kept = mask.sum()
