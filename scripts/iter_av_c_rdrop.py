@@ -82,3 +82,31 @@ def main():
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
 
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    train_dataset = AVCrossEncoderDataset(train_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset = AVCrossEncoderDataset(dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    encoder = AutoModel.from_pretrained(MODEL_NAME).to(device)
+    classifier = nn.Sequential(
+        nn.Dropout(0.1),
+        nn.Linear(encoder.config.hidden_size, 256),
+        nn.GELU(),
+        nn.Dropout(0.2),
+        nn.Linear(256, 1),
+    ).to(device)
+
+    bce_loss = nn.BCEWithLogitsLoss()
+    optimizer = AdamW([
+        {'params': encoder.parameters(), 'lr': LR},
+        {'params': classifier.parameters(), 'lr': 5e-4},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1 = 0
