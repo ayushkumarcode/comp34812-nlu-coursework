@@ -82,3 +82,19 @@ ens2 = StackingClassifier(
                                eval_metric='logloss', random_state=42, n_jobs=1)),
         ('lgbm', LGBMClassifier(n_estimators=2000, max_depth=5, learning_rate=0.01,
                                   num_leaves=31, verbose=-1, random_state=42, n_jobs=1)),
+        ('rf', RandomForestClassifier(n_estimators=500, max_depth=15,
+                                       random_state=42, n_jobs=1)),
+    ],
+    final_estimator=LogisticRegression(C=1.0, max_iter=2000, random_state=42),
+    cv=5, passthrough=True, n_jobs=1,
+)
+ens2.fit(X_tr, y_train)
+y_pred2 = ens2.predict(X_dv)
+
+metrics2 = compute_all_metrics(y_dev, y_pred2)
+print_metrics(metrics2, "AV Cat A (stack v2 — all)")
+save_predictions(y_pred2, PROJECT_ROOT / 'predictions' / 'av_Group_34_A_stack_v2_all.csv')
+
+for n, bl in {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}.items():
+    print(f"  Best vs {n}: {'+' if max(metrics['macro_f1'],metrics2['macro_f1'])>bl else ''}{max(metrics['macro_f1'],metrics2['macro_f1'])-bl:.4f}")
+print("Done!")
