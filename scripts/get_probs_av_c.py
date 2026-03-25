@@ -82,3 +82,31 @@ def main():
     dev_df = load_av_data(split='dev')
     dev_labels = load_solution_labels(task='av')
     y_true = np.array(dev_labels)
+
+    dev_dataset = AVCrossEncoderDataset(dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    # Run inference and collect probabilities
+    all_probs = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            outputs = encoder(input_ids=ids, attention_mask=mask)
+            cls_repr = outputs.last_hidden_state[:, 0, :]
+            logits = classifier(cls_repr)
+            probs = torch.sigmoid(logits.squeeze(-1))
+            all_probs.extend(probs.cpu().numpy())
+
+    probs = np.array(all_probs)
+    print(f"Collected {len(probs)} probabilities.")
+    print(f"Prob stats: min={probs.min():.4f}, max={probs.max():.4f}, "
+          f"mean={probs.mean():.4f}, std={probs.std():.4f}")
+
+    # Save probabilities
+    prob_path = PROJECT_ROOT / 'predictions' / 'av_cat_c_probs.npy'
+    prob_path.parent.mkdir(exist_ok=True)
+    np.save(str(prob_path), probs)
+    print(f"Probabilities saved to {prob_path}")
+
