@@ -166,3 +166,31 @@ def main():
         elapsed = time.time() - t0
         print(f"Epoch {epoch:3d} | Loss: {train_loss:.4f} | "
               f"Train F1: {train_f1:.4f} | Dev F1: {dev_f1:.4f} | "
+              f"LR: {lr:.2e} | Time: {elapsed:.1f}s")
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            patience_counter = 0
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'vocab': vocab,
+                'config': {
+                    'hidden_size': HIDDEN_SIZE,
+                    'emb_dim': emb_dim,
+                    'premise_max': PREMISE_MAX,
+                    'hypothesis_max': HYPOTHESIS_MAX,
+                },
+            }, save_dir / 'nli_cat_b_v2_best.pt')
+            # Also save probabilities for threshold search
+            np.save(save_dir / 'nli_cat_b_v2_probs.npy', dev_probs)
+            print(f"  -> New best model saved (F1={best_f1:.4f})")
+        else:
+            patience_counter += 1
+            if patience_counter >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
+
+    # Final evaluation with threshold search
+    print(f"\n[6/6] Final evaluation (best F1={best_f1:.4f})...")
+    checkpoint = torch.load(save_dir / 'nli_cat_b_v2_best.pt', weights_only=False)
+    model.load_state_dict(checkpoint['model_state_dict'])
