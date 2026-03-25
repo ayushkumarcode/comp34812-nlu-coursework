@@ -82,3 +82,31 @@ def main():
         nn.Linear(encoder.config.hidden_size, 256),
         nn.GELU(),
         nn.Dropout(0.2),
+        nn.Linear(256, 1),
+    ).to(device)
+
+    bce_loss = nn.BCEWithLogitsLoss()
+    optimizer = AdamW([
+        {'params': encoder.parameters(), 'lr': LR},
+        {'params': classifier.parameters(), 'lr': 5e-4},
+    ], weight_decay=0.01)
+    scaler = GradScaler('cuda')
+
+    best_f1 = 0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        encoder.train()
+        classifier.train()
+        total_loss = 0
+        n_batches = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
