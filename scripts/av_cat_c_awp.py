@@ -194,3 +194,31 @@ def main():
                 logits = model(ids, mask).squeeze(-1)
                 loss = bce(logits, labels)
             scaler.scale(loss).backward()
+
+            # AWP after warmup epochs
+            if epoch >= AWP_START:
+                scaler.unscale_(optimizer)
+                awp.attack_step()
+                with autocast('cuda'):
+                    logits_adv = model(ids, mask).squeeze(-1)
+                    loss_adv = bce(logits_adv, labels)
+                scaler.scale(loss_adv).backward()
+                awp.restore()
+                total_adv += loss_adv.item()
+            else:
+                scaler.unscale_(optimizer)
+
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), 1.0
+            )
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+            n_b += 1
+
+        model.eval()
+        preds, labels_all = [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
