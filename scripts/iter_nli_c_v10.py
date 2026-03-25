@@ -110,3 +110,31 @@ def main():
     model = NLIDeBERTaCrossEncoder(model_name=MODEL_NAME).to(device)
     bce_loss = nn.BCEWithLogitsLoss()
     optimizer = AdamW(model.parameters(), lr=LR, weight_decay=0.01)
+
+    total_steps = len(train_loader) * EPOCHS
+    warmup_steps = int(total_steps * WARMUP_RATIO)
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer, num_warmup_steps=warmup_steps, num_training_steps=total_steps)
+
+    scaler = GradScaler('cuda')
+
+    best_f1 = 0
+    patience_counter = 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, EPOCHS + 1):
+        model.train()
+        total_loss, total_task, total_kl = 0, 0, 0
+        n_batches = 0
+
+        for batch in train_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                logits1 = model(ids, mask).squeeze(-1)
+                logits2 = model(ids, mask).squeeze(-1)
+                loss, task_l, kl_l = compute_rdrop_loss(
