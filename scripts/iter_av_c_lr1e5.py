@@ -166,3 +166,31 @@ def main():
     classifier.load_state_dict(ckpt['classifier'])
     encoder.eval()
     classifier.eval()
+
+    final_probs = []
+    with torch.no_grad():
+        for batch in dev_loader:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            out = encoder(input_ids=ids, attention_mask=mask)
+            logits = classifier(out.last_hidden_state[:, 0, :]).squeeze(-1)
+            final_probs.extend(torch.sigmoid(logits).cpu().numpy())
+    final_probs = np.array(final_probs)
+    y_dev = np.array(dev_labels)
+
+    print("\nThreshold search:")
+    best_thresh, best_thresh_f1 = 0.5, 0
+    for t in np.arange(0.30, 0.80, 0.02):
+        preds_t = (final_probs >= t).astype(int)
+        f1_t = f1_score(y_dev, preds_t, average='macro', zero_division=0)
+        if f1_t > best_thresh_f1:
+            best_thresh, best_thresh_f1 = t, f1_t
+        print(f"  thresh={t:.2f}: F1={f1_t:.4f}")
+
+    print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_thresh_f1:.4f}")
+    final_preds = (final_probs >= best_thresh).astype(int)
+    metrics = compute_all_metrics(y_dev, final_preds)
+    print_metrics(metrics, "AV Cat C (LR=1e-5) — Final w/ Threshold")
+
+    save_predictions(final_preds,
+                     PROJECT_ROOT / 'predictions' / 'av_Group_34_C_lr1e5_v2.csv')
