@@ -82,3 +82,31 @@ def main():
     print(f"\n=== AV Cat C R-Drop+Smooth LONG ===")
     print(f"Ep={EPOCHS} Pat={PAT} alpha={ALPHA}")
     print(f"Previous best: 0.8247 at ep 25\n")
+
+    tok = AutoTokenizer.from_pretrained(
+        MN, use_fast=False
+    )
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+    y_dev = np.array(dev_labels)
+
+    train_ds = AVCEDataset(train_df, tok, max_len=ML)
+    dev_ds = AVCEDataset(dev_df, tok, max_len=ML)
+    dev_ds.labels = np.array(dev_labels, dtype=np.float32)
+
+    tl = DataLoader(
+        train_ds, batch_size=BS, shuffle=True,
+        num_workers=4
+    )
+    dl = DataLoader(
+        dev_ds, batch_size=BS, shuffle=False,
+        num_workers=4
+    )
+
+    encoder = AutoModel.from_pretrained(MN).to(device)
+    hs = encoder.config.hidden_size
+    classifier = nn.Sequential(
+        nn.Dropout(0.1), nn.Linear(hs, 256),
+        nn.GELU(), nn.Dropout(0.2),
+        nn.Linear(256, 1),
