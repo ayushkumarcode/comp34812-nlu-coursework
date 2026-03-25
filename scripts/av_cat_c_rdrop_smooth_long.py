@@ -54,3 +54,31 @@ class AVCEDataset(Dataset):
 
 def get_cosine_warmup(opt, warmup, total):
     def fn(step):
+        if step < warmup:
+            return float(step) / max(1, warmup)
+        prog = (step - warmup) / max(1, total - warmup)
+        return max(0.0, 0.5 * (1 + math.cos(math.pi * prog)))
+    return torch.optim.lr_scheduler.LambdaLR(opt, fn)
+
+
+def smooth_bce(logits, labels, s=0.05):
+    sl = labels * (1 - s) + (1 - labels) * s
+    return F.binary_cross_entropy_with_logits(logits, sl)
+
+
+def main():
+    from transformers import AutoTokenizer, AutoModel
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    MN = 'microsoft/deberta-v3-base'
+    ML, BS, LR = 384, 8, 2e-5
+    EPOCHS, PAT = 40, 10
+    ALPHA, SMOOTH = 0.5, 0.05
+
+    print(f"\n=== AV Cat C R-Drop+Smooth LONG ===")
+    print(f"Ep={EPOCHS} Pat={PAT} alpha={ALPHA}")
+    print(f"Previous best: 0.8247 at ep 25\n")
