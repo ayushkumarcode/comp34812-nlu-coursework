@@ -222,3 +222,19 @@ def main():
     )
     pred_path.parent.mkdir(exist_ok=True)
     save_predictions(final_preds, pred_path)
+    np.save(
+        PROJECT_ROOT / 'predictions'
+        / 'av_cat_c_maxlen256_probs.npy', all_probs
+    )
+
+    for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+                  ('BERT', 0.7854)]:
+        gap = metrics['macro_f1'] - bl
+        s = "BEATS" if gap > 0 else "BELOW"
+        print(f"  vs {n}: {s} by {gap:+.4f}")
+    print(f"Current best AV Cat C: 0.8293")
+    print("Done!")
+
+
+if __name__ == '__main__':
+    main()
