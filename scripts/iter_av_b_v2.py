@@ -110,3 +110,31 @@ def main():
     dev_loader = DataLoader(dev_dataset, batch_size=64, shuffle=False,
                              num_workers=4, pin_memory=True)
 
+    print("\n[4/5] Building model...")
+    model = AVCatBModel(
+        vocab_size=VOCAB_SIZE, char_emb_dim=32, cnn_filters=128,
+        lstm_hidden=128, proj_dim=128, num_topics=num_topics,
+        grl_lambda=0.0).to(device)
+
+    bce_loss_fn = nn.BCEWithLogitsLoss()
+    contrastive_loss_fn = nn.CosineEmbeddingLoss(margin=0.3)
+    topic_loss_fn = nn.CrossEntropyLoss()
+    optimizer = AdamW(model.parameters(), lr=5e-4, weight_decay=1e-4)
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=2)
+
+    print("\n[5/5] Training...")
+    best_f1 = 0.0
+    patience_counter = 0
+    max_epochs = 100
+    patience = 15
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, max_epochs + 1):
+        t0 = time.time()
+        # Ramp GRL lambda slowly
+        if epoch <= 15:
+            grl_lambda = 0.05 * epoch / 15
+        else:
+            grl_lambda = 0.05
+        model.grl.lambda_val = grl_lambda
