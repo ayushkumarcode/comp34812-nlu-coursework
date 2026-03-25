@@ -222,3 +222,31 @@ def main():
                 'classifier': classifier.state_dict(),
             }, sd / 'av_cat_c_rdrop_smooth_long_best.pt')
             np.save(
+                pd / 'av_cat_c_rdrop_smooth_long_probs.npy',
+                probs
+            )
+            preds = (probs > bt).astype(int)
+            save_predictions(
+                preds,
+                pd / 'av_Group_34_C_rdrop_smooth_long.csv'
+            )
+            print(f"  -> Best (F1={best_f1:.4f})")
+        else:
+            pat += 1
+            if pat >= PAT:
+                print(f"Early stop at ep {ep}")
+                break
+
+    print(f"\nBest: {best_f1:.4f}")
+    print(f"Previous best (25 ep): 0.8247")
+
+    metrics = compute_all_metrics(
+        y_dev, (np.load(
+            pd / 'av_cat_c_rdrop_smooth_long_probs.npy'
+        ) > bt).astype(int)
+    )
+    print_metrics(metrics, "AV Cat C R-Drop+Smooth Long")
+
+    for n, bl in [('SVM', 0.5610), ('LSTM', 0.6226),
+                  ('BERT', 0.7854)]:
+        gap = best_f1 - bl
