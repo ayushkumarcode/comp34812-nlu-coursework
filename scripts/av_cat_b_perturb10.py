@@ -110,3 +110,31 @@ def main():
     train_topic = topic_all[:len(train_df)]
     num_topics = int(topic_all.max()) + 1
 
+    train_dataset = AVCharDatasetV2(
+        train_df, max_len=1500, augment=True,
+        topic_labels=train_topic, perturb_prob=0.10
+    )
+    dev_dataset = AVCharDatasetV2(
+        dev_df, max_len=1500, augment=False,
+        topic_labels=None, perturb_prob=0.0
+    )
+    dev_dataset.labels = np.array(
+        dev_labels, dtype=np.float32
+    )
+
+    train_loader = DataLoader(
+        train_dataset, batch_size=64, shuffle=True,
+        num_workers=4, pin_memory=True
+    )
+    dev_loader = DataLoader(
+        dev_dataset, batch_size=64, shuffle=False,
+        num_workers=4, pin_memory=True
+    )
+
+    model = AVCatBModel(
+        vocab_size=VOCAB_SIZE, char_emb_dim=32,
+        cnn_filters=128, lstm_hidden=128,
+        proj_dim=128, num_topics=num_topics,
+        grl_lambda=0.0,
+    ).to(device)
+
