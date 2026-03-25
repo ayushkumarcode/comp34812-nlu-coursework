@@ -54,3 +54,31 @@ def main():
 
     MODEL_NAME = 'microsoft/deberta-v3-base'
     LR = 1e-5
+    BATCH_SIZE = 8
+    MAX_LEN = 384
+    EPOCHS = 30
+    PATIENCE = 10
+
+    print(f"\n=== AV Cat C — Cross-Encoder LR={LR} ===")
+    print(f"BS={BATCH_SIZE}, MaxLen={MAX_LEN}")
+    print(f"Epochs={EPOCHS}, Patience={PATIENCE}\n")
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    train_dataset = AVCrossEncoderDataset(train_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset = AVCrossEncoderDataset(dev_df, tokenizer, max_len=MAX_LEN)
+    dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+    dev_loader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+
+    encoder = AutoModel.from_pretrained(MODEL_NAME).to(device)
+    classifier = nn.Sequential(
+        nn.Dropout(0.1),
+        nn.Linear(encoder.config.hidden_size, 256),
+        nn.GELU(),
+        nn.Dropout(0.2),
