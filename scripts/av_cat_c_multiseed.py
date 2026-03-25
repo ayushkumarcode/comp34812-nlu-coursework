@@ -222,3 +222,31 @@ def main():
     tok = AutoTokenizer.from_pretrained(
         MN, use_fast=False
     )
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+    y_dev = np.array(dev_labels)
+
+    sd = PROJECT_ROOT / 'models'
+    sd.mkdir(exist_ok=True)
+    pd = PROJECT_ROOT / 'predictions'
+    pd.mkdir(exist_ok=True)
+
+    seeds = [42, 123, 7]
+    all_probs = []
+    all_f1s = []
+
+    for seed in seeds:
+        probs, f1 = train_one_seed(
+            seed, train_df, dev_df, dev_labels,
+            tok, device, sd, pd
+        )
+        all_probs.append(probs)
+        all_f1s.append(f1)
+
+    # Ensemble
+    avg = np.mean(all_probs, axis=0)
+    bf, bt = 0, 0.5
+    for t in np.arange(0.30, 0.70, 0.005):
+        f1 = f1_score(
+            y_dev, (avg > t).astype(int),
