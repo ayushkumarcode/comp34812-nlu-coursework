@@ -82,3 +82,31 @@ class AWP:
     """
     def __init__(self, model, optimizer, adv_lr=1e-2,
                  adv_eps=1e-2):
+        self.model = model
+        self.optimizer = optimizer
+        self.adv_lr = adv_lr
+        self.adv_eps = adv_eps
+        self.backup = {}
+        self.backup_eps = {}
+
+    def attack_step(self):
+        """Perturb weights in gradient direction."""
+        e = 1e-6
+        for name, param in self.model.named_parameters():
+            if (param.requires_grad and
+                    param.grad is not None and
+                    'LayerNorm' not in name and
+                    'bias' not in name):
+                norm1 = torch.norm(param.grad)
+                norm2 = torch.norm(param.data)
+                if norm1 != 0 and not torch.isnan(norm1):
+                    r = self.adv_lr * param.grad / (
+                        norm1 + e
+                    ) * (norm2 + e)
+                    # Clip perturbation
+                    r = torch.clamp(
+                        r, -self.adv_eps, self.adv_eps
+                    )
+                    param.data.add_(r)
+                    self.backup[name] = param.data.clone()
+                    self.backup_eps[name] = r
