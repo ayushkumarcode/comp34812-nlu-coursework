@@ -138,3 +138,31 @@ def main():
         encoder.train()
         classifier.train()
         tl_sum, nb = 0, 0
+        for batch in tl:
+            ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                o1 = encoder(
+                    input_ids=ids, attention_mask=mask
+                )
+                l1 = classifier(
+                    o1.last_hidden_state[:, 0]
+                ).squeeze(-1)
+                o2 = encoder(
+                    input_ids=ids, attention_mask=mask
+                )
+                l2 = classifier(
+                    o2.last_hidden_state[:, 0]
+                ).squeeze(-1)
+                loss1 = smooth_bce(l1, labels, SMOOTH)
+                loss2 = smooth_bce(l2, labels, SMOOTH)
+                task = (loss1 + loss2) / 2
+                p1, p2 = torch.sigmoid(l1), torch.sigmoid(l2)
+                d1 = torch.stack([p1, 1-p1], -1).clamp(1e-7)
+                d2 = torch.stack([p2, 1-p2], -1).clamp(1e-7)
+                kl = (
+                    F.kl_div(d1.log(), d2,
+                             reduction='batchmean')
+                    + F.kl_div(d2.log(), d1,
