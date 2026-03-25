@@ -194,3 +194,31 @@ def main():
             f"Ep {ep:3d} | "
             f"L:{tl_sum/nb:.4f} "
             f"(task={tk_sum/nb:.4f} kl={kl_sum/nb:.4f})"
+            f" | Dev F1: {dev_f1:.4f}"
+        )
+
+        if dev_f1 > best_f1:
+            best_f1 = dev_f1
+            pat = 0
+            torch.save(
+                model.state_dict(),
+                sd / 'av_cat_c_rdrop_smooth_v2_best.pt'
+            )
+            print(f"  -> Best (F1={best_f1:.4f})")
+        else:
+            pat += 1
+            if pat >= PAT:
+                print(f"Early stop at ep {ep}")
+                break
+
+    # Final eval + threshold sweep
+    print(f"\nBest F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(
+        sd / 'av_cat_c_rdrop_smooth_v2_best.pt',
+        weights_only=True
+    ))
+    model.eval()
+    all_probs = []
+    with torch.no_grad():
+        for batch in dl:
+            ids = batch['input_ids'].to(device)
