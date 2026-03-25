@@ -194,3 +194,31 @@ def main():
                 all_probs.extend(
                     torch.sigmoid(logits).cpu().numpy()
                 )
+        probs = np.array(all_probs)
+
+        bf, bt = 0, 0.5
+        for t in np.arange(0.35, 0.65, 0.01):
+            f1 = f1_score(
+                y_dev, (probs > t).astype(int),
+                average='macro'
+            )
+            if f1 > bf: bf, bt = f1, t
+
+        f1_50 = f1_score(
+            y_dev, (probs > 0.5).astype(int),
+            average='macro'
+        )
+        print(
+            f"Ep {ep:3d} | Loss: {tl_sum/nb:.4f} | "
+            f"F1@0.5={f1_50:.4f} | "
+            f"F1@{bt:.2f}={bf:.4f}"
+        )
+
+        if bf > best_f1:
+            best_f1 = bf
+            pat = 0
+            torch.save({
+                'encoder': encoder.state_dict(),
+                'classifier': classifier.state_dict(),
+            }, sd / 'av_cat_c_rdrop_smooth_long_best.pt')
+            np.save(
