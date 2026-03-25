@@ -54,3 +54,31 @@ class AVCEDataset(Dataset):
 
 class AVCE(nn.Module):
     """DeBERTa cross-encoder for AV."""
+    def __init__(self, mn='microsoft/deberta-v3-base'):
+        super().__init__()
+        from transformers import AutoModel
+        self.encoder = AutoModel.from_pretrained(mn)
+        hs = self.encoder.config.hidden_size
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.1), nn.Linear(hs, 256),
+            nn.GELU(), nn.Dropout(0.2),
+            nn.Linear(256, 1),
+        )
+
+    def forward(self, input_ids, attention_mask):
+        out = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask
+        )
+        return self.classifier(out.last_hidden_state[:, 0])
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    MODEL_NAME = 'microsoft/deberta-v3-base'
