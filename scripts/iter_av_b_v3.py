@@ -26,3 +26,31 @@ def train_epoch(model, dl, opt, dev, bce_fn, topic_fn, t_weight=0.02):
         c1, c2, labels = b['char_ids_1'].to(dev), b['char_ids_2'].to(dev), b['label'].to(dev)
         opt.zero_grad()
         logits, tl, _ = model(c1, c2, return_embeddings=True)
+        loss = bce_fn(logits.squeeze(-1), labels)
+        if t_weight > 0 and 'topic' in b:
+            loss = loss + t_weight * topic_fn(tl, b['topic'].to(dev))
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+        opt.step()
+        total += loss.item()
+        all_p.extend((torch.sigmoid(logits.squeeze(-1)) > 0.5).long().cpu().numpy())
+        all_l.extend(labels.cpu().numpy())
+    return total / len(dl), f1_score(all_l, all_p, average='macro', zero_division=0)
+
+def evaluate(model, dl, dev):
+    model.eval()
+    all_p, all_pr, all_l = [], [], []
+    with torch.no_grad():
+        for b in dl:
+            c1, c2 = b['char_ids_1'].to(dev), b['char_ids_2'].to(dev)
+            logits, _ = model(c1, c2)
+            pr = torch.sigmoid(logits.squeeze(-1))
+            all_p.extend((pr > 0.5).long().cpu().numpy())
+            all_pr.extend(pr.cpu().numpy())
+            all_l.extend(b['label'].numpy())
+    return np.array(all_p), np.array(all_pr), np.array(all_l)
+
+def main():
+    print("=" * 60)
+    print("  AV Cat B v3 — LR=2e-4, no contrastive")
+    print("=" * 60)
