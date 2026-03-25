@@ -54,3 +54,31 @@ configs_xgb = [
     {'n': 1500, 'd': 5, 'lr': 0.02, 'sub': 0.7,
      'col': 0.6, 'ra': 0.1, 'rl': 1.0, 'mcw': 5},
     {'n': 3000, 'd': 3, 'lr': 0.01, 'sub': 0.6,
+     'col': 0.5, 'ra': 0.5, 'rl': 2.0, 'mcw': 10},
+    {'n': 2000, 'd': 7, 'lr': 0.01, 'sub': 0.8,
+     'col': 0.7, 'ra': 0.05, 'rl': 0.5, 'mcw': 3},
+]
+for i, c in enumerate(configs_xgb):
+    name = f"xgb_{i}"
+    print(f"\n--- {name} ---")
+    m = XGBClassifier(
+        n_estimators=c['n'], max_depth=c['d'],
+        learning_rate=c['lr'],
+        subsample=c['sub'],
+        colsample_bytree=c['col'],
+        reg_alpha=c['ra'], reg_lambda=c['rl'],
+        min_child_weight=c['mcw'],
+        eval_metric='logloss',
+        random_state=42, n_jobs=-1,
+    )
+    m.fit(X_tr, y_tr)
+    p = m.predict_proba(X_dv)[:, 1]
+    bf, bt = 0, 0.5
+    for t in np.arange(0.35, 0.65, 0.005):
+        f1 = f1_score(
+            y_dv, (p > t).astype(int),
+            average='macro'
+        )
+        if f1 > bf: bf, bt = f1, t
+    print(f"  F1={bf:.4f} (t={bt:.3f})")
+    results[name] = (bf, p, bt)
