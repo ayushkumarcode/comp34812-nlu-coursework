@@ -54,3 +54,31 @@ class AV_MLP(nn.Module):
 
 def rdrop_loss(logits1, logits2, labels, alpha=1.0):
     """R-Drop loss for binary classification."""
+    bce = nn.BCEWithLogitsLoss()
+    loss1 = bce(logits1, labels)
+    loss2 = bce(logits2, labels)
+    task_loss = (loss1 + loss2) / 2
+    p1 = torch.sigmoid(logits1)
+    p2 = torch.sigmoid(logits2)
+    dist1 = torch.stack([p1, 1 - p1], dim=-1)
+    dist2 = torch.stack([p2, 1 - p2], dim=-1)
+    dist1 = dist1.clamp(min=1e-7)
+    dist2 = dist2.clamp(min=1e-7)
+    kl = (
+        F.kl_div(dist1.log(), dist2, reduction='batchmean')
+        + F.kl_div(dist2.log(), dist1, reduction='batchmean')
+    ) / 2
+    return task_loss + alpha * kl, task_loss, kl
+
+
+def main():
+    print("=== AV Cat A: MLP + R-Drop ===\n")
+
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    y_train = train_df['label'].values.astype(np.float32)
+    y_dev = np.array(
+        load_solution_labels(task='av'), dtype=np.float32
+    )
+
+    print("Extracting features...")
