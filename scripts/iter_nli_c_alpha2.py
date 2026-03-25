@@ -82,3 +82,31 @@ def main():
         with torch.no_grad():
             for b in dll:
                 ids, mask = b['ids'].to(dev), b['mask'].to(dev)
+                lo = model(ids, mask).squeeze(-1)
+                pr = torch.sigmoid(lo)
+                ps.extend((pr > 0.5).long().cpu().numpy())
+                prs.extend(pr.cpu().numpy()); ls.extend(b['label'].numpy())
+        df1 = f1_score(ls, ps, average='macro', zero_division=0)
+        print(f"Epoch {ep:3d} | task={ttl/nb:.4f} kl={ttk/nb:.4f} | Dev F1: {df1:.4f}")
+        if df1 > bf1:
+            bf1, pc = df1, 0
+            torch.save(model.state_dict(), sd / 'nli_cat_c_alpha2_best.pt')
+            np.save(sd / 'nli_cat_c_alpha2_probs.npy', np.array(prs))
+            print(f"  -> Best (F1={bf1:.4f})")
+        else:
+            pc += 1
+            if pc >= PAT: print(f"Early stop at {ep}"); break
+    model.load_state_dict(torch.load(sd / 'nli_cat_c_alpha2_best.pt', weights_only=True))
+    model.eval()
+    fps = []
+    with torch.no_grad():
+        for b in dll:
+            lo = model(b['ids'].to(dev), b['mask'].to(dev)).squeeze(-1)
+            fps.extend(torch.sigmoid(lo).cpu().numpy())
+    fps = np.array(fps); yd = np.array(dl)
+    bt, btf = 0.5, 0
+    for t in np.arange(0.30, 0.72, 0.02):
+        pt = (fps >= t).astype(int)
+        ft = f1_score(yd, pt, average='macro', zero_division=0)
+        if ft > btf: bt, btf = t, ft
+        print(f"  thresh={t:.2f}: F1={ft:.4f}")
