@@ -194,3 +194,31 @@ def train_one_seed(seed, train_df, dev_df, dev_labels,
                 'encoder': encoder.state_dict(),
                 'classifier': classifier.state_dict(),
             }, save_dir / f'av_cat_c_seed{seed}_best.pt')
+        else:
+            pat += 1
+            if pat >= PAT:
+                print(f"  Early stop at ep {ep}")
+                break
+
+    np.save(
+        pred_dir / f'av_cat_c_seed{seed}_probs.npy',
+        best_probs
+    )
+    print(f"  Seed {seed}: best F1={best_f1:.4f}")
+    del encoder, classifier
+    torch.cuda.empty_cache()
+    return best_probs, best_f1
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
+
+    MN = 'microsoft/deberta-v3-base'
+    tok = AutoTokenizer.from_pretrained(
+        MN, use_fast=False
+    )
