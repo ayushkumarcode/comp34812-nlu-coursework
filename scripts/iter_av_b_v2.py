@@ -166,3 +166,31 @@ def main():
             patience_counter += 1
             if patience_counter >= patience:
                 print(f"Early stopping at epoch {epoch}")
+                break
+
+    # Final eval + threshold search
+    print(f"\nBest AV Cat B v2 F1: {best_f1:.4f}")
+    model.load_state_dict(torch.load(save_dir / 'av_cat_b_v2_best.pt', weights_only=True))
+    dev_preds, dev_probs, dev_true = evaluate(model, dev_loader, device)
+
+    print("\nThreshold search:")
+    best_thresh, best_thresh_f1 = 0.5, 0
+    for t in np.arange(0.30, 0.72, 0.02):
+        preds_t = (dev_probs >= t).astype(int)
+        f1_t = f1_score(dev_true, preds_t, average='macro', zero_division=0)
+        if f1_t > best_thresh_f1:
+            best_thresh, best_thresh_f1 = t, f1_t
+        print(f"  thresh={t:.2f}: F1={f1_t:.4f}")
+
+    print(f"\nBest threshold: {best_thresh:.2f} -> F1={best_thresh_f1:.4f}")
+    final_preds = (dev_probs >= best_thresh).astype(int)
+    metrics = compute_all_metrics(dev_true, final_preds)
+    print_metrics(metrics, "AV Cat B v2 — Final Dev Results")
+
+    save_predictions(final_preds, PROJECT_ROOT / 'predictions' / 'av_Group_34_B_v2.csv')
+
+    baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
+    for name, bl in baselines.items():
+        gap = metrics['macro_f1'] - bl
+        print(f"  vs {name} ({bl:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
+    print("Done!")
