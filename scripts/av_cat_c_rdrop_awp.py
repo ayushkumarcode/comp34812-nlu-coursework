@@ -110,3 +110,31 @@ class AWP:
         self.backup_eps = {}
 
 
+def smooth_bce(logits, labels, smoothing=0.05):
+    """BCE with label smoothing."""
+    sl = labels * (1 - smoothing) + 0.5 * smoothing
+    return F.binary_cross_entropy_with_logits(logits, sl)
+
+
+def rdrop_loss(l1, l2, labels, alpha=1.0, smooth=0.05):
+    """R-Drop + label smoothing."""
+    loss1 = smooth_bce(l1, labels, smooth)
+    loss2 = smooth_bce(l2, labels, smooth)
+    task = (loss1 + loss2) / 2
+    p1, p2 = torch.sigmoid(l1), torch.sigmoid(l2)
+    d1 = torch.stack([p1, 1 - p1], -1).clamp(1e-7)
+    d2 = torch.stack([p2, 1 - p2], -1).clamp(1e-7)
+    kl = (
+        F.kl_div(d1.log(), d2, reduction='batchmean')
+        + F.kl_div(d2.log(), d1, reduction='batchmean')
+    ) / 2
+    return task + alpha * kl
+
+
+def main():
+    from transformers import AutoTokenizer
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+    print(f"Device: {device}")
