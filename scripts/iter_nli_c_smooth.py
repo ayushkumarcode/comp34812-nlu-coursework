@@ -138,3 +138,31 @@ def main():
 
         for batch in train_loader:
             ids = batch['input_ids'].to(device)
+            mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
+
+            optimizer.zero_grad()
+            with autocast('cuda'):
+                logits1 = model(ids, mask).squeeze(-1)
+                logits2 = model(ids, mask).squeeze(-1)
+                loss, task_l, kl_l = compute_rdrop_loss_smooth(
+                    logits1, logits2, labels, alpha=ALPHA, smooth=SMOOTH)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            scaler.step(optimizer)
+            scaler.update()
+            scheduler.step()
+
+            total_loss += loss.item()
+            total_task += task_l.item()
+            total_kl += kl_l.item()
+            n_batches += 1
+
+        model.eval()
+        preds, probs_all, labels_all = [], [], []
+        with torch.no_grad():
+            for batch in dev_loader:
+                ids = batch['input_ids'].to(device)
+                mask = batch['attention_mask'].to(device)
