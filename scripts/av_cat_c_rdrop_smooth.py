@@ -110,3 +110,31 @@ def main():
     )
     print(f"Device: {device}")
 
+    MN = 'microsoft/deberta-v3-base'
+    LR, BS, ML = 2e-5, 8, 384
+    EPOCHS, PAT = 25, 7
+    ALPHA, SMOOTH = 1.0, 0.05
+
+    print(f"\n=== AV Cat C R-Drop+LabelSmooth ===")
+    print(f"LR={LR} BS={BS} ML={ML}")
+    print(f"alpha={ALPHA} smooth={SMOOTH}\n")
+
+    tok = AutoTokenizer.from_pretrained(MN, use_fast=False)
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+
+    train_ds = AVCEDataset(train_df, tok, max_len=ML)
+    dev_ds = AVCEDataset(dev_df, tok, max_len=ML)
+    dev_ds.labels = np.array(dev_labels, dtype=np.float32)
+
+    tl = DataLoader(
+        train_ds, batch_size=BS, shuffle=True,
+        num_workers=4
+    )
+    dl = DataLoader(
+        dev_ds, batch_size=BS, shuffle=False,
+        num_workers=4
+    )
+
+    model = AVCE(mn=MN).to(device)
