@@ -11,6 +11,10 @@ archive_extracted/
 *.bin
 *.safetensors
 
+# Allow models in models/ dir
+!models/*.pt
+!models/*.joblib
+
 # Python
 __pycache__/
 *.pyc
@@ -36,3 +40,6 @@ Thumbs.db
 wandb/
 runs/
 *.ipynb
+
+# Allow notebooks in notebooks/ dir
+!notebooks/*.ipynb
