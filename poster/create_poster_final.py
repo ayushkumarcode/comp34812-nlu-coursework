@@ -786,12 +786,37 @@ def create_poster():
              Pt(32), RGBColor(0xBB, 0xCC, 0xDD), bold=False,
              alignment=PP_ALIGN.CENTER)
 
-    # Decorative elements: small teal dots on title bar
-    for dx in [Emu(600000), Emu(800000), Emu(1000000)]:
-        _shape(slide, dx, Emu(2200000), Emu(50000), Emu(50000), TEAL)
-    for dx in [Emu(600000), Emu(800000), Emu(1000000)]:
-        right_x = SLIDE_W - dx - Emu(50000)
-        _shape(slide, right_x, Emu(2200000), Emu(50000), Emu(50000), TEAL)
+    # Key results highlight strip below title
+    highlight_y = title_h
+    highlight_h = Emu(350000)
+    _shape(slide, 0, highlight_y, SLIDE_W, highlight_h,
+           RGBColor(0xE8, 0xEB, 0xF0))
+
+    # Sol 1 callout
+    _rich_textbox(slide, Emu(3000000), highlight_y + Emu(50000),
+                  Emu(12000000), highlight_h - Emu(100000),
+                  [{'runs': [
+                      {'text': 'Sol 1 (Cat A): ', 'font_size': Pt(26),
+                       'font_color': ACCENT_GREEN, 'bold': True},
+                      {'text': 'F1 = 0.7340', 'font_size': Pt(30),
+                       'font_color': ACCENT_GREEN, 'bold': True},
+                      {'text': '  (+30.8% vs SVM)', 'font_size': Pt(22),
+                       'font_color': MID_GRAY},
+                  ], 'alignment': PP_ALIGN.CENTER}])
+
+    # Sol 2 callout
+    _rich_textbox(slide, Emu(21000000), highlight_y + Emu(50000),
+                  Emu(14000000), highlight_h - Emu(100000),
+                  [{'runs': [
+                      {'text': 'Sol 2 (Cat B): ', 'font_size': Pt(26),
+                       'font_color': ACCENT_ORANGE, 'bold': True},
+                      {'text': 'F1 = 0.7422', 'font_size': Pt(30),
+                       'font_color': ACCENT_ORANGE, 'bold': True},
+                      {'text': '  (+19.2% vs LSTM)', 'font_size': Pt(22),
+                       'font_color': MID_GRAY},
+                      {'text': '    Both p < 0.001 ***', 'font_size': Pt(20),
+                       'font_color': LIGHT_GRAY, 'italic': True},
+                  ], 'alignment': PP_ALIGN.CENTER}])
 
     # =====================================================
     # COLUMN LAYOUT: 4 columns
@@ -799,7 +824,7 @@ def create_poster():
     usable_w = SLIDE_W - 2 * MARGIN
     n_cols = 4
     col_w = (usable_w - (n_cols - 1) * COL_GAP) // n_cols
-    y_start = title_h + Emu(250000)
+    y_start = title_h + highlight_h + Emu(150000)
 
     # Bottom strip starts here — all column content MUST end above this
     bottom_strip_y = Emu(15700000)  # ~17.16"
@@ -825,7 +850,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Introduction', '\u2460')
     y += hdr_h
 
-    intro_h = Emu(3650000)
+    intro_h = Emu(3550000)
     _section_body(slide, x, y, col_w, intro_h)
 
     intro_paras = [
@@ -859,7 +884,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Dataset Summary', '\u2461')
     y += hdr_h
 
-    dataset_h = Emu(3350000)
+    dataset_h = Emu(3250000)
     _section_body(slide, x, y, col_w, dataset_h)
 
     dataset_paras = [
@@ -920,7 +945,7 @@ def create_poster():
                              'Solution 1: Stylometric Ensemble (Cat A)', '\u2463')
     y += hdr_h
 
-    sol1_h = Emu(5400000)
+    sol1_h = Emu(5600000)
     _section_body(slide, x, y, col_w, sol1_h)
 
     sol1_paras = [
@@ -964,13 +989,13 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Feature Group Breakdown')
     y += hdr_h
 
-    feat_h = Emu(4600000)
+    feat_h = Emu(4800000)
     _section_body(slide, x, y, col_w, feat_h)
 
     if feat_path.exists():
         img_margin = Emu(150000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(4100000)
+        img_h = Emu(4300000)
         slide.shapes.add_picture(str(feat_path),
                                   x + img_margin, y + Emu(250000),
                                   img_w, img_h)
@@ -1046,7 +1071,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Results (Development Set)', '\u2465')
     y += hdr_h
 
-    results_h = Emu(3600000)
+    results_h = Emu(3400000)
     _section_body(slide, x, y, col_w, results_h)
 
     results_paras = [
@@ -1115,7 +1140,7 @@ def create_poster():
     if f1_path.exists():
         img_margin = Emu(120000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(3150000)
+        img_h = Emu(3100000)
         slide.shapes.add_picture(str(f1_path),
                                   x + img_margin, y + Emu(180000),
                                   img_w, img_h)
@@ -1126,13 +1151,13 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Confusion Matrices')
     y += hdr_h
 
-    cm_display_h = Emu(2800000)
+    cm_display_h = Emu(2900000)
     _section_body(slide, x, y, col_w, cm_display_h)
 
     if cm_path.exists():
         img_margin = Emu(60000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(2500000)
+        img_h = Emu(2600000)
         slide.shapes.add_picture(str(cm_path),
                                   x + img_margin, y + Emu(150000),
                                   img_w, img_h)
