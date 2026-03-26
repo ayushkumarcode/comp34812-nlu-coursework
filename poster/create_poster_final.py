@@ -1071,7 +1071,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Results (Development Set)', '\u2465')
     y += hdr_h
 
-    results_h = Emu(3400000)
+    results_h = Emu(3600000)
     _section_body(slide, x, y, col_w, results_h)
 
     results_paras = [
@@ -1112,7 +1112,9 @@ def create_poster():
             {'text': '  ', 'font_size': BODY_FONT_SM},
             {'text': '+30.8% vs SVM ***', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_GREEN}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        ], 'font_size': BODY_FONT_SM, 'space_after': 1},
+        {'text': '     MCC=0.469  Acc=0.734',
+         'font_size': TINY_FONT, 'font_color': ACCENT_GREEN, 'space_after': 3},
         {'runs': [
             {'text': '\u2605 Sol 2 (Cat B)   ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_ORANGE},
@@ -1121,7 +1123,9 @@ def create_poster():
             {'text': '  ', 'font_size': BODY_FONT_SM},
             {'text': '+19.2% vs LSTM ***', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_ORANGE}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+        ], 'font_size': BODY_FONT_SM, 'space_after': 1},
+        {'text': '     MCC=0.485  Acc=0.742',
+         'font_size': TINY_FONT, 'font_color': ACCENT_ORANGE, 'space_after': 3},
         {'text': '*** p < 0.001, McNemar\u2019s test. Both statistically significant.',
          'font_size': TINY_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 2},
     ]
@@ -1151,13 +1155,13 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Confusion Matrices')
     y += hdr_h
 
-    cm_display_h = Emu(2900000)
+    cm_display_h = Emu(2700000)
     _section_body(slide, x, y, col_w, cm_display_h)
 
     if cm_path.exists():
         img_margin = Emu(60000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(2600000)
+        img_h = Emu(2400000)
         slide.shapes.add_picture(str(cm_path),
                                   x + img_margin, y + Emu(150000),
                                   img_w, img_h)
