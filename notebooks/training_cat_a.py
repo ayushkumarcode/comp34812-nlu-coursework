@@ -2,37 +2,37 @@
 COMP34812 — Solution 1 (Category A) Training Notebook
 Group 34
 
-Feature-rich stacking ensemble for Authorship Verification / NLI.
-This notebook documents the complete training pipeline.
+LightGBM classifier with comprehensive stylometric features for Authorship Verification.
 
-To convert: jupyter nbconvert --to notebook training_cat_a.py
+To convert: python scripts/convert_to_ipynb.py notebooks/training_cat_a.py
 """
 
 # %% [markdown]
 # # Solution 1 (Category A) — Training
-# ## Diff-Vector Stacking Ensemble with Comprehensive Stylometrics
+# ## LightGBM with Comprehensive Stylometric Features
 #
-# This notebook trains our Category A solution: a stacking ensemble
-# (SVM-RBF, Random Forest, XGBoost) with logistic regression meta-learner,
-# using ~950 stylometric features per text pair.
+# This notebook trains our Category A solution: a LightGBM gradient boosting
+# classifier using ~695 stylometric features per text pair, including novel
+# syntactic complexity, writing rhythm, and information-theoretic features.
 
 # %%
-# !pip install scikit-learn xgboost lightgbm spacy numpy pandas tqdm joblib
+# !pip install scikit-learn lightgbm spacy numpy pandas tqdm joblib
 # !python -m spacy download en_core_web_md
 
 # %%
 import sys
 import time
 import numpy as np
-import pandas as pd
+import joblib
 from pathlib import Path
+from sklearn.preprocessing import StandardScaler
+from lightgbm import LGBMClassifier
 
 PROJECT_ROOT = Path('.').resolve()
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.data_utils import load_av_data, load_solution_labels, save_predictions
 from src.av_pipeline import AVFeatureExtractor
-from src.training.train_av_ensemble import train_ensemble, save_ensemble, predict
 from src.scorer import compute_all_metrics, print_metrics
 
 # %% [markdown]
@@ -57,7 +57,7 @@ print(f"Train label dist: {np.bincount(y_train)}")
 # - Writing rhythm (6, NOVEL), Information-theoretic (5, NOVEL)
 #
 # Then compute diff-vectors |f(text1) - f(text2)| + style-only diff-vectors
-# + 14 pairwise features = ~950 total features per pair.
+# + 14 pairwise features = ~695 total features per pair.
 
 # %%
 extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
@@ -71,26 +71,28 @@ print(f"Dev features: {X_dev.shape}")
 print(f"Feature count: {len(feature_names)}")
 
 # %% [markdown]
-# ## 3. Train Stacking Ensemble
+# ## 3. Train LightGBM Classifier
 
 # %%
-scaler, ensemble, dev_metrics = train_ensemble(X_train, y_train, X_dev, y_dev)
+scaler = StandardScaler()
+X_tr = scaler.fit_transform(X_train)
+X_dv = scaler.transform(X_dev)
+
+model = LGBMClassifier(
+    n_estimators=1000, max_depth=7, learning_rate=0.05,
+    num_leaves=63, subsample=0.8, colsample_bytree=0.8,
+    min_child_samples=20, reg_alpha=0.1, reg_lambda=1,
+    verbose=-1, random_state=42, n_jobs=1,
+)
+model.fit(X_tr, y_train)
 
 # %% [markdown]
-# ## 4. Save Model
+# ## 4. Evaluate
 
 # %%
-save_ensemble(scaler, ensemble, extractor, save_dir='models')
-
-# %% [markdown]
-# ## 5. Generate Predictions
-
-# %%
-y_pred = predict(X_dev, scaler, ensemble)
-save_predictions(y_pred, 'predictions/Group_34_A.csv')
-
+y_pred = model.predict(X_dv)
 metrics = compute_all_metrics(y_dev, y_pred)
-print_metrics(metrics, "Category A — Dev Set Results")
+print_metrics(metrics, "Category A — Dev Set Results (LightGBM)")
 
 # Baseline comparison
 baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
@@ -98,3 +100,23 @@ f1 = metrics['macro_f1']
 for name, baseline in baselines.items():
     gap = f1 - baseline
     print(f"vs {name} ({baseline:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
+
+# %% [markdown]
+# ## 5. Save Model
+
+# %%
+save_dir = Path('models')
+save_dir.mkdir(exist_ok=True)
+joblib.dump(model, save_dir / 'av_cat_a_lgbm.joblib')
+joblib.dump(scaler, save_dir / 'av_cat_a_scaler.joblib')
+joblib.dump(feature_names, save_dir / 'av_cat_a_feature_names.joblib')
+joblib.dump(extractor.tfidf, save_dir / 'av_cat_a_tfidf.joblib')
+joblib.dump(extractor.cosine, save_dir / 'av_cat_a_cosine.joblib')
+print("All model artifacts saved to models/")
+
+# %% [markdown]
+# ## 6. Generate Predictions
+
+# %%
+save_predictions(y_pred, 'predictions/Group_34_A.csv')
+print("Saved to predictions/Group_34_A.csv")
