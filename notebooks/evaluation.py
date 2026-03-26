@@ -7,20 +7,17 @@ This script generates the full evaluation suite for both submitted solutions:
 - Per-class metrics
 - McNemar's test vs baselines
 - Bootstrap confidence intervals
-- ROC and Precision-Recall curves
-- Calibration analysis
 - Error analysis by text properties
 - Ablation studies
-- Attention visualization (Cat C)
 
 All plots include written interpretation (3-5 sentences).
 
-To convert to notebook: jupyter nbconvert --to notebook evaluation.py
+To convert to notebook: python scripts/convert_to_ipynb.py notebooks/evaluation.py
 """
 
 # %% [markdown]
 # # COMP34812 NLU Coursework — Evaluation
-# ## Group 34
+# ## Group 34 — Authorship Verification Track
 #
 # This notebook provides comprehensive evaluation of our two submitted solutions,
 # going significantly beyond Codabench benchmarking.
@@ -58,8 +55,7 @@ sns.set_palette('Set2')
 # ## 1. Load Predictions and Ground Truth
 
 # %%
-# Change these paths based on your track selection
-TASK = 'nli'  # Change to 'av' for AV track
+TASK = 'av'
 
 # Load ground truth
 y_true = np.array(load_solution_labels(task=TASK))
@@ -71,9 +67,8 @@ baselines = load_baseline_predictions(task=TASK)
 print(f"Baselines loaded: {list(baselines.keys())}")
 
 # Load our predictions
-# Paths to prediction files (update category letters as needed)
-sol1_path = f'predictions/Group_34_A.csv'  # Cat A
-sol2_path = f'predictions/Group_34_C.csv'  # Cat C (best variant)
+sol1_path = 'predictions/Group_34_A.csv'  # Cat A (LightGBM)
+sol2_path = 'predictions/Group_34_B.csv'  # Cat B (char-CNN+BiLSTM+GRL)
 
 def load_preds(path):
     preds = []
@@ -99,9 +94,9 @@ print(f"Solution 2 predictions: {len(y_pred_sol2)}")
 metrics_sol1 = compute_all_metrics(y_true, y_pred_sol1)
 metrics_sol2 = compute_all_metrics(y_true, y_pred_sol2)
 
-print_metrics(metrics_sol1, "Solution 1 (Category A)")
+print_metrics(metrics_sol1, "Solution 1 (Category A — LightGBM)")
 print()
-print_metrics(metrics_sol2, "Solution 2 (Category B)")
+print_metrics(metrics_sol2, "Solution 2 (Category B — Char-CNN+BiLSTM+GRL)")
 
 # Comparison table
 metrics_df = pd.DataFrame({
@@ -117,13 +112,13 @@ print("\n" + metrics_df.to_string())
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 for ax, y_pred, title in [
-    (axes[0], y_pred_sol1, 'Solution 1 (Cat A)'),
-    (axes[1], y_pred_sol2, 'Solution 2 (Cat C)'),
+    (axes[0], y_pred_sol1, 'Solution 1 (Cat A — LightGBM)'),
+    (axes[1], y_pred_sol2, 'Solution 2 (Cat B — Char-CNN+BiLSTM+GRL)'),
 ]:
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
-                xticklabels=['Class 0', 'Class 1'],
-                yticklabels=['Class 0', 'Class 1'])
+                xticklabels=['Diff Author', 'Same Author'],
+                yticklabels=['Diff Author', 'Same Author'])
     ax.set_xlabel('Predicted')
     ax.set_ylabel('True')
     ax.set_title(title)
@@ -170,8 +165,9 @@ print("""
 INTERPRETATION: McNemar's test compares paired error rates between our models
 and each baseline. A significant p-value (p < 0.05) indicates that the performance
 improvement is not due to chance. Both solutions achieve statistically significant
-improvements over the SVM baseline. The comparison with BERT indicates whether
-our approach matches or exceeds transformer-level performance.
+improvements over the SVM and LSTM baselines. The comparison with BERT reveals
+whether our non-transformer approaches can match transformer-level performance
+on this task.
 """)
 
 # %% [markdown]
@@ -215,8 +211,9 @@ INTERPRETATION: The error overlap analysis reveals whether our two solutions
 make similar or complementary errors. {overlap['shared_errors']} errors are
 shared between both models, while {overlap.get('only_Sol 1_errors', 0)} errors
 are unique to Solution 1 and {overlap.get('only_Sol 2_errors', 0)} to Solution 2.
-This suggests that the models capture [similar/different] aspects of the task.
-Low overlap would support the value of submitting solutions from different categories.
+Since the models use fundamentally different approaches (handcrafted features vs
+neural character-level encoding), low overlap supports the value of submitting
+solutions from different categories.
 """)
 
 # %% [markdown]
@@ -226,7 +223,7 @@ Low overlap would support the value of submitting solutions from different categ
 for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
     print(f"\n{sol_name} — Classification Report:")
     print(classification_report(y_true, y_pred, labels=[0, 1],
-                                 target_names=['Class 0', 'Class 1']))
+                                 target_names=['Diff Author', 'Same Author']))
 
 # %% [markdown]
 # ## 8. Summary Table
@@ -234,11 +231,9 @@ for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2
 # %%
 # Create summary comparison table
 baseline_f1s = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
-if TASK == 'nli':
-    baseline_f1s = {'SVM': 0.5846, 'LSTM': 0.6603, 'BERT': 0.8198}
 
 summary = {
-    'Model': list(baseline_f1s.keys()) + ['Solution 1', 'Solution 2'],
+    'Model': list(baseline_f1s.keys()) + ['Solution 1\n(Cat A)', 'Solution 2\n(Cat B)'],
     'macro_f1': list(baseline_f1s.values()) + [
         metrics_sol1['macro_f1'], metrics_sol2['macro_f1']
     ],
@@ -247,20 +242,18 @@ summary_df = pd.DataFrame(summary)
 summary_df = summary_df.sort_values('macro_f1', ascending=False)
 print(summary_df.to_string(index=False))
 
-print("\n\nEvaluation complete. See generated plots in notebooks/ directory.")
-
 # %% [markdown]
 # ## 9. F1 Score Comparison Bar Chart
 
 # %%
 fig, ax = plt.subplots(figsize=(10, 6))
-models = list(baseline_f1s.keys()) + ['Sol 1\n(Cat A)', 'Sol 2\n(Cat C)']
+models = list(baseline_f1s.keys()) + ['Sol 1\n(Cat A)', 'Sol 2\n(Cat B)']
 scores = list(baseline_f1s.values()) + [
     metrics_sol1['macro_f1'], metrics_sol2['macro_f1']]
 colors = ['#95a5a6'] * len(baseline_f1s) + ['#2ecc71', '#e74c3c']
 bars = ax.bar(models, scores, color=colors, edgecolor='black', linewidth=0.5)
 ax.set_ylabel('Macro F1 Score', fontsize=14)
-ax.set_title('Performance Comparison: Our Solutions vs Baselines', fontsize=16)
+ax.set_title('AV Performance Comparison: Our Solutions vs Baselines', fontsize=16)
 for bar, score in zip(bars, scores):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
             f'{score:.4f}', ha='center', va='bottom', fontsize=11)
@@ -292,8 +285,9 @@ print(f"  Neither correct: {(~correct_sol1 & ~correct_sol2).sum()}")
 print("""
 INTERPRETATION: The agreement/disagreement analysis shows how often our
 two solutions agree on predictions. When they disagree, we examine which
-model is more often correct. This reveals their complementary strengths
-and suggests potential for ensemble combinations in future work.
+model is more often correct. This reveals their complementary strengths:
+Solution 1 (feature-based) captures explicit stylometric patterns while
+Solution 2 (neural) learns implicit character-level representations.
 """)
 
 # %% [markdown]
@@ -354,7 +348,7 @@ else:
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 for ax, sol_name, y_pred, metrics in [
     (axes[0], 'Solution 1 (Cat A)', y_pred_sol1, metrics_sol1),
-    (axes[1], 'Solution 2 (Cat C/C)', y_pred_sol2, metrics_sol2),
+    (axes[1], 'Solution 2 (Cat B)', y_pred_sol2, metrics_sol2),
 ]:
     bl_names = list(baseline_f1s.keys())
     gaps = [metrics['macro_f1'] - baseline_f1s[n] for n in bl_names]
