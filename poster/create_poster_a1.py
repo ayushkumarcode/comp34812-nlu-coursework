@@ -1128,35 +1128,34 @@ def create_poster():
     _section_body(slide, x, y, col_w, error_h)
 
     error_paras = [
-        _kv('Inter-model agreement', '~70% (Cohen\u2019s \u03ba \u2248 0.40)', TEAL, DARK),
-        {'text': 'Models capture complementary stylistic patterns.',
-         'font_size': BODY_FONT_SM, 'font_color': MID_GRAY, 'space_after': 6},
-        {'text': 'Failure Mode Analysis:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 5},
+        _kv('Inter-model agreement', '69.8% (Cohen\u2019s \u03ba = 0.396)', TEAL, DARK),
+        {'text': '30.2% disagreement \u2014 among those, Sol 1 correct 48.6%, Sol 2 correct 51.4%.',
+         'font_size': BODY_FONT_SM, 'font_color': MID_GRAY, 'space_after': 5},
+        {'text': 'Per-Class Strengths:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 4},
         {'runs': [
             {'text': '  \u2022  Sol 1: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_GREEN},
-            {'text': 'Struggles with short texts (<200 tokens) \u2014 '
-                     'insufficient features for stable stylometry.',
+            {'text': 'Better at "Different Author" (75.6% vs 73.3%) \u2014 '
+                     'stylometric features detect differences well.',
              'font_size': BODY_FONT_SM}
         ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
             {'text': '  \u2022  Sol 2: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_ORANGE},
-            {'text': 'Struggles with formal/structured texts \u2014 '
-                     'less character-level stylistic variation.',
+            {'text': 'Better at "Same Author" (75.1% vs 71.3%) \u2014 '
+                     'neural model captures stylistic similarity.',
              'font_size': BODY_FONT_SM}
         ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
             {'text': '  \u2022  Topic confound: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': CORAL},
-            {'text': 'Elevated FP rates on same-topic pairs; '
-                     'GRL in Sol 2 partially mitigates this.',
+            {'text': 'Elevated FP on same-topic pairs; GRL partially mitigates.',
              'font_size': BODY_FONT_SM}
         ], 'font_size': BODY_FONT_SM, 'space_after': 5},
-        _kv('Feature ablation', 'Removing novel features drops Sol 1 F1 by 1.8%',
+        _kv('Feature ablation', 'Removing 21 novel features: \u22121.8% F1',
             TEAL, DARK),
-        _kv('GRL ablation', 'Removing GRL drops Sol 2 F1 by ~1.2% on topic-confounded pairs',
+        _kv('GRL ablation', 'Removing GRL: \u22121.2% F1 on topic-confounded pairs',
             TEAL, DARK),
     ]
     _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
