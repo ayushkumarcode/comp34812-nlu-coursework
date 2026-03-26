@@ -185,22 +185,16 @@ def generate_f1_chart():
     ax.text(3, scores[3] + 0.04, '***', color=C_GREEN, **star_props)
     ax.text(4, scores[4] + 0.04, '***', color=C_ORANGE, **star_props)
 
-    # Improvement annotations with brackets
+    # Improvement annotations — inside the bars
     # Sol 1 vs SVM
-    y_bracket = 0.78
-    ax.plot([0, 0, 3, 3], [0.57, y_bracket, y_bracket, 0.75],
-            color=C_GREEN, linewidth=1.8, alpha=0.7)
-    ax.text(1.5, y_bracket + 0.008, '+30.8%', ha='center', fontsize=16,
-            fontweight='bold', color=C_GREEN,
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=C_GREEN, alpha=0.9))
+    ax.text(3, scores[3] / 2, '+30.8%\nvs SVM', ha='center', va='center',
+            fontsize=16, fontweight='bold', color='white',
+            path_effects=[path_effects.withStroke(linewidth=4, foreground=C_GREEN)])
 
     # Sol 2 vs LSTM
-    y_bracket2 = 0.82
-    ax.plot([1, 1, 4, 4], [0.63, y_bracket2, y_bracket2, 0.76],
-            color=C_ORANGE, linewidth=1.8, alpha=0.7)
-    ax.text(2.5, y_bracket2 + 0.008, '+19.2%', ha='center', fontsize=16,
-            fontweight='bold', color=C_ORANGE,
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=C_ORANGE, alpha=0.9))
+    ax.text(4, scores[4] / 2, '+19.2%\nvs LSTM', ha='center', va='center',
+            fontsize=16, fontweight='bold', color='white',
+            path_effects=[path_effects.withStroke(linewidth=4, foreground=C_ORANGE)])
 
     # Styling
     ax.set_ylabel('Macro F1 Score', fontsize=24, fontweight='bold',
@@ -468,6 +462,7 @@ def generate_architecture_diagram():
 def generate_feature_groups_chart():
     """Generate horizontal bar chart of feature groups with counts."""
     _set_chart_style()
+    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial']
 
     groups = [
         'Function Words', 'TF-IDF + SVD', 'Character N-gram',
@@ -498,8 +493,8 @@ def generate_feature_groups_chart():
     ax.set_yticklabels(groups, fontsize=18, fontweight='bold')
     ax.set_xlabel('Number of Features', fontsize=21, fontweight='bold',
                   labelpad=12, color=C_DARK)
-    ax.set_title('Feature Architecture (417 Total Features)',
-                 fontsize=24, fontweight='bold', pad=20, color=C_NAVY)
+    ax.set_title('Feature Architecture: 417 per text, 695-dim diff-vector',
+                 fontsize=22, fontweight='bold', pad=20, color=C_NAVY)
     ax.set_xlim(0, 190)
     ax.invert_yaxis()
 
@@ -830,7 +825,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Introduction', '\u2460')
     y += hdr_h
 
-    intro_h = Emu(3500000)
+    intro_h = Emu(3650000)
     _section_body(slide, x, y, col_w, intro_h)
 
     intro_paras = [
@@ -864,7 +859,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Dataset Summary', '\u2461')
     y += hdr_h
 
-    dataset_h = Emu(3200000)
+    dataset_h = Emu(3350000)
     _section_body(slide, x, y, col_w, dataset_h)
 
     dataset_paras = [
@@ -890,7 +885,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Evaluation Methodology', '\u2462')
     y += hdr_h
 
-    eval_h = Emu(3100000)
+    eval_h = Emu(3200000)
     _section_body(slide, x, y, col_w, eval_h)
 
     eval_paras = [
