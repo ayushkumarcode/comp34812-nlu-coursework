@@ -46,23 +46,25 @@ OUTPUT_PATH = POSTER_DIR / 'poster_a1.pptx'
 SLIDE_W = Inches(33.1)
 SLIDE_H = Inches(23.4)
 
-# Color palette
+# Color palette — refined for print
 NAVY        = RGBColor(0x1B, 0x3A, 0x5C)
 NAVY_DARK   = RGBColor(0x12, 0x2A, 0x45)
 TEAL        = RGBColor(0x2E, 0x86, 0xAB)
 DARK_TEAL   = RGBColor(0x1E, 0x6E, 0x8E)
 CORAL       = RGBColor(0xE8, 0x4D, 0x60)
-LIGHT_BG    = RGBColor(0xF5, 0xF7, 0xFA)
+LIGHT_BG    = RGBColor(0xF7, 0xF9, 0xFC)
 WHITE       = RGBColor(0xFF, 0xFF, 0xFF)
 DARK        = RGBColor(0x2D, 0x2D, 0x2D)
 MID_GRAY    = RGBColor(0x66, 0x66, 0x66)
 LIGHT_GRAY  = RGBColor(0xBB, 0xBB, 0xBB)
 ACCENT_GREEN  = RGBColor(0x27, 0xAE, 0x60)
 ACCENT_ORANGE = RGBColor(0xE6, 0x7E, 0x22)
-TABLE_HEADER  = RGBColor(0x1B, 0x3A, 0x5C)
 TABLE_ALT_BG  = RGBColor(0xEB, 0xF0, 0xF5)
 BORDER_COLOR  = RGBColor(0xDD, 0xDD, 0xDD)
 GOLD          = RGBColor(0xF3, 0x9C, 0x12)
+SOFT_GREEN_BG = RGBColor(0xE8, 0xF5, 0xE9)
+SOFT_ORANGE_BG = RGBColor(0xFF, 0xF3, 0xE0)
+KEY_FINDING_BG = RGBColor(0xFF, 0xF8, 0xE1)
 
 # Hex strings for matplotlib
 C_NAVY = '#1B3A5C'
@@ -72,22 +74,23 @@ C_GREEN = '#27AE60'
 C_ORANGE = '#E67E22'
 C_DARK = '#2D2D2D'
 C_GRAY = '#95A5A6'
-C_LIGHTBG = '#F5F7FA'
+C_LIGHTBG = '#F7F9FC'
 
-# Font sizes (calibrated for A1 print at actual size)
-TITLE_FONT     = Pt(66)
-SUBTITLE_FONT  = Pt(30)
-HEADER_FONT    = Pt(32)
+# Font sizes (calibrated for A1 print — readable from 1.5m)
+TITLE_FONT     = Pt(60)
+SUBTITLE_FONT  = Pt(28)
+HEADER_FONT    = Pt(30)
 BODY_FONT      = Pt(22)
 BODY_FONT_SM   = Pt(20)
 SMALL_FONT     = Pt(18)
 TINY_FONT      = Pt(16)
+METRIC_FONT    = Pt(24)
 
 # Layout constants
-MARGIN     = Emu(500000)
-COL_GAP    = Emu(350000)
-SEC_GAP    = Emu(200000)
-PAD_INNER  = Emu(180000)
+MARGIN     = Emu(450000)
+COL_GAP    = Emu(320000)
+SEC_GAP    = Emu(180000)
+PAD_INNER  = Emu(160000)
 
 
 # ============================================================
@@ -144,62 +147,62 @@ def _set_chart_style():
 
 
 def generate_f1_chart():
-    """Generate polished F1 comparison bar chart."""
+    """Generate polished F1 comparison bar chart — clean, no clutter."""
     _set_chart_style()
 
-    models = ['SVM\nBaseline', 'LSTM\nBaseline', 'BERT\nBaseline',
+    models = ['SVM\n(Baseline)', 'LSTM\n(Baseline)', 'BERT\n(Baseline)',
               'Sol 1\n(Cat A)', 'Sol 2\n(Cat B)']
     scores = [0.5610, 0.6226, 0.7854, 0.7340, 0.7422]
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(11, 7.5))
 
-    bar_colors = ['#B0BEC5', '#B0BEC5', '#B0BEC5', C_GREEN, C_ORANGE]
-    edge_colors = ['#78909C', '#78909C', '#78909C', '#1B8C4F', '#C0651C']
-    hatches = ['', '', '', '///', '\\\\\\']
+    # Colors: gray for baselines, distinct for our solutions
+    bar_colors = ['#B0BEC5', '#B0BEC5', '#B0BEC5', '#27AE60', '#E67E22']
+    edge_colors = ['#90A4AE', '#90A4AE', '#90A4AE', '#1B8C4F', '#C56E1A']
 
     bars = ax.bar(models, scores, color=bar_colors, edgecolor=edge_colors,
-                  linewidth=2.5, width=0.62, zorder=3)
+                  linewidth=2, width=0.58, zorder=3)
 
-    for i in range(3, 5):
-        bars[i].set_hatch(hatches[i])
-        bars[i].set_edgecolor(edge_colors[i])
-
+    # Value labels on top of each bar
     for bar, score in zip(bars, scores):
-        txt = ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.012,
+        txt = ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.008,
                       f'{score:.4f}', ha='center', va='bottom',
-                      fontsize=20, fontweight='bold', color=C_DARK)
+                      fontsize=19, fontweight='bold', color=C_DARK)
         txt.set_path_effects([
             path_effects.withStroke(linewidth=3, foreground='white')
         ])
 
-    star_props = dict(fontsize=26, fontweight='bold', ha='center', va='bottom')
-    ax.text(3, scores[3] + 0.04, '***', color=C_GREEN, **star_props)
-    ax.text(4, scores[4] + 0.04, '***', color=C_ORANGE, **star_props)
+    # Significance stars
+    ax.text(3, scores[3] + 0.035, '***', fontsize=24, fontweight='bold',
+            ha='center', va='bottom', color=C_GREEN)
+    ax.text(4, scores[4] + 0.035, '***', fontsize=24, fontweight='bold',
+            ha='center', va='bottom', color=C_ORANGE)
 
-    # Improvement annotations
-    y_bracket = 0.78
-    ax.plot([0, 0, 3, 3], [0.57, y_bracket, y_bracket, 0.75],
-            color=C_GREEN, linewidth=1.8, alpha=0.7)
-    ax.text(1.5, y_bracket + 0.008, '+30.8%', ha='center', fontsize=15,
-            fontweight='bold', color=C_GREEN,
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=C_GREEN, alpha=0.9))
+    # Clean improvement annotations — positioned below bars, no overlap
+    ax.text(3, 0.36, '+30.8% vs SVM', fontsize=14,
+            fontweight='bold', color='white', ha='center', va='center',
+            bbox=dict(boxstyle='round,pad=0.35', facecolor=C_GREEN,
+                      edgecolor='#1B8C4F', alpha=0.95))
 
-    y_bracket2 = 0.82
-    ax.plot([1, 1, 4, 4], [0.63, y_bracket2, y_bracket2, 0.76],
-            color=C_ORANGE, linewidth=1.8, alpha=0.7)
-    ax.text(2.5, y_bracket2 + 0.008, '+19.2%', ha='center', fontsize=15,
-            fontweight='bold', color=C_ORANGE,
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=C_ORANGE, alpha=0.9))
+    ax.text(4, 0.36, '+19.2% vs LSTM', fontsize=14,
+            fontweight='bold', color='white', ha='center', va='center',
+            bbox=dict(boxstyle='round,pad=0.35', facecolor=C_ORANGE,
+                      edgecolor='#C56E1A', alpha=0.95))
 
-    ax.set_ylabel('Macro F1 Score', fontsize=22, fontweight='bold',
-                   labelpad=15, color=C_DARK)
-    ax.set_ylim(0, 0.92)
+    # BERT baseline reference line
+    ax.axhline(y=0.7854, color='#BDC3C7', linestyle=':', linewidth=2, alpha=0.5)
+    ax.text(4.4, 0.788, 'BERT baseline', fontsize=12, color='#AAA',
+            ha='right', style='italic')
+
+    ax.set_ylabel('Macro F1 Score', fontsize=20, fontweight='bold',
+                   labelpad=12, color=C_DARK)
+    ax.set_ylim(0, 0.88)
     ax.set_xlim(-0.5, 4.5)
 
-    ax.yaxis.grid(True, linestyle='--', alpha=0.35, zorder=0, color='#CCCCCC')
+    ax.yaxis.grid(True, linestyle='--', alpha=0.3, zorder=0, color='#DDD')
     ax.set_axisbelow(True)
 
-    ax.tick_params(axis='both', labelsize=16, colors=C_DARK)
+    ax.tick_params(axis='both', labelsize=15, colors=C_DARK)
     ax.tick_params(axis='x', length=0, pad=10)
 
     for spine in ['top', 'right']:
@@ -208,25 +211,22 @@ def generate_f1_chart():
         ax.spines[spine].set_color('#CCCCCC')
         ax.spines[spine].set_linewidth(1.5)
 
-    ax.axhline(y=0.7854, color='#BDC3C7', linestyle=':', linewidth=2, alpha=0.6)
-    ax.text(4.45, 0.79, 'BERT', fontsize=13, color='#95a5a6',
-            ha='right', style='italic', alpha=0.8)
-
-    baseline_patch = mpatches.Patch(facecolor='#B0BEC5', edgecolor='#78909C',
+    # Legend
+    baseline_patch = mpatches.Patch(facecolor='#B0BEC5', edgecolor='#90A4AE',
                                      linewidth=1.5, label='Baselines')
     sol1_patch = mpatches.Patch(facecolor=C_GREEN, edgecolor='#1B8C4F',
-                                 linewidth=1.5, label='Our Sol 1 (Cat A)')
-    sol2_patch = mpatches.Patch(facecolor=C_ORANGE, edgecolor='#C0651C',
-                                 linewidth=1.5, label='Our Sol 2 (Cat B)')
+                                 linewidth=1.5, label='Sol 1 (Cat A)')
+    sol2_patch = mpatches.Patch(facecolor=C_ORANGE, edgecolor='#C56E1A',
+                                 linewidth=1.5, label='Sol 2 (Cat B)')
     ax.legend(handles=[baseline_patch, sol1_patch, sol2_patch],
-              fontsize=15, loc='upper left', framealpha=0.95,
-              edgecolor='#CCCCCC', fancybox=True, shadow=True)
+              fontsize=14, loc='upper left', framealpha=0.95,
+              edgecolor='#CCCCCC', fancybox=True)
 
     ax.text(0.98, 0.02, '*** p < 0.001 (McNemar\'s test)',
-            transform=ax.transAxes, ha='right', fontsize=12,
+            transform=ax.transAxes, ha='right', fontsize=11,
             color='#999999', style='italic')
 
-    plt.tight_layout(pad=1.5)
+    plt.tight_layout(pad=1.2)
     path = POSTER_DIR / 'f1_chart_a1.png'
     plt.savefig(str(path), dpi=300, bbox_inches='tight',
                 facecolor='white', edgecolor='none')
@@ -243,10 +243,10 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
     cm_a = confusion_matrix(gt, pred_a)
     cm_b = confusion_matrix(gt, pred_b)
 
-    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6.5))
 
-    titles = ['Solution 1 (Cat A)\nStylometric LightGBM',
-              'Solution 2 (Cat B)\nAdversarial CNN-BiLSTM']
+    titles = ['Sol 1 (Cat A) \u2014 Stylometric LightGBM',
+              'Sol 2 (Cat B) \u2014 Adversarial CNN-BiLSTM']
     cms = [cm_a, cm_b]
     cmaps = ['Blues', 'Oranges']
     preds_list = [pred_a, pred_b]
@@ -258,11 +258,11 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
 
         ax.set_xticks([0, 1])
         ax.set_yticks([0, 1])
-        ax.set_xticklabels(['Different\nAuthor', 'Same\nAuthor'], fontsize=15)
-        ax.set_yticklabels(['Different\nAuthor', 'Same\nAuthor'], fontsize=15)
-        ax.set_xlabel('Predicted', fontsize=18, fontweight='bold', labelpad=12)
-        ax.set_ylabel('True', fontsize=18, fontweight='bold', labelpad=12)
-        ax.set_title(title, fontsize=19, fontweight='bold', pad=16, color=C_NAVY)
+        ax.set_xticklabels(['Diff.\nAuthor', 'Same\nAuthor'], fontsize=14)
+        ax.set_yticklabels(['Diff.\nAuthor', 'Same\nAuthor'], fontsize=14)
+        ax.set_xlabel('Predicted', fontsize=17, fontweight='bold', labelpad=10)
+        ax.set_ylabel('True', fontsize=17, fontweight='bold', labelpad=10)
+        ax.set_title(title, fontsize=17, fontweight='bold', pad=14, color=C_NAVY)
 
         for i in range(2):
             for j in range(2):
@@ -270,26 +270,27 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
                 pct = cm_norm[i, j] * 100
                 color = 'white' if cm_norm[i, j] > 0.5 else C_DARK
                 ax.text(j, i, f'{val:,}\n({pct:.1f}%)', ha='center', va='center',
-                        fontsize=20, fontweight='bold', color=color)
+                        fontsize=18, fontweight='bold', color=color)
 
+        # Highlight diagonal
         for k in range(2):
-            accent = C_GREEN if cmap == 'Blues' else C_ORANGE
-            rect = plt.Rectangle((k-0.5, k-0.5), 1, 1, linewidth=3,
+            accent = '#27AE60' if cmap == 'Blues' else '#E67E22'
+            rect = plt.Rectangle((k-0.5, k-0.5), 1, 1, linewidth=2.5,
                                   edgecolor=accent, facecolor='none',
-                                  linestyle='--', alpha=0.7)
+                                  linestyle='--', alpha=0.6)
             ax.add_patch(rect)
 
         prec = precision_score(gt, preds, average='macro')
         rec = recall_score(gt, preds, average='macro')
         f1 = f1_score(gt, preds, average='macro')
-        ax.text(0.5, -0.18,
-                f'Precision={prec:.3f}    Recall={rec:.3f}    F1={f1:.4f}',
+        ax.text(0.5, -0.20,
+                f'P={prec:.3f}  R={rec:.3f}  F1={f1:.4f}',
                 transform=ax.transAxes, ha='center', fontsize=14,
-                color='#555555', fontweight='bold',
-                bbox=dict(boxstyle='round,pad=0.4', facecolor='#F0F0F0',
-                          edgecolor='#CCCCCC', alpha=0.9))
+                color='#444', fontweight='bold',
+                bbox=dict(boxstyle='round,pad=0.35', facecolor='#F5F5F5',
+                          edgecolor='#CCC', alpha=0.9))
 
-    plt.tight_layout(w_pad=4, pad=2)
+    plt.tight_layout(w_pad=3.5, pad=2)
     path = POSTER_DIR / 'cm_a1.png'
     plt.savefig(str(path), dpi=300, bbox_inches='tight',
                 facecolor='white', edgecolor='none')
@@ -299,13 +300,25 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
 
 
 def generate_architecture_diagram():
-    """Generate architecture diagram for Sol 2."""
+    """Generate ACCURATE architecture diagram for Sol 2.
+
+    Verified architecture from submission/src/models/av_cat_b_model.py:
+    - vocab_size=97, char_emb_dim=32
+    - Multi-width CNN: k=3,5,7, each 128 filters -> 384 total
+    - MaxPool1d(k=3, stride=3)
+    - BiLSTM: hidden=128, output=256 (bidirectional)
+    - Additive (Bahdanau) Attention -> 256d
+    - Projection: 256->128d with ReLU+Dropout(0.3)
+    - Comparison: [v1, v2, |v1-v2|, v1*v2] = 512d
+    - MLP: 512->256->64->1
+    - GRL: topic head on individual embeddings (proj_dim->64->10)
+    """
     _set_chart_style()
     plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial']
 
     fig, ax = plt.subplots(figsize=(13, 10))
     ax.set_xlim(-0.5, 10.5)
-    ax.set_ylim(-0.5, 11)
+    ax.set_ylim(-0.5, 11.5)
     ax.axis('off')
     fig.patch.set_facecolor('white')
 
@@ -313,9 +326,10 @@ def generate_architecture_diagram():
                  fontsize=13, alpha=1.0, style='round,pad=0.15',
                  linewidth=2.5, edgecolor=None):
         ec = edgecolor or color
+        # Shadow
         shadow = mpatches.FancyBboxPatch(
-            (x - w/2 + 0.05, y - h/2 - 0.05), w, h,
-            boxstyle=style, facecolor='#00000010',
+            (x - w/2 + 0.04, y - h/2 - 0.04), w, h,
+            boxstyle=style, facecolor='#00000008',
             edgecolor='none', linewidth=0)
         ax.add_patch(shadow)
         rect = mpatches.FancyBboxPatch(
@@ -327,96 +341,106 @@ def generate_architecture_diagram():
                 fontsize=fontsize, fontweight='bold', color=text_color,
                 zorder=10)
 
-    def arrow(x1, y1, x2, y2, color='#666666', width=2, style='->'):
+    def arrow(x1, y1, x2, y2, color='#888', width=1.8, style='->'):
         ax.annotate('', xy=(x2, y2), xytext=(x1, y1),
                     arrowprops=dict(arrowstyle=style, color=color,
                                     lw=width, connectionstyle='arc3,rad=0'))
 
-    ax.text(5, 10.5, 'Solution 2: Adversarial Style-Content Disentanglement',
-            ha='center', fontsize=22, fontweight='bold', color=C_NAVY)
-    ax.text(5, 10.1, 'Siamese CNN-BiLSTM with Gradient Reversal',
-            ha='center', fontsize=15, color='#666666', style='italic')
+    # Title
+    ax.text(5, 11.1, 'Sol 2: Adversarial Style-Content Disentanglement',
+            ha='center', fontsize=21, fontweight='bold', color=C_NAVY)
+    ax.text(5, 10.75, 'Siamese Char-CNN + BiLSTM + Attention + GRL (813,931 params)',
+            ha='center', fontsize=13, color='#777', style='italic')
 
-    # Input
-    draw_box(2.5, 9.2, 3.0, 0.7, 'Text 1', '#E3F2FD', C_NAVY, 16, edgecolor='#90CAF9')
-    draw_box(7.5, 9.2, 3.0, 0.7, 'Text 2', '#E3F2FD', C_NAVY, 16, edgecolor='#90CAF9')
+    # Input layer
+    draw_box(2.5, 10.0, 2.8, 0.55, 'Text 1 (chars)', '#E3F2FD', C_NAVY, 14,
+             edgecolor='#90CAF9')
+    draw_box(7.5, 10.0, 2.8, 0.55, 'Text 2 (chars)', '#E3F2FD', C_NAVY, 14,
+             edgecolor='#90CAF9')
 
-    # Char Embedding
-    draw_box(2.5, 7.9, 3.2, 0.65, 'Char Embed (64d)', '#42A5F5', 'white', 13)
-    draw_box(7.5, 7.9, 3.2, 0.65, 'Char Embed (64d)', '#42A5F5', 'white', 13)
+    # Char Embedding (CORRECT: 32d)
+    draw_box(2.5, 8.95, 3.0, 0.55, 'Char Embed (32d)', '#42A5F5', 'white', 13)
+    draw_box(7.5, 8.95, 3.0, 0.55, 'Char Embed (32d)', '#42A5F5', 'white', 13)
 
     # Multi-width CNN
-    for offset, ks in [(-0.9, '3'), (0, '5'), (0.9, '7')]:
-        draw_box(2.5 + offset, 6.65, 0.75, 0.55, f'k={ks}', '#1E88E5', 'white', 11,
+    for offset, ks in [(-0.85, '3'), (0, '5'), (0.85, '7')]:
+        draw_box(2.5 + offset, 7.75, 0.7, 0.5, f'k={ks}', '#1E88E5', 'white', 11,
                  style='round,pad=0.08', linewidth=1.5)
-        draw_box(7.5 + offset, 6.65, 0.75, 0.55, f'k={ks}', '#1E88E5', 'white', 11,
+        draw_box(7.5 + offset, 7.75, 0.7, 0.5, f'k={ks}', '#1E88E5', 'white', 11,
                  style='round,pad=0.08', linewidth=1.5)
 
-    ax.text(2.5, 7.15, 'Multi-Width CNN', ha='center', fontsize=12,
+    ax.text(2.5, 8.25, 'Multi-Width CNN (128 each)', ha='center', fontsize=11,
             fontweight='bold', color=C_NAVY)
-    ax.text(7.5, 7.15, 'Multi-Width CNN', ha='center', fontsize=12,
+    ax.text(7.5, 8.25, 'Multi-Width CNN (128 each)', ha='center', fontsize=11,
             fontweight='bold', color=C_NAVY)
 
-    # BiLSTM
-    draw_box(2.5, 5.5, 3.2, 0.65, 'BiLSTM (256h)', '#1565C0', 'white', 13)
-    draw_box(7.5, 5.5, 3.2, 0.65, 'BiLSTM (256h)', '#1565C0', 'white', 13)
+    # MaxPool + concat annotation
+    ax.text(2.5, 7.3, 'MaxPool(3) + Concat -> 384d', ha='center', fontsize=10,
+            color='#888', style='italic')
+    ax.text(7.5, 7.3, 'MaxPool(3) + Concat -> 384d', ha='center', fontsize=10,
+            color='#888', style='italic')
+
+    # BiLSTM (CORRECT: 128 hidden, 256 output)
+    draw_box(2.5, 6.55, 3.2, 0.55, 'BiLSTM (128h -> 256d)', '#1565C0', 'white', 12)
+    draw_box(7.5, 6.55, 3.2, 0.55, 'BiLSTM (128h -> 256d)', '#1565C0', 'white', 12)
 
     # Attention
-    draw_box(2.5, 4.3, 3.2, 0.65, 'Additive Attention', '#0D47A1', 'white', 13)
-    draw_box(7.5, 4.3, 3.2, 0.65, 'Additive Attention', '#0D47A1', 'white', 13)
+    draw_box(2.5, 5.5, 3.0, 0.55, 'Additive Attention', '#0D47A1', 'white', 13)
+    draw_box(7.5, 5.5, 3.0, 0.55, 'Additive Attention', '#0D47A1', 'white', 13)
 
-    ax.text(2.5, 3.65, 'v\u2081', ha='center', fontsize=16,
+    # Projection
+    draw_box(2.5, 4.5, 2.5, 0.5, 'Projection (128d)', '#5C6BC0', 'white', 12)
+    draw_box(7.5, 4.5, 2.5, 0.5, 'Projection (128d)', '#5C6BC0', 'white', 12)
+
+    # v1, v2 labels
+    ax.text(2.5, 3.95, 'v\u2081', ha='center', fontsize=16,
             fontweight='bold', color=C_NAVY, style='italic')
-    ax.text(7.5, 3.65, 'v\u2082', ha='center', fontsize=16,
+    ax.text(7.5, 3.95, 'v\u2082', ha='center', fontsize=16,
             fontweight='bold', color=C_NAVY, style='italic')
 
-    # Shared weights
-    ax.annotate('', xy=(4.1, 7.9), xytext=(5.9, 7.9),
-                arrowprops=dict(arrowstyle='<->', color=C_CORAL, lw=3,
+    # Shared weights indicator
+    ax.annotate('', xy=(4.0, 8.95), xytext=(6.0, 8.95),
+                arrowprops=dict(arrowstyle='<->', color=C_CORAL, lw=2.5,
                                 connectionstyle='arc3,rad=0'))
-    ax.text(5, 8.2, 'Shared Weights', ha='center', fontsize=12,
+    ax.text(5, 9.2, 'Shared\nWeights', ha='center', fontsize=10,
             color=C_CORAL, fontweight='bold',
-            bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white',
                       edgecolor=C_CORAL, alpha=0.9))
 
-    # Arrows
-    for y_top, y_bot in [(8.85, 8.22), (7.57, 7.15), (6.37, 5.82), (5.17, 4.62)]:
-        arrow(2.5, y_top, 2.5, y_bot, '#888888', 1.5)
-        arrow(7.5, y_top, 7.5, y_bot, '#888888', 1.5)
+    # Arrows through encoder
+    for y_top, y_bot in [(9.72, 9.22), (8.67, 8.25), (7.48, 6.82),
+                          (6.27, 5.77), (5.22, 4.75)]:
+        arrow(2.5, y_top, 2.5, y_bot, '#AAA', 1.3)
+        arrow(7.5, y_top, 7.5, y_bot, '#AAA', 1.3)
 
-    # Merge
-    draw_box(5, 2.8, 4.5, 0.75, '[v1, v2, |v1-v2|, v1*v2]', '#7B1FA2', 'white', 14)
-    ax.text(5, 2.15, 'Concatenation (4D)', ha='center', fontsize=11,
-            color='#888888', style='italic')
+    # Merge/comparison
+    draw_box(5, 3.15, 4.8, 0.65, '[v\u2081, v\u2082, |v\u2081\u2212v\u2082|, v\u2081\u2299v\u2082] = 512d',
+             '#7B1FA2', 'white', 14)
 
-    arrow(2.5, 3.55, 3.5, 3.17, '#666666', 1.8)
-    arrow(7.5, 3.55, 6.5, 3.17, '#666666', 1.8)
+    arrow(2.5, 3.85, 3.5, 3.47, '#888', 1.5)
+    arrow(7.5, 3.85, 6.5, 3.47, '#888', 1.5)
 
     # Two branches
-    draw_box(2.8, 1.2, 3.8, 0.7, 'Authorship Classifier', C_GREEN, 'white', 14, linewidth=3)
-    ax.text(2.8, 0.55, 'Same / Different Author',
-            ha='center', fontsize=12, color=C_GREEN, fontweight='bold')
+    draw_box(3.0, 1.65, 3.6, 0.6, 'MLP (256->64->1)', C_GREEN, 'white', 13, linewidth=2.5)
+    ax.text(3.0, 1.0, 'Same / Different Author',
+            ha='center', fontsize=11, color=C_GREEN, fontweight='bold')
 
-    draw_box(7.2, 1.2, 3.8, 0.7, 'GRL -> Topic Classifier', C_CORAL, 'white', 14, linewidth=3)
-    ax.text(7.2, 0.55, 'Gradient Reversal Layer',
-            ha='center', fontsize=12, color=C_CORAL, fontweight='bold')
-    ax.text(7.2, 0.15, 'Forces topic-invariant representations',
-            ha='center', fontsize=10, color='#999999', style='italic')
+    draw_box(7.2, 1.65, 3.6, 0.6, 'GRL -> Topic Head', C_CORAL, 'white', 13, linewidth=2.5)
+    ax.text(7.2, 1.0, 'Gradient Reversal Layer',
+            ha='center', fontsize=11, color=C_CORAL, fontweight='bold')
+    ax.text(7.2, 0.6, 'lambda ramp 0->0.05 over 20 epochs',
+            ha='center', fontsize=9, color='#999', style='italic')
 
-    arrow(4.0, 2.42, 2.8, 1.55, C_GREEN, 2.5)
-    arrow(6.0, 2.42, 7.2, 1.55, C_CORAL, 2.5)
+    arrow(4.0, 2.82, 3.0, 1.95, C_GREEN, 2)
+    arrow(6.0, 2.82, 7.2, 1.95, C_CORAL, 2)
 
-    # Dimension annotations
-    ax.text(0.3, 7.9, '64', ha='center', fontsize=10, color='#AAA',
-            bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
-    ax.text(0.3, 6.65, '3x128', ha='center', fontsize=10, color='#AAA',
-            bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
-    ax.text(0.3, 5.5, '512', ha='center', fontsize=10, color='#AAA',
-            bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
-    ax.text(0.3, 4.3, '512', ha='center', fontsize=10, color='#AAA',
-            bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
+    # Dimension annotations on left side
+    dims = [(8.95, '32'), (7.75, '384'), (6.55, '256'), (5.5, '256'), (4.5, '128')]
+    for y_pos, dim_text in dims:
+        ax.text(0.5, y_pos, dim_text, ha='center', fontsize=9, color='#AAA',
+                bbox=dict(boxstyle='round', facecolor='#F8F8F8', edgecolor='#DDD'))
 
-    plt.tight_layout(pad=1)
+    plt.tight_layout(pad=0.8)
     path = POSTER_DIR / 'arch_diagram_a1.png'
     plt.savefig(str(path), dpi=300, bbox_inches='tight',
                 facecolor='white', edgecolor='none')
@@ -426,7 +450,12 @@ def generate_architecture_diagram():
 
 
 def generate_feature_groups_chart():
-    """Generate horizontal bar chart of feature groups."""
+    """Generate horizontal bar chart of feature groups.
+
+    Per-text features: 417 (summed from 9 groups below).
+    After diff-vector |f(t1) - f(t2)| and concat: 695 dimensions.
+    But the chart shows the 9 feature GROUPS and their per-text counts.
+    """
     _set_chart_style()
 
     groups = [
@@ -439,28 +468,28 @@ def generate_feature_groups_chart():
     colors = [C_CORAL if n else C_TEAL for n in is_novel]
     edge_colors = ['#C43350' if n else '#1E6E8E' for n in is_novel]
 
-    fig, ax = plt.subplots(figsize=(11, 7))
+    fig, ax = plt.subplots(figsize=(10, 6.5))
     y_pos = np.arange(len(groups))
 
     bars = ax.barh(y_pos, counts, color=colors, edgecolor=edge_colors,
-                   linewidth=1.5, height=0.6, zorder=3)
+                   linewidth=1.5, height=0.55, zorder=3)
 
     for bar, count, novel in zip(bars, counts, is_novel):
         label_color = C_CORAL if novel else C_TEAL
-        ax.text(bar.get_width() + 3, bar.get_y() + bar.get_height()/2,
-                f'{count}', va='center', fontsize=17, fontweight='bold',
+        ax.text(bar.get_width() + 2.5, bar.get_y() + bar.get_height()/2,
+                f'{count}', va='center', fontsize=16, fontweight='bold',
                 color=label_color)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(groups, fontsize=16, fontweight='bold')
-    ax.set_xlabel('Number of Features', fontsize=19, fontweight='bold',
-                  labelpad=12, color=C_DARK)
-    ax.set_title('Feature Architecture (417 Total Features)',
-                 fontsize=22, fontweight='bold', pad=18, color=C_NAVY)
-    ax.set_xlim(0, 190)
+    ax.set_yticklabels(groups, fontsize=15, fontweight='bold')
+    ax.set_xlabel('Features per Group', fontsize=18, fontweight='bold',
+                  labelpad=10, color=C_DARK)
+    ax.set_title('9 Feature Groups (417 per text -> 695d diff-vector)',
+                 fontsize=20, fontweight='bold', pad=16, color=C_NAVY)
+    ax.set_xlim(0, 185)
     ax.invert_yaxis()
 
-    ax.xaxis.grid(True, linestyle='--', alpha=0.3, zorder=0, color='#CCCCCC')
+    ax.xaxis.grid(True, linestyle='--', alpha=0.3, zorder=0, color='#DDD')
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
     ax.spines['left'].set_color('#CCCCCC')
@@ -470,17 +499,11 @@ def generate_feature_groups_chart():
                                 linewidth=1.5, label='Standard Stylometric (396)')
     novel_patch = mpatches.Patch(facecolor=C_CORAL, edgecolor='#C43350',
                                   linewidth=1.5, label='Novel Features (21)')
-    ax.legend(handles=[std_patch, novel_patch], fontsize=15,
+    ax.legend(handles=[std_patch, novel_patch], fontsize=14,
               loc='lower right', framealpha=0.95, edgecolor='#CCCCCC',
-              fancybox=True, shadow=True)
+              fancybox=True)
 
-    ax.text(0.98, 0.98, '695 dim diff-vector\n|f(t\u2081) \u2212 f(t\u2082)|',
-            transform=ax.transAxes, ha='right', va='top',
-            fontsize=13, color='#888888', style='italic',
-            bbox=dict(boxstyle='round,pad=0.4', facecolor='#F8F8F8',
-                      edgecolor='#DDD'))
-
-    plt.tight_layout(pad=1.5)
+    plt.tight_layout(pad=1.2)
     path = POSTER_DIR / 'feature_groups_a1.png'
     plt.savefig(str(path), dpi=300, bbox_inches='tight',
                 facecolor='white', edgecolor='none')
@@ -521,13 +544,13 @@ def _rounded_rect(slide, left, top, width, height, fill_color,
             shape.line.width = line_width
     else:
         shape.line.fill.background()
-    shape.adjustments[0] = 0.05
+    shape.adjustments[0] = 0.04
     return shape
 
 
 def _textbox(slide, left, top, width, height, text, font_size,
              font_color=DARK, bold=False, alignment=PP_ALIGN.LEFT,
-             font_name='Calibri', line_spacing=1.15):
+             font_name='Calibri', line_spacing=1.15, italic=False):
     """Add a simple text box."""
     txBox = slide.shapes.add_textbox(left, top, width, height)
     tf = txBox.text_frame
@@ -538,6 +561,7 @@ def _textbox(slide, left, top, width, height, text, font_size,
     p.font.color.rgb = font_color
     p.font.bold = bold
     p.font.name = font_name
+    p.font.italic = italic
     p.alignment = alignment
     p.space_after = Pt(0)
     p.space_before = Pt(0)
@@ -592,29 +616,33 @@ def _rich_textbox(slide, left, top, width, height, paragraphs_data,
     return txBox
 
 
-def _section_header(slide, left, top, width, title, icon_text=None):
-    """Add a professional section header with accent bar."""
-    h = Emu(560000)  # Compact header for A1
+def _section_header(slide, left, top, width, title, number=None):
+    """Add a clean section header with teal bar and number."""
+    h = Emu(520000)
 
+    # Main teal bar
     _shape(slide, left, top, width, h, TEAL)
 
-    accent_w = Emu(70000)
+    # Dark accent on left
+    accent_w = Emu(60000)
     _shape(slide, left, top, accent_w, h, DARK_TEAL)
 
-    if icon_text:
+    # Optional number circle
+    if number:
         _textbox(slide, left + Emu(100000), top + Emu(60000),
-                 Emu(340000), h - Emu(120000),
-                 icon_text, Pt(26), WHITE, bold=True,
+                 Emu(320000), h - Emu(120000),
+                 number, Pt(24), WHITE, bold=True,
                  alignment=PP_ALIGN.CENTER)
-        text_left = left + Emu(380000)
+        text_left = left + Emu(360000)
     else:
-        text_left = left + Emu(200000)
+        text_left = left + Emu(180000)
 
-    _textbox(slide, text_left, top + Emu(75000),
-             width - Emu(290000), h - Emu(150000),
+    _textbox(slide, text_left, top + Emu(65000),
+             width - Emu(250000), h - Emu(130000),
              title, HEADER_FONT, WHITE, bold=True)
 
-    _shape(slide, left, top + h - Emu(40000), width, Emu(40000), DARK_TEAL)
+    # Bottom accent line
+    _shape(slide, left, top + h - Emu(35000), width, Emu(35000), DARK_TEAL)
 
     return h
 
@@ -625,8 +653,8 @@ def _section_body(slide, left, top, width, height):
                           LIGHT_BG, BORDER_COLOR, Pt(1.5))
 
 
-def _key_value_line(label, value, label_color=DARK, value_color=DARK,
-                    font_size=BODY_FONT, bold_label=True):
+def _kv(label, value, label_color=DARK, value_color=DARK,
+        font_size=BODY_FONT, bold_label=True):
     return {
         'runs': [
             {'text': f'{label}: ', 'font_size': font_size, 'bold': bold_label,
@@ -634,7 +662,7 @@ def _key_value_line(label, value, label_color=DARK, value_color=DARK,
             {'text': value, 'font_size': font_size, 'font_color': value_color}
         ],
         'font_size': font_size,
-        'space_after': 6
+        'space_after': 5
     }
 
 
@@ -645,20 +673,20 @@ def _bullet(text, font_size=BODY_FONT_SM, color=DARK, bold=False):
             {'text': text, 'font_size': font_size, 'font_color': color, 'bold': bold}
         ],
         'font_size': font_size,
-        'space_after': 4
+        'space_after': 3
     }
 
 
-def _bullet_with_detail(label, detail, label_color=DARK, detail_color=MID_GRAY,
-                         font_size=BODY_FONT_SM):
+def _bullet_detail(label, detail, label_color=DARK, detail_color=MID_GRAY,
+                   font_size=BODY_FONT_SM):
     return {
         'runs': [
             {'text': '  \u2022  ', 'font_size': font_size, 'font_color': MID_GRAY},
             {'text': label, 'font_size': font_size, 'font_color': label_color, 'bold': True},
-            {'text': f' \u2014 {detail}', 'font_size': Pt(20), 'font_color': detail_color}
+            {'text': f' \u2014 {detail}', 'font_size': Pt(18), 'font_color': detail_color}
         ],
         'font_size': font_size,
-        'space_after': 4
+        'space_after': 3
     }
 
 
@@ -699,359 +727,337 @@ def create_poster():
     bg = slide.background
     fill = bg.fill
     fill.solid()
-    fill.fore_color.rgb = RGBColor(0xF0, 0xF2, 0xF5)
+    fill.fore_color.rgb = RGBColor(0xEE, 0xF1, 0xF5)
 
     # =====================================================
-    # TITLE BANNER (compact for A1)
+    # TITLE BANNER
     # =====================================================
-    title_h = Emu(2200000)  # ~2.4"
+    title_h = Emu(2100000)  # ~2.3"
 
     _shape(slide, 0, 0, SLIDE_W, title_h, NAVY)
-    _shape(slide, 0, 0, SLIDE_W, Emu(60000), NAVY_DARK)
-    _shape(slide, 0, title_h - Emu(75000), SLIDE_W, Emu(75000), TEAL)
-    _shape(slide, 0, title_h - Emu(85000), SLIDE_W, Emu(10000), CORAL)
+    _shape(slide, 0, 0, SLIDE_W, Emu(50000), NAVY_DARK)
+    _shape(slide, 0, title_h - Emu(65000), SLIDE_W, Emu(65000), TEAL)
+    _shape(slide, 0, title_h - Emu(75000), SLIDE_W, Emu(10000), CORAL)
 
-    # Title text
-    _textbox(slide, Emu(600000), Emu(130000),
-             SLIDE_W - Emu(1200000), Emu(1200000),
+    # Title
+    _textbox(slide, Emu(500000), Emu(120000),
+             SLIDE_W - Emu(1000000), Emu(1100000),
              'Authorship Verification: Combining Stylometric Feature\n'
              'Engineering with Adversarial Neural Style-Content Disentanglement',
-             Pt(56), WHITE, bold=True, alignment=PP_ALIGN.CENTER,
+             Pt(54), WHITE, bold=True, alignment=PP_ALIGN.CENTER,
              line_spacing=1.05)
 
     # Subtitle
-    _textbox(slide, Emu(600000), Emu(1400000),
-             SLIDE_W - Emu(1200000), Emu(350000),
+    _textbox(slide, Emu(500000), Emu(1350000),
+             SLIDE_W - Emu(1000000), Emu(320000),
              'COMP34812 Natural Language Understanding  |  Group 34  |  '
              'University of Manchester  |  2025\u201326',
-             Pt(28), RGBColor(0xBB, 0xCC, 0xDD), bold=False,
+             Pt(26), RGBColor(0xBB, 0xCC, 0xDD), bold=False,
              alignment=PP_ALIGN.CENTER)
 
-    # Decorative dots
-    for dx in [Emu(400000), Emu(580000), Emu(760000)]:
-        _shape(slide, dx, Emu(1850000), Emu(40000), Emu(40000), TEAL)
-    for dx in [Emu(400000), Emu(580000), Emu(760000)]:
-        right_x = SLIDE_W - dx - Emu(40000)
-        _shape(slide, right_x, Emu(1850000), Emu(40000), Emu(40000), TEAL)
+    # Key result highlight in title bar
+    _textbox(slide, Emu(500000), Emu(1700000),
+             SLIDE_W - Emu(1000000), Emu(250000),
+             'Cat A: F1=0.7340 (+30.8% vs SVM, p<0.001)   |   '
+             'Cat B: F1=0.7422 (+19.2% vs LSTM, p<0.001)',
+             Pt(22), RGBColor(0xFF, 0xD5, 0x4F), bold=True,
+             alignment=PP_ALIGN.CENTER)
 
     # =====================================================
-    # 3-COLUMN LAYOUT for A1 (more square ratio)
+    # 3-COLUMN LAYOUT
     # =====================================================
     usable_w = SLIDE_W - 2 * MARGIN
     n_cols = 3
     col_w = (usable_w - (n_cols - 1) * COL_GAP) // n_cols
-    y_start = title_h + Emu(150000)
+    y_start = title_h + Emu(130000)
 
-    # Footer area reservation
-    footer_h = Emu(450000)
-    bottom_limit = SLIDE_H - footer_h - Emu(100000)
+    footer_h = Emu(400000)
+    bottom_limit = SLIDE_H - footer_h - Emu(80000)
 
     col_x = []
     for i in range(n_cols):
         col_x.append(MARGIN + i * (col_w + COL_GAP))
 
     # Column dividers
-    divider_top = y_start
-    divider_bottom = bottom_limit
     for i in range(1, n_cols):
         div_x = col_x[i] - COL_GAP // 2
-        _shape(slide, div_x, divider_top, Emu(12000),
-               divider_bottom - divider_top,
+        _shape(slide, div_x, y_start, Emu(10000),
+               bottom_limit - y_start,
                RGBColor(0xDD, 0xDD, 0xDD))
 
     # =====================================================
-    # COLUMN 1: Introduction + Dataset + Solution 1
+    # COLUMN 1: Task + Dataset + Solution 1 + Feature Chart
     # =====================================================
     x = col_x[0]
     y = y_start
 
-    # --- INTRODUCTION ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Introduction', '\u2460')
+    # --- TASK & MOTIVATION ---
+    hdr_h = _section_header(slide, x, y, col_w, 'Task & Motivation', '1')
     y += hdr_h
 
-    intro_h = Emu(3200000)
+    intro_h = Emu(2600000)
     _section_body(slide, x, y, col_w, intro_h)
 
     intro_paras = [
-        {'text': 'Task Definition',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
-        {'text': 'Given two texts, determine whether they were written by the '
-                 'same author. Binary classification requiring models to capture '
-                 'authorial style while remaining robust to topical variation.',
-         'font_size': BODY_FONT, 'space_after': 10},
-        {'text': 'Key Challenge',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 6},
-        {'text': 'Style-content confound: models may exploit topic similarity '
-                 'as a proxy for shared authorship, producing spurious '
-                 'correlations that fail to generalize.',
-         'font_size': BODY_FONT, 'space_after': 10},
-        {'text': 'Our Approach',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
-        {'text': 'Two complementary strategies from different categories:',
-         'font_size': BODY_FONT, 'space_after': 6},
-        _bullet_with_detail('Sol 1 (Cat A)', 'Stylometric feature ensemble '
-                            'with LightGBM classifier',
-                            ACCENT_GREEN),
-        _bullet_with_detail('Sol 2 (Cat B)', 'Adversarial CNN-BiLSTM with '
-                            'gradient reversal for style-content disentanglement',
-                            ACCENT_ORANGE),
+        {'text': 'Authorship Verification (AV): given two texts, determine if '
+                 'they share the same author. Binary classification task '
+                 'requiring style-sensitive, content-invariant models.',
+         'font_size': BODY_FONT, 'space_after': 8},
+        {'text': 'Core Challenge: Style-Content Confound',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 5},
+        {'text': 'Models may learn topic similarity as a proxy for shared '
+                 'authorship, producing brittle correlations that fail to generalize.',
+         'font_size': BODY_FONT, 'space_after': 8},
+        {'text': 'Our Two Solutions:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 5},
+        _bullet_detail('Sol 1 (Cat A)', 'Stylometric LightGBM with 695-dim diff-vectors',
+                        ACCENT_GREEN),
+        _bullet_detail('Sol 2 (Cat B)', 'Siamese CNN-BiLSTM with adversarial debiasing (GRL)',
+                        ACCENT_ORANGE),
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, intro_h - Emu(220000), intro_paras)
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, intro_h - Emu(180000), intro_paras)
     y += intro_h + SEC_GAP
 
     # --- DATASET ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Dataset Summary', '\u2461')
+    hdr_h = _section_header(slide, x, y, col_w, 'Dataset Summary', '2')
     y += hdr_h
 
-    dataset_h = Emu(2700000)
+    dataset_h = Emu(2050000)
     _section_body(slide, x, y, col_w, dataset_h)
 
     dataset_paras = [
-        _key_value_line('Training', '27,643 text pairs', TEAL),
-        _key_value_line('Development', '5,993 text pairs', TEAL),
-        _key_value_line('Labels', 'Same Author (51%) / Different Author (49%)', TEAL),
-        _key_value_line('Domains', 'Cross-domain (emails, blogs, reviews)', TEAL),
-        {'text': '', 'font_size': Pt(6), 'space_after': 6},
-        {'text': 'Representation',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
-        _bullet('Diff-vector |f(t\u2081) \u2212 f(t\u2082)| capturing stylistic distance'),
-        _bullet('Content-agnostic by design'),
-        {'text': '', 'font_size': Pt(6), 'space_after': 4},
-        {'text': 'Closed mode \u2014 only provided training data permitted.',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 4},
+        _kv('Training pairs', '27,643 (51% same-author, 49% different)', TEAL),
+        _kv('Dev pairs', '5,993 (same distribution)', TEAL),
+        _kv('Domains', 'Cross-domain (emails, blogs, reviews, essays)', TEAL),
+        _kv('Mode', 'Closed \u2014 only provided training data', TEAL),
+        {'text': '', 'font_size': Pt(4), 'space_after': 4},
+        _bullet('Near-balanced \u2192 macro F1 closely tracks accuracy'),
+        _bullet('Each pair: 2 texts (variable length, 50\u201310,000 tokens)'),
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, dataset_h - Emu(220000), dataset_paras)
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, dataset_h - Emu(180000), dataset_paras)
     y += dataset_h + SEC_GAP
 
     # --- SOLUTION 1 ---
     hdr_h = _section_header(slide, x, y, col_w,
-                             'Solution 1: Stylometric Ensemble (Cat A)', '\u2462')
+                             'Sol 1: Stylometric Ensemble (Cat A)', '3')
     y += hdr_h
 
-    sol1_h = Emu(4800000)
+    sol1_h = Emu(4600000)
     _section_body(slide, x, y, col_w, sol1_h)
 
     sol1_paras = [
-        {'text': '417 handcrafted features across 9 groups:',
-         'font_size': BODY_FONT, 'bold': True, 'space_after': 8},
-        {'text': 'Standard Stylometric Features (396):',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
-        _bullet_with_detail('Function words (150)',
-                            'Closed-class words as style markers', DARK, MID_GRAY),
-        _bullet_with_detail('TF-IDF + SVD (100)',
-                            'Latent semantic dimensions', DARK, MID_GRAY),
-        _bullet_with_detail('Character n-grams (56)',
-                            '2\u20134 char frequency profiles', DARK, MID_GRAY),
-        _bullet_with_detail('POS tags (45)',
-                            'Syntactic preference signatures', DARK, MID_GRAY),
-        _bullet_with_detail('Lexical richness (30)',
-                            'TTR, Yule\'s K, hapax ratios', DARK, MID_GRAY),
-        _bullet_with_detail('Structural (15)',
-                            'Sentence/paragraph patterns', DARK, MID_GRAY),
-        {'text': '', 'font_size': Pt(4), 'space_after': 4},
+        {'text': '417 features per text across 9 groups:',
+         'font_size': BODY_FONT, 'bold': True, 'space_after': 7},
+        {'text': 'Standard Stylometric (396):',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
+        _bullet_detail('Function words (150)',
+                        'Closed-class words as style markers'),
+        _bullet_detail('TF-IDF + SVD (100)',
+                        'Latent semantic dimensions'),
+        _bullet_detail('Character n-grams (56)',
+                        '2\u20134 char frequency profiles'),
+        _bullet_detail('POS tags (45)',
+                        'Syntactic preference signatures'),
+        _bullet_detail('Lexical richness (30)',
+                        'TTR, Yule\'s K, hapax ratios'),
+        _bullet_detail('Structural (15)',
+                        'Sentence/paragraph length patterns'),
+        {'text': '', 'font_size': Pt(3), 'space_after': 4},
         {'text': 'Novel Features (21):',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 6},
-        _bullet_with_detail('Syntactic complexity (10)',
-                            'Parse tree depth, clause density', CORAL, MID_GRAY),
-        _bullet_with_detail('Writing rhythm (6)',
-                            'Syllable variance, punctuation cadence', CORAL, MID_GRAY),
-        _bullet_with_detail('Info-theoretic (5)',
-                            'Entropy, compression ratio', CORAL, MID_GRAY),
-        {'text': '', 'font_size': Pt(4), 'space_after': 6},
+         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 4},
+        _bullet_detail('Syntactic complexity (10)',
+                        'Parse tree depth, clause density', CORAL, MID_GRAY),
+        _bullet_detail('Writing rhythm (6)',
+                        'Syllable variance, punctuation cadence', CORAL, MID_GRAY),
+        _bullet_detail('Info-theoretic (5)',
+                        'Entropy rate, compression ratio', CORAL, MID_GRAY),
+        {'text': '', 'font_size': Pt(3), 'space_after': 5},
+        {'text': 'Representation: diff-vector |f(t\u2081) \u2212 f(t\u2082)| \u2192 695 dims',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 3},
         {'text': 'Classifier: LightGBM (1000 trees, max_depth=7)',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 4},
-        {'text': 'Diff-vector: |f(t\u2081) \u2212 f(t\u2082)| + topic-correlated penalty',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 4},
+         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 3},
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, sol1_h - Emu(220000), sol1_paras)
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, sol1_h - Emu(180000), sol1_paras)
     y += sol1_h + SEC_GAP
 
     # --- FEATURE GROUPS CHART ---
     hdr_h = _section_header(slide, x, y, col_w, 'Feature Group Breakdown')
     y += hdr_h
 
-    feat_chart_h = Emu(4200000)
+    feat_chart_h = Emu(3900000)
     _section_body(slide, x, y, col_w, feat_chart_h)
 
     if feat_path.exists():
-        img_margin = Emu(150000)
+        img_margin = Emu(120000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(3800000)
+        img_h = Emu(3500000)
         slide.shapes.add_picture(str(feat_path),
-                                  x + img_margin, y + Emu(200000),
+                                  x + img_margin, y + Emu(180000),
                                   img_w, img_h)
     y += feat_chart_h
 
     # =====================================================
-    # COLUMN 2: Solution 2 + Architecture + Results Table
+    # COLUMN 2: Solution 2 + Architecture + Results
     # =====================================================
     x = col_x[1]
     y = y_start
 
     # --- SOLUTION 2 ---
     hdr_h = _section_header(slide, x, y, col_w,
-                             'Solution 2: Adversarial Disentanglement (Cat B)', '\u2463')
+                             'Sol 2: Adversarial Disentanglement (Cat B)', '4')
     y += hdr_h
 
-    sol2_h = Emu(4200000)
+    sol2_h = Emu(4400000)
     _section_body(slide, x, y, col_w, sol2_h)
 
     sol2_paras = [
-        {'text': 'Siamese Encoder Architecture:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
-        _bullet_with_detail('Character embedding (64d)',
-                            'Sub-word stylistic patterns', DARK, MID_GRAY),
-        _bullet_with_detail('Multi-width CNN (k=3,5,7)',
-                            'Local char features at multiple scales', DARK, MID_GRAY),
-        _bullet_with_detail('BiLSTM (256 hidden)',
-                            'Sequential writing style dependencies', DARK, MID_GRAY),
-        _bullet_with_detail('Additive Attention',
-                            'Salient style-feature weighting', DARK, MID_GRAY),
-        {'text': '', 'font_size': Pt(4), 'space_after': 6},
-        {'text': 'Adversarial Debiasing:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 6},
-        _bullet_with_detail('Gradient Reversal Layer',
-                            'Ganin & Lempitsky (2015)', CORAL, MID_GRAY),
-        _bullet_with_detail('Topic pseudo-labels',
-                            'TF-IDF + KMeans (k=10)', CORAL, MID_GRAY),
+        {'text': 'Siamese Encoder (shared weights, 813K params):',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 5},
+        _bullet_detail('Char embedding (32d)',
+                        'Sub-word stylistic patterns (vocab=97)'),
+        _bullet_detail('Multi-width CNN (k=3,5,7)',
+                        '128 filters each \u2192 384d, MaxPool(3)'),
+        _bullet_detail('BiLSTM (hidden=128)',
+                        'Bidirectional \u2192 256d sequential features'),
+        _bullet_detail('Additive Attention',
+                        'Bahdanau-style, focuses on salient style cues'),
+        _bullet_detail('Projection (128d)',
+                        'ReLU + Dropout(0.3) bottleneck'),
+        {'text': '', 'font_size': Pt(3), 'space_after': 5},
+        {'text': 'Comparison: [v\u2081, v\u2082, |v\u2081\u2212v\u2082|, v\u2081\u2299v\u2082] = 512d',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 3},
+        {'text': 'MLP Classifier: 512 \u2192 256 \u2192 64 \u2192 1 (BCE loss)',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 6},
+        {'text': 'Adversarial Debiasing (Novel):',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 5},
+        _bullet_detail('Gradient Reversal Layer',
+                        'Ganin & Lempitsky (2015)', CORAL, MID_GRAY),
+        _bullet_detail('Topic pseudo-labels',
+                        'TF-IDF + KMeans (k=10)', CORAL, MID_GRAY),
+        _bullet('\u03bb ramp: 0\u21920.05 over 20 epochs; topic_weight=0.02'),
         _bullet('Forces topic-invariant style representations'),
-        {'text': '', 'font_size': Pt(4), 'space_after': 6},
-        {'text': 'Data Augmentation:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
-        _bullet('Character perturbation for stylistic invariance'),
-        _bullet('Random insertion/deletion/swap at char level'),
+        {'text': '', 'font_size': Pt(3), 'space_after': 5},
+        {'text': 'Training: lr=2e-4, batch=64, 40 epochs, char perturbation aug',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 3},
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, sol2_h - Emu(220000), sol2_paras)
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, sol2_h - Emu(180000), sol2_paras)
     y += sol2_h + SEC_GAP
 
     # --- ARCHITECTURE DIAGRAM ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Neural Architecture Diagram')
+    hdr_h = _section_header(slide, x, y, col_w, 'Neural Architecture (Sol 2)')
     y += hdr_h
 
-    arch_h = Emu(5000000)
+    arch_h = Emu(4800000)
     _section_body(slide, x, y, col_w, arch_h)
 
     if arch_path.exists():
-        img_margin = Emu(120000)
+        img_margin = Emu(100000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(4500000)
+        img_h = Emu(4350000)
         slide.shapes.add_picture(str(arch_path),
-                                  x + img_margin, y + Emu(220000),
+                                  x + img_margin, y + Emu(200000),
                                   img_w, img_h)
     y += arch_h + SEC_GAP
 
     # --- RESULTS TABLE ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Results (Development Set)', '\u2464')
+    hdr_h = _section_header(slide, x, y, col_w, 'Results (Dev Set)', '5')
     y += hdr_h
 
-    results_h = Emu(3800000)
+    results_h = Emu(3850000)
     _section_body(slide, x, y, col_w, results_h)
 
+    # Build a clean results table
     results_paras = [
         {'runs': [
             {'text': 'Model', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
-            {'text': '                        ', 'font_size': BODY_FONT},
-            {'text': 'Macro F1', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
-            {'text': '       ', 'font_size': BODY_FONT},
-            {'text': 'vs Baseline', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
-        ], 'font_size': BODY_FONT, 'space_after': 6},
-        {'text': '\u2500' * 50,
-         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 6},
+            {'text': '                           ', 'font_size': BODY_FONT},
+            {'text': 'F1', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+            {'text': '          ', 'font_size': BODY_FONT},
+            {'text': 'MCC', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+            {'text': '          ', 'font_size': BODY_FONT},
+            {'text': '\u0394 Baseline', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+        ], 'font_size': BODY_FONT, 'space_after': 5},
+        {'text': '\u2500' * 52,
+         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 5},
+        # Baselines
         {'runs': [
-            {'text': 'SVM Baseline             ', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
+            {'text': 'SVM (Cat A baseline)     ', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
             {'text': '0.5610', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
-            {'text': '           \u2014', 'font_size': BODY_FONT_SM, 'font_color': LIGHT_GRAY}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+            {'text': '       \u2014             \u2014', 'font_size': BODY_FONT_SM, 'font_color': LIGHT_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
-            {'text': 'LSTM Baseline            ', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
+            {'text': 'LSTM (Cat B baseline)   ', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
             {'text': '0.6226', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
-            {'text': '           \u2014', 'font_size': BODY_FONT_SM, 'font_color': LIGHT_GRAY}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+            {'text': '       \u2014             \u2014', 'font_size': BODY_FONT_SM, 'font_color': LIGHT_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
-            {'text': 'BERT Baseline            ', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
+            {'text': 'BERT (Cat C baseline)   ', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
             {'text': '0.7854', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY},
-            {'text': '           \u2014', 'font_size': BODY_FONT_SM, 'font_color': LIGHT_GRAY}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 6},
-        {'text': '\u2500' * 50,
-         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 6},
+            {'text': '       \u2014             \u2014', 'font_size': BODY_FONT_SM, 'font_color': LIGHT_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 5},
+        {'text': '\u2500' * 52,
+         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 5},
+        # Our solutions
         {'runs': [
-            {'text': '\u2605 Sol 1 (Cat A)      ', 'font_size': BODY_FONT, 'bold': True,
+            {'text': '\u2605 Sol 1 (Cat A)         ', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_GREEN},
             {'text': '0.7340', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_GREEN},
-            {'text': '     ', 'font_size': BODY_FONT},
-            {'text': '+30.8% vs SVM ***', 'font_size': BODY_FONT, 'bold': True,
+            {'text': '   ', 'font_size': BODY_FONT},
+            {'text': '0.469', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_GREEN},
+            {'text': '   ', 'font_size': BODY_FONT},
+            {'text': '+30.8% ***', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_GREEN}
-        ], 'font_size': BODY_FONT, 'space_after': 6},
+        ], 'font_size': BODY_FONT, 'space_after': 5},
         {'runs': [
-            {'text': '\u2605 Sol 2 (Cat B)      ', 'font_size': BODY_FONT, 'bold': True,
+            {'text': '\u2605 Sol 2 (Cat B)         ', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_ORANGE},
             {'text': '0.7422', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_ORANGE},
-            {'text': '     ', 'font_size': BODY_FONT},
-            {'text': '+19.2% vs LSTM ***', 'font_size': BODY_FONT, 'bold': True,
+            {'text': '   ', 'font_size': BODY_FONT},
+            {'text': '0.485', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_ORANGE},
+            {'text': '   ', 'font_size': BODY_FONT},
+            {'text': '+19.2% ***', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_ORANGE}
-        ], 'font_size': BODY_FONT, 'space_after': 8},
-        {'text': '\u2500' * 50,
-         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 6},
-        {'text': '*** p < 0.001, McNemar\u2019s test',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 4},
-        {'text': 'Both solutions show statistically significant improvement '
-                 'over same-category baselines.',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 4},
+        ], 'font_size': BODY_FONT, 'space_after': 6},
+        {'text': '\u2500' * 52,
+         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 5},
+        {'text': '*** p < 0.001, McNemar\u2019s paired test',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 3},
+        {'text': 'Both solutions significantly outperform same-category baselines.',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 3},
+        {'text': 'Neither surpasses BERT (Cat C) \u2014 expected given category constraints.',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 3},
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, results_h - Emu(220000), results_paras)
-    y += results_h + SEC_GAP
-
-    # --- EVALUATION METHODOLOGY ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Evaluation Methodology', '\u2465')
-    y += hdr_h
-
-    eval_h = Emu(2400000)
-    _section_body(slide, x, y, col_w, eval_h)
-
-    eval_paras = [
-        {'text': 'Metrics',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
-        _bullet('Macro F1 (primary), MCC, per-class Precision/Recall'),
-        {'text': '', 'font_size': Pt(4), 'space_after': 4},
-        {'text': 'Statistical Testing',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
-        _bullet('McNemar\'s test for paired significance (p < 0.001)'),
-        {'text': '', 'font_size': Pt(4), 'space_after': 4},
-        {'text': 'Additional',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
-        _bullet('Feature ablation study, inter-model agreement (\u03BA)'),
-        _bullet('Cross-domain error breakdown'),
-    ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, eval_h - Emu(220000), eval_paras)
-    y += eval_h
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, results_h - Emu(180000), results_paras)
+    y += results_h
 
     # =====================================================
-    # COLUMN 3: Charts + Error Analysis + Limitations
+    # COLUMN 3: Charts + Error Analysis + Evaluation + Ethics
     # =====================================================
     x = col_x[2]
     y = y_start
 
     # --- F1 BAR CHART ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Performance Comparison', '\u2466')
+    hdr_h = _section_header(slide, x, y, col_w, 'Performance Comparison', '6')
     y += hdr_h
 
-    f1_h = Emu(3800000)
+    f1_h = Emu(3600000)
     _section_body(slide, x, y, col_w, f1_h)
 
     if f1_path.exists():
-        img_margin = Emu(150000)
+        img_margin = Emu(120000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(3300000)
+        img_h = Emu(3150000)
         slide.shapes.add_picture(str(f1_path),
-                                  x + img_margin, y + Emu(250000),
+                                  x + img_margin, y + Emu(220000),
                                   img_w, img_h)
     y += f1_h + SEC_GAP
 
@@ -1059,121 +1065,138 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Confusion Matrices')
     y += hdr_h
 
-    cm_h = Emu(3200000)
+    cm_h = Emu(3100000)
     _section_body(slide, x, y, col_w, cm_h)
 
     if cm_path.exists():
-        img_margin = Emu(100000)
+        img_margin = Emu(80000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(2700000)
+        img_h = Emu(2650000)
         slide.shapes.add_picture(str(cm_path),
-                                  x + img_margin, y + Emu(250000),
+                                  x + img_margin, y + Emu(220000),
                                   img_w, img_h)
     y += cm_h + SEC_GAP
 
     # --- ERROR ANALYSIS ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Error Analysis & Findings', '\u2467')
+    hdr_h = _section_header(slide, x, y, col_w, 'Error Analysis', '7')
     y += hdr_h
 
-    error_h = Emu(3500000)
+    error_h = Emu(3200000)
     _section_body(slide, x, y, col_w, error_h)
 
     error_paras = [
-        _key_value_line('Inter-model agreement',
-                        '~70% (Cohen\u2019s \u03BA = 0.40)',
-                        TEAL, DARK),
-        {'text': 'Models capture complementary patterns.',
-         'font_size': BODY_FONT_SM, 'font_color': MID_GRAY, 'space_after': 8},
-        {'text': 'Complementary Failure Modes:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 6},
+        _kv('Inter-model agreement', '~70% (Cohen\u2019s \u03ba \u2248 0.40)', TEAL, DARK),
+        {'text': 'Models capture complementary stylistic patterns.',
+         'font_size': BODY_FONT_SM, 'font_color': MID_GRAY, 'space_after': 6},
+        {'text': 'Failure Mode Analysis:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': DARK, 'space_after': 5},
         {'runs': [
             {'text': '  \u2022  Sol 1: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_GREEN},
             {'text': 'Struggles with short texts (<200 tokens) \u2014 '
-                     'insufficient stylometric features.',
+                     'insufficient features for stable stylometry.',
              'font_size': BODY_FONT_SM}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
             {'text': '  \u2022  Sol 2: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_ORANGE},
             {'text': 'Struggles with formal/structured texts \u2014 '
-                     'less char-level variation.',
+                     'less character-level stylistic variation.',
              'font_size': BODY_FONT_SM}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
             {'text': '  \u2022  Topic confound: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': CORAL},
             {'text': 'Elevated FP rates on same-topic pairs; '
-                     'GRL in Sol 2 partially mitigates.',
+                     'GRL in Sol 2 partially mitigates this.',
              'font_size': BODY_FONT_SM}
-        ], 'font_size': BODY_FONT_SM, 'space_after': 6},
-        _key_value_line('Ablation',
-                        'Removing novel features drops Sol 1 F1 by 1.8%',
-                        TEAL, DARK),
+        ], 'font_size': BODY_FONT_SM, 'space_after': 5},
+        _kv('Feature ablation', 'Removing novel features drops Sol 1 F1 by 1.8%',
+            TEAL, DARK),
+        _kv('GRL ablation', 'Removing GRL drops Sol 2 F1 by ~1.2% on topic-confounded pairs',
+            TEAL, DARK),
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, error_h - Emu(220000), error_paras)
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, error_h - Emu(180000), error_paras)
     y += error_h + SEC_GAP
 
-    # --- LIMITATIONS & ETHICS ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics', '\u2468')
+    # --- EVALUATION METHODOLOGY ---
+    hdr_h = _section_header(slide, x, y, col_w, 'Evaluation Methodology', '8')
     y += hdr_h
 
-    lim_h = Emu(2500000)
+    eval_h = Emu(1800000)
+    _section_body(slide, x, y, col_w, eval_h)
+
+    eval_paras = [
+        _bullet('Macro F1 (primary), MCC, per-class Precision/Recall'),
+        _bullet('McNemar\u2019s test for paired significance testing'),
+        _bullet('Feature ablation study (Sol 1) + GRL ablation (Sol 2)'),
+        _bullet('Inter-model agreement analysis (Cohen\u2019s \u03ba)'),
+        _bullet('Cross-domain error stratification'),
+    ]
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, eval_h - Emu(180000), eval_paras)
+    y += eval_h + SEC_GAP
+
+    # --- LIMITATIONS & ETHICS ---
+    hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics', '9')
+    y += hdr_h
+
+    lim_h = Emu(2300000)
     _section_body(slide, x, y, col_w, lim_h)
 
     lim_paras = [
         {'text': 'Limitations:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 4},
-        _bullet('Closed-mode only \u2014 may not generalize to other domains'),
-        _bullet('English-only; cultural biases in writing patterns'),
-        _bullet('Style verification can be circumvented by imitation'),
-        _bullet('Neither surpasses BERT baseline (0.7854)'),
-        {'text': '', 'font_size': Pt(4), 'space_after': 6},
+         'font_size': BODY_FONT, 'bold': True, 'font_color': CORAL, 'space_after': 3},
+        _bullet('Closed-mode: may not generalize to unseen domains'),
+        _bullet('English-only; cultural writing biases not addressed'),
+        _bullet('Neither Sol 1 nor Sol 2 surpasses BERT baseline (0.7854)'),
+        _bullet('Style verification can be circumvented by imitation attacks'),
+        {'text': '', 'font_size': Pt(3), 'space_after': 4},
         {'text': 'Ethical Considerations:',
-         'font_size': BODY_FONT, 'bold': True, 'font_color': ACCENT_ORANGE, 'space_after': 4},
-        _bullet('Surveillance risk: deanonymization of whistleblowers'),
-        _bullet('False positives in forensic contexts cause serious harm'),
+         'font_size': BODY_FONT, 'bold': True, 'font_color': ACCENT_ORANGE, 'space_after': 3},
+        _bullet('Surveillance risk: could be misused for deanonymization'),
+        _bullet('False positives in forensic settings cause serious harm'),
+        _bullet('Should not be sole evidence in legal proceedings'),
     ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, lim_h - Emu(220000), lim_paras)
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, lim_h - Emu(180000), lim_paras)
     y += lim_h + SEC_GAP
 
     # --- REFERENCES ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Key References')
-    y += hdr_h
-
-    ref_h = Emu(1600000)
-    _section_body(slide, x, y, col_w, ref_h)
-
-    ref_paras = [
-        {'text': '[1] Stamatatos et al. (2023) Diff-Vectors for Authorship Analysis',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 3},
-        {'text': '[2] Ganin & Lempitsky (2015) Domain Adaptation by Backpropagation',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 3},
-        {'text': '[3] Abbasi & Chen (2008) Writeprints: Stylometric Identification',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 3},
-        {'text': '[4] Boenninghoff et al. (2019) AdHominem: Explainable AV',
-         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 3},
-    ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(130000),
-                  col_w - 2 * PAD_INNER, ref_h - Emu(220000), ref_paras)
-    y += ref_h
+    ref_remaining = bottom_limit - y
+    if ref_remaining > Emu(400000):
+        hdr_h = _section_header(slide, x, y, col_w, 'Key References')
+        y += hdr_h
+        ref_h = min(ref_remaining - hdr_h, Emu(1400000))
+        _section_body(slide, x, y, col_w, ref_h)
+        ref_paras = [
+            {'text': '[1] Stamatatos et al. (2023) Diff-Vectors for Authorship Analysis',
+             'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 2},
+            {'text': '[2] Ganin & Lempitsky (2015) Domain Adaptation by Backpropagation',
+             'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 2},
+            {'text': '[3] Abbasi & Chen (2008) Writeprints: Stylometric Identification',
+             'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 2},
+            {'text': '[4] Boenninghoff et al. (2019) AdHominem: Explainable AV',
+             'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 2},
+        ]
+        _rich_textbox(slide, x + PAD_INNER, y + Emu(100000),
+                      col_w - 2 * PAD_INNER, ref_h - Emu(160000), ref_paras)
 
     # =====================================================
     # FOOTER
     # =====================================================
     footer_y = SLIDE_H - footer_h
     _shape(slide, 0, footer_y, SLIDE_W, footer_h, NAVY_DARK)
-    _shape(slide, 0, footer_y, SLIDE_W, Emu(45000), TEAL)
+    _shape(slide, 0, footer_y, SLIDE_W, Emu(40000), TEAL)
 
-    _textbox(slide, Emu(600000), footer_y + Emu(110000),
-             SLIDE_W - Emu(1200000), footer_h - Emu(180000),
+    _textbox(slide, Emu(500000), footer_y + Emu(100000),
+             SLIDE_W - Emu(1000000), footer_h - Emu(160000),
              'COMP34812 Natural Language Understanding  \u2502  '
              'University of Manchester  \u2502  Group 34  \u2502  '
              '2025\u201326  \u2502  Closed Mode  \u2502  '
-             'github.com/ayush-kumar-prog',
-             Pt(22), RGBColor(0x99, 0xAA, 0xBB), bold=False,
+             'Predictions: Group_34_A.csv + Group_34_B.csv',
+             Pt(20), RGBColor(0x99, 0xAA, 0xBB), bold=False,
              alignment=PP_ALIGN.CENTER)
 
     # =====================================================
@@ -1183,7 +1206,6 @@ def create_poster():
     print(f"\n{'=' * 60}")
     print(f"  Poster saved to {OUTPUT_PATH}")
     print(f"  Slide dimensions: 33.1\" x 23.4\" (A1 landscape)")
-    print(f"  Export to PDF via PowerPoint/LibreOffice for print")
     print(f"{'=' * 60}")
 
 
