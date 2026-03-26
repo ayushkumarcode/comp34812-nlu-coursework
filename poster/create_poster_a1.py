@@ -75,19 +75,19 @@ C_GRAY = '#95A5A6'
 C_LIGHTBG = '#F5F7FA'
 
 # Font sizes (calibrated for A1 print at actual size)
-TITLE_FONT     = Pt(72)
-SUBTITLE_FONT  = Pt(34)
-HEADER_FONT    = Pt(36)
-BODY_FONT      = Pt(24)
-BODY_FONT_SM   = Pt(22)
-SMALL_FONT     = Pt(20)
-TINY_FONT      = Pt(18)
+TITLE_FONT     = Pt(66)
+SUBTITLE_FONT  = Pt(30)
+HEADER_FONT    = Pt(32)
+BODY_FONT      = Pt(22)
+BODY_FONT_SM   = Pt(20)
+SMALL_FONT     = Pt(18)
+TINY_FONT      = Pt(16)
 
 # Layout constants
-MARGIN     = Emu(600000)
-COL_GAP    = Emu(400000)
-SEC_GAP    = Emu(300000)
-PAD_INNER  = Emu(200000)
+MARGIN     = Emu(500000)
+COL_GAP    = Emu(350000)
+SEC_GAP    = Emu(200000)
+PAD_INNER  = Emu(180000)
 
 
 # ============================================================
@@ -594,27 +594,27 @@ def _rich_textbox(slide, left, top, width, height, paragraphs_data,
 
 def _section_header(slide, left, top, width, title, icon_text=None):
     """Add a professional section header with accent bar."""
-    h = Emu(680000)
+    h = Emu(560000)  # Compact header for A1
 
     _shape(slide, left, top, width, h, TEAL)
 
-    accent_w = Emu(80000)
+    accent_w = Emu(70000)
     _shape(slide, left, top, accent_w, h, DARK_TEAL)
 
     if icon_text:
-        _textbox(slide, left + Emu(120000), top + Emu(80000),
-                 Emu(380000), h - Emu(160000),
-                 icon_text, Pt(30), WHITE, bold=True,
+        _textbox(slide, left + Emu(100000), top + Emu(60000),
+                 Emu(340000), h - Emu(120000),
+                 icon_text, Pt(26), WHITE, bold=True,
                  alignment=PP_ALIGN.CENTER)
-        text_left = left + Emu(420000)
+        text_left = left + Emu(380000)
     else:
-        text_left = left + Emu(230000)
+        text_left = left + Emu(200000)
 
-    _textbox(slide, text_left, top + Emu(100000),
-             width - Emu(330000), h - Emu(200000),
+    _textbox(slide, text_left, top + Emu(75000),
+             width - Emu(290000), h - Emu(150000),
              title, HEADER_FONT, WHITE, bold=True)
 
-    _shape(slide, left, top + h - Emu(45000), width, Emu(45000), DARK_TEAL)
+    _shape(slide, left, top + h - Emu(40000), width, Emu(40000), DARK_TEAL)
 
     return h
 
@@ -702,37 +702,37 @@ def create_poster():
     fill.fore_color.rgb = RGBColor(0xF0, 0xF2, 0xF5)
 
     # =====================================================
-    # TITLE BANNER
+    # TITLE BANNER (compact for A1)
     # =====================================================
-    title_h = Emu(2500000)  # ~2.7"
+    title_h = Emu(2200000)  # ~2.4"
 
     _shape(slide, 0, 0, SLIDE_W, title_h, NAVY)
-    _shape(slide, 0, 0, SLIDE_W, Emu(70000), NAVY_DARK)
-    _shape(slide, 0, title_h - Emu(85000), SLIDE_W, Emu(85000), TEAL)
-    _shape(slide, 0, title_h - Emu(95000), SLIDE_W, Emu(12000), CORAL)
+    _shape(slide, 0, 0, SLIDE_W, Emu(60000), NAVY_DARK)
+    _shape(slide, 0, title_h - Emu(75000), SLIDE_W, Emu(75000), TEAL)
+    _shape(slide, 0, title_h - Emu(85000), SLIDE_W, Emu(10000), CORAL)
 
     # Title text
-    _textbox(slide, Emu(800000), Emu(180000),
-             SLIDE_W - Emu(1600000), Emu(1300000),
+    _textbox(slide, Emu(600000), Emu(130000),
+             SLIDE_W - Emu(1200000), Emu(1200000),
              'Authorship Verification: Combining Stylometric Feature\n'
              'Engineering with Adversarial Neural Style-Content Disentanglement',
-             Pt(60), WHITE, bold=True, alignment=PP_ALIGN.CENTER,
+             Pt(56), WHITE, bold=True, alignment=PP_ALIGN.CENTER,
              line_spacing=1.05)
 
     # Subtitle
-    _textbox(slide, Emu(800000), Emu(1550000),
-             SLIDE_W - Emu(1600000), Emu(400000),
+    _textbox(slide, Emu(600000), Emu(1400000),
+             SLIDE_W - Emu(1200000), Emu(350000),
              'COMP34812 Natural Language Understanding  |  Group 34  |  '
              'University of Manchester  |  2025\u201326',
-             Pt(30), RGBColor(0xBB, 0xCC, 0xDD), bold=False,
+             Pt(28), RGBColor(0xBB, 0xCC, 0xDD), bold=False,
              alignment=PP_ALIGN.CENTER)
 
     # Decorative dots
-    for dx in [Emu(500000), Emu(700000), Emu(900000)]:
-        _shape(slide, dx, Emu(2050000), Emu(45000), Emu(45000), TEAL)
-    for dx in [Emu(500000), Emu(700000), Emu(900000)]:
-        right_x = SLIDE_W - dx - Emu(45000)
-        _shape(slide, right_x, Emu(2050000), Emu(45000), Emu(45000), TEAL)
+    for dx in [Emu(400000), Emu(580000), Emu(760000)]:
+        _shape(slide, dx, Emu(1850000), Emu(40000), Emu(40000), TEAL)
+    for dx in [Emu(400000), Emu(580000), Emu(760000)]:
+        right_x = SLIDE_W - dx - Emu(40000)
+        _shape(slide, right_x, Emu(1850000), Emu(40000), Emu(40000), TEAL)
 
     # =====================================================
     # 3-COLUMN LAYOUT for A1 (more square ratio)
@@ -740,11 +740,11 @@ def create_poster():
     usable_w = SLIDE_W - 2 * MARGIN
     n_cols = 3
     col_w = (usable_w - (n_cols - 1) * COL_GAP) // n_cols
-    y_start = title_h + Emu(200000)
+    y_start = title_h + Emu(150000)
 
     # Footer area reservation
-    footer_h = Emu(500000)
-    bottom_limit = SLIDE_H - footer_h - Emu(200000)
+    footer_h = Emu(450000)
+    bottom_limit = SLIDE_H - footer_h - Emu(100000)
 
     col_x = []
     for i in range(n_cols):
@@ -769,7 +769,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Introduction', '\u2460')
     y += hdr_h
 
-    intro_h = Emu(3500000)
+    intro_h = Emu(3200000)
     _section_body(slide, x, y, col_w, intro_h)
 
     intro_paras = [
@@ -804,7 +804,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Dataset Summary', '\u2461')
     y += hdr_h
 
-    dataset_h = Emu(3000000)
+    dataset_h = Emu(2700000)
     _section_body(slide, x, y, col_w, dataset_h)
 
     dataset_paras = [
@@ -830,7 +830,7 @@ def create_poster():
                              'Solution 1: Stylometric Ensemble (Cat A)', '\u2462')
     y += hdr_h
 
-    sol1_h = Emu(5200000)
+    sol1_h = Emu(4800000)
     _section_body(slide, x, y, col_w, sol1_h)
 
     sol1_paras = [
@@ -873,15 +873,15 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Feature Group Breakdown')
     y += hdr_h
 
-    feat_chart_h = Emu(4800000)
+    feat_chart_h = Emu(4200000)
     _section_body(slide, x, y, col_w, feat_chart_h)
 
     if feat_path.exists():
-        img_margin = Emu(180000)
+        img_margin = Emu(150000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(4300000)
+        img_h = Emu(3800000)
         slide.shapes.add_picture(str(feat_path),
-                                  x + img_margin, y + Emu(250000),
+                                  x + img_margin, y + Emu(200000),
                                   img_w, img_h)
     y += feat_chart_h
 
@@ -896,7 +896,7 @@ def create_poster():
                              'Solution 2: Adversarial Disentanglement (Cat B)', '\u2463')
     y += hdr_h
 
-    sol2_h = Emu(4800000)
+    sol2_h = Emu(4200000)
     _section_body(slide, x, y, col_w, sol2_h)
 
     sol2_paras = [
@@ -932,15 +932,15 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Neural Architecture Diagram')
     y += hdr_h
 
-    arch_h = Emu(5800000)
+    arch_h = Emu(5000000)
     _section_body(slide, x, y, col_w, arch_h)
 
     if arch_path.exists():
-        img_margin = Emu(130000)
+        img_margin = Emu(120000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(5300000)
+        img_h = Emu(4500000)
         slide.shapes.add_picture(str(arch_path),
-                                  x + img_margin, y + Emu(250000),
+                                  x + img_margin, y + Emu(220000),
                                   img_w, img_h)
     y += arch_h + SEC_GAP
 
@@ -948,7 +948,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Results (Development Set)', '\u2464')
     y += hdr_h
 
-    results_h = Emu(4400000)
+    results_h = Emu(3800000)
     _section_body(slide, x, y, col_w, results_h)
 
     results_paras = [
@@ -1012,7 +1012,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Evaluation Methodology', '\u2465')
     y += hdr_h
 
-    eval_h = Emu(2600000)
+    eval_h = Emu(2400000)
     _section_body(slide, x, y, col_w, eval_h)
 
     eval_paras = [
@@ -1043,15 +1043,15 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Performance Comparison', '\u2466')
     y += hdr_h
 
-    f1_h = Emu(4600000)
+    f1_h = Emu(3800000)
     _section_body(slide, x, y, col_w, f1_h)
 
     if f1_path.exists():
-        img_margin = Emu(180000)
+        img_margin = Emu(150000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(4000000)
+        img_h = Emu(3300000)
         slide.shapes.add_picture(str(f1_path),
-                                  x + img_margin, y + Emu(300000),
+                                  x + img_margin, y + Emu(250000),
                                   img_w, img_h)
     y += f1_h + SEC_GAP
 
@@ -1059,15 +1059,15 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Confusion Matrices')
     y += hdr_h
 
-    cm_h = Emu(3800000)
+    cm_h = Emu(3200000)
     _section_body(slide, x, y, col_w, cm_h)
 
     if cm_path.exists():
         img_margin = Emu(100000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(3200000)
+        img_h = Emu(2700000)
         slide.shapes.add_picture(str(cm_path),
-                                  x + img_margin, y + Emu(300000),
+                                  x + img_margin, y + Emu(250000),
                                   img_w, img_h)
     y += cm_h + SEC_GAP
 
@@ -1075,7 +1075,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Error Analysis & Findings', '\u2467')
     y += hdr_h
 
-    error_h = Emu(4000000)
+    error_h = Emu(3500000)
     _section_body(slide, x, y, col_w, error_h)
 
     error_paras = [
@@ -1119,7 +1119,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics', '\u2468')
     y += hdr_h
 
-    lim_h = Emu(2700000)
+    lim_h = Emu(2500000)
     _section_body(slide, x, y, col_w, lim_h)
 
     lim_paras = [
@@ -1143,7 +1143,7 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Key References')
     y += hdr_h
 
-    ref_h = Emu(1800000)
+    ref_h = Emu(1600000)
     _section_body(slide, x, y, col_w, ref_h)
 
     ref_paras = [
