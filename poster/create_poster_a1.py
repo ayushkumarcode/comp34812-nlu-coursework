@@ -235,7 +235,7 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
     cm_a = confusion_matrix(gt, pred_a)
     cm_b = confusion_matrix(gt, pred_b)
 
-    fig, axes = plt.subplots(1, 2, figsize=(15, 6.5))
+    fig, axes = plt.subplots(1, 2, figsize=(15, 7))
 
     titles = ['Sol 1 (Cat A) \u2014 Stylometric LightGBM',
               'Sol 2 (Cat B) \u2014 Adversarial CNN-BiLSTM']
@@ -276,14 +276,14 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
         rec = recall_score(gt, preds, average='macro')
         f1 = f1_score(gt, preds, average='macro')
         acc = np.mean(gt == preds)
-        ax.text(0.5, -0.22,
+        ax.text(0.5, -0.25,
                 f'Acc={acc:.3f}  P={prec:.3f}  R={rec:.3f}  F1={f1:.4f}',
-                transform=ax.transAxes, ha='center', fontsize=13,
+                transform=ax.transAxes, ha='center', fontsize=14,
                 color='#444', fontweight='bold',
                 bbox=dict(boxstyle='round,pad=0.35', facecolor='#F5F5F5',
                           edgecolor='#CCC', alpha=0.9))
 
-    plt.tight_layout(w_pad=3.5, pad=2)
+    plt.tight_layout(w_pad=3.5, pad=2.5)
     path = POSTER_DIR / 'cm_a1.png'
     plt.savefig(str(path), dpi=300, bbox_inches='tight',
                 facecolor='white', edgecolor='none')
@@ -1058,7 +1058,7 @@ def create_poster():
     y += results_h + SEC_GAP
 
     # --- EVALUATION & CONCLUSIONS (moved to Column 2 for balance) ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Evaluation & Conclusions', '8')
+    hdr_h = _section_header(slide, x, y, col_w, 'Evaluation & Conclusions')
     y += hdr_h
 
     eval_h = Emu(2200000)
@@ -1089,7 +1089,7 @@ def create_poster():
     y = y_start
 
     # --- F1 BAR CHART ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Performance Comparison', '6')
+    hdr_h = _section_header(slide, x, y, col_w, 'Performance Comparison')
     y += hdr_h
 
     f1_h = Emu(3600000)
@@ -1121,7 +1121,7 @@ def create_poster():
     y += cm_h + SEC_GAP
 
     # --- ERROR ANALYSIS ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Error Analysis', '7')
+    hdr_h = _section_header(slide, x, y, col_w, 'Error Analysis', '6')
     y += hdr_h
 
     error_h = Emu(3200000)
@@ -1163,7 +1163,7 @@ def create_poster():
     y += error_h + SEC_GAP
 
     # --- LIMITATIONS & ETHICS ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics')
+    hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics', '7')
     y += hdr_h
 
     lim_h = Emu(2300000)
