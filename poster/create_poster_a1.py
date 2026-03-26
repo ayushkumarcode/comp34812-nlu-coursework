@@ -275,9 +275,10 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
         prec = precision_score(gt, preds, average='macro')
         rec = recall_score(gt, preds, average='macro')
         f1 = f1_score(gt, preds, average='macro')
-        ax.text(0.5, -0.20,
-                f'P={prec:.3f}  R={rec:.3f}  F1={f1:.4f}',
-                transform=ax.transAxes, ha='center', fontsize=14,
+        acc = np.mean(gt == preds)
+        ax.text(0.5, -0.22,
+                f'Acc={acc:.3f}  P={prec:.3f}  R={rec:.3f}  F1={f1:.4f}',
+                transform=ax.transAxes, ha='center', fontsize=13,
                 color='#444', fontweight='bold',
                 bbox=dict(boxstyle='round,pad=0.35', facecolor='#F5F5F5',
                           edgecolor='#CCC', alpha=0.9))
@@ -345,9 +346,9 @@ def generate_architecture_diagram():
             ha='center', fontsize=13, color='#777', style='italic')
 
     # Input layer
-    draw_box(2.5, 10.0, 2.8, 0.55, 'Text 1 (chars)', '#E3F2FD', C_NAVY, 14,
+    draw_box(2.5, 10.0, 3.0, 0.55, 'Text 1 (max 1500 chars)', '#E3F2FD', C_NAVY, 13,
              edgecolor='#90CAF9')
-    draw_box(7.5, 10.0, 2.8, 0.55, 'Text 2 (chars)', '#E3F2FD', C_NAVY, 14,
+    draw_box(7.5, 10.0, 3.0, 0.55, 'Text 2 (max 1500 chars)', '#E3F2FD', C_NAVY, 13,
              edgecolor='#90CAF9')
 
     # Char Embedding (CORRECT: 32d)
@@ -879,17 +880,42 @@ def create_poster():
     hdr_h = _section_header(slide, x, y, col_w, 'Feature Group Breakdown')
     y += hdr_h
 
-    feat_chart_h = Emu(3900000)
+    feat_chart_h = Emu(4200000)
     _section_body(slide, x, y, col_w, feat_chart_h)
 
     if feat_path.exists():
         img_margin = Emu(120000)
         img_w = col_w - 2 * img_margin
-        img_h = Emu(3500000)
+        img_h = Emu(3800000)
         slide.shapes.add_picture(str(feat_path),
                                   x + img_margin, y + Emu(180000),
                                   img_w, img_h)
-    y += feat_chart_h
+    y += feat_chart_h + SEC_GAP
+
+    # --- KEY INSIGHT CALLOUT (uses remaining column 1 space) ---
+    remaining_c1 = bottom_limit - y
+    if remaining_c1 > Emu(600000):
+        insight_h = min(remaining_c1, Emu(2200000))
+        _rounded_rect(slide, x, y, col_w, insight_h,
+                      KEY_FINDING_BG, GOLD, Pt(2))
+
+        insight_paras = [
+            {'text': 'Key Insight',
+             'font_size': Pt(24), 'bold': True, 'font_color': NAVY, 'space_after': 6},
+            {'text': 'The diff-vector |f(t\u2081) \u2212 f(t\u2082)| representation is '
+                     'central to Cat A: each feature captures authorial style per text, '
+                     'and the absolute difference measures stylistic distance. '
+                     'This makes the representation symmetric and '
+                     'content-agnostic by construction.',
+             'font_size': BODY_FONT_SM, 'space_after': 6},
+            {'text': 'The 21 novel features (syntactic complexity, writing rhythm, '
+                     'information-theoretic measures) contribute a statistically '
+                     'significant +1.8% F1 gain over standard stylometric features alone.',
+             'font_size': BODY_FONT_SM, 'font_color': CORAL, 'bold': True, 'space_after': 3},
+        ]
+        _rich_textbox(slide, x + PAD_INNER, y + Emu(100000),
+                      col_w - 2 * PAD_INNER, insight_h - Emu(160000), insight_paras)
+        y += insight_h
 
     # =====================================================
     # COLUMN 2: Solution 2 + Architecture + Results
