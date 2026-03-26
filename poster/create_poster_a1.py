@@ -958,7 +958,7 @@ def create_poster():
         _bullet('Lambda ramp: 0 -> 0.05 over 20 epochs; topic_weight=0.02'),
         _bullet('Forces topic-invariant style representations'),
         {'text': '', 'font_size': Pt(3), 'space_after': 5},
-        {'text': 'Training: lr=2e-4, batch=64, 40 epochs, char perturbation aug',
+        {'text': 'Training: AdamW lr=2e-4, cosine scheduler, early stopping, char augmentation',
          'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 3},
     ]
     _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
