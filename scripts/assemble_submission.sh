@@ -47,7 +47,7 @@ cp models/av_cat_a_cosine.joblib submission/models/ 2>/dev/null
 
 # README and poster
 cp README.md submission/
-cp poster/poster.pptx submission/ 2>/dev/null
+cp poster/poster_av.pptx submission/poster.pptx 2>/dev/null || cp poster/poster.pptx submission/ 2>/dev/null
 
 echo ""
 echo "Contents:"
