@@ -1,7 +1,11 @@
 """
-AV Category B — Training script.
+AV Category B — Training script (v3, final).
 Adversarial Style-Content Disentanglement Network.
-Composite loss: BCE + Contrastive + Domain Adversarial.
+Loss: BCE + Topic Adversarial (NO contrastive loss).
+Optimizer: AdamW, lr=2e-4, weight_decay=1e-4.
+Scheduler: CosineAnnealingWarmRestarts, T_0=30, T_mult=2.
+GRL: lambda ramps 0->0.05 over epochs 1-20. Topic weight 0.02 from epoch 15.
+Patience: 20, max_epochs: 120.
 """
 
 import sys
@@ -26,11 +30,9 @@ from src.data_utils import load_av_data, load_solution_labels, save_predictions
 from src.scorer import compute_all_metrics, print_metrics
 
 
-def train_epoch(model, dataloader, optimizer, device, epoch,
-                bce_loss_fn, contrastive_loss_fn,
-                topic_loss_fn, contrastive_weight=0.2,
-                topic_weight=0.1, grl_lambda=0.1):
-    """Train for one epoch."""
+def train_epoch(model, dataloader, optimizer, device,
+                bce_loss_fn, topic_loss_fn, topic_weight=0.02):
+    """Train for one epoch with BCE + optional topic adversarial loss."""
     model.train()
     total_loss = 0
     all_preds = []
@@ -43,31 +45,17 @@ def train_epoch(model, dataloader, optimizer, device, epoch,
 
         optimizer.zero_grad()
 
-        # Forward pass
-        logits, topic_logits, (v1, v2, _, _) = model(
+        logits, topic_logits, _ = model(
             char_1, char_2, return_embeddings=True
         )
 
-        # BCE loss
-        loss_bce = bce_loss_fn(logits.squeeze(-1), labels)
+        # BCE loss (primary)
+        loss = bce_loss_fn(logits.squeeze(-1), labels)
 
-        # Contrastive loss (cosine embedding)
-        # target: +1 for same-author, -1 for different-author
-        contrastive_target = labels * 2 - 1  # 0 -> -1, 1 -> +1
-        loss_contrastive = contrastive_loss_fn(v1, v2, contrastive_target)
-
-        # Topic adversarial loss
-        loss_topic = torch.tensor(0.0, device=device)
-        if 'topic' in batch and topic_weight > 0:
+        # Topic adversarial loss (secondary)
+        if topic_weight > 0 and 'topic' in batch:
             topic_labels = batch['topic'].to(device)
-            loss_topic = topic_loss_fn(topic_logits, topic_labels)
-
-        # Total loss — weights control introduction
-        loss = loss_bce
-        if contrastive_weight > 0:
-            loss = loss + contrastive_weight * loss_contrastive
-        if topic_weight > 0:
-            loss = loss + topic_weight * loss_topic
+            loss = loss + topic_weight * topic_loss_fn(topic_logits, topic_labels)
 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
@@ -109,7 +97,8 @@ def evaluate(model, dataloader, device):
 
 def main():
     print("=" * 60)
-    print("  AV Category B — Training")
+    print("  AV Category B — Training (v3, final)")
+    print("  BCE + Topic Adversarial, lr=2e-4, no contrastive")
     print("=" * 60)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -126,7 +115,6 @@ def main():
     print("\n[2/5] Generating topic labels...")
     all_texts = list(train_df['text_1']) + list(train_df['text_2'])
     topic_labels_all = generate_topic_labels(all_texts, n_clusters=10)
-    # Use text_1 topic labels for each pair
     train_topic = topic_labels_all[:len(train_df)]
     num_topics = int(topic_labels_all.max()) + 1
 
@@ -138,14 +126,15 @@ def main():
     dev_dataset = AVCharDataset(
         dev_df, max_len=1500, augment=False, topic_labels=None
     )
-    # Add labels to dev dataset
     dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
 
     train_loader = DataLoader(
-        train_dataset, batch_size=64, shuffle=True, num_workers=4, pin_memory=True
+        train_dataset, batch_size=64, shuffle=True,
+        num_workers=4, pin_memory=True
     )
     dev_loader = DataLoader(
-        dev_dataset, batch_size=64, shuffle=False, num_workers=4, pin_memory=True
+        dev_dataset, batch_size=64, shuffle=False,
+        num_workers=4, pin_memory=True
     )
 
     # Build model
@@ -157,46 +146,44 @@ def main():
         lstm_hidden=128,
         proj_dim=128,
         num_topics=num_topics,
-        grl_lambda=0.0,  # Start at 0, ramp up
+        grl_lambda=0.0,
     ).to(device)
     total_params = sum(p.numel() for p in model.parameters())
     print(f"  Total parameters: {total_params:,}")
 
-    # Loss functions
+    # Loss functions (NO contrastive loss in v3)
     bce_loss_fn = nn.BCEWithLogitsLoss()
-    contrastive_loss_fn = nn.CosineEmbeddingLoss(margin=0.3)
     topic_loss_fn = nn.CrossEntropyLoss()
 
-    # Optimizer and scheduler
-    optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
-    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=1e-6)
+    # Optimizer and scheduler (v3: lr=2e-4, T_0=30)
+    optimizer = AdamW(model.parameters(), lr=2e-4, weight_decay=1e-4)
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=30, T_mult=2)
 
     # Training loop
     print("\n[5/5] Training...")
     best_f1 = 0.0
     patience_counter = 0
-    max_epochs = 80
-    patience = 12
+    max_epochs = 120
+    patience = 20
     save_dir = PROJECT_ROOT / 'models'
     save_dir.mkdir(exist_ok=True)
 
     for epoch in range(1, max_epochs + 1):
         t0 = time.time()
 
-        # Ramp GRL lambda slowly
-        if epoch <= 10:
-            grl_lambda = 0.05 * epoch / 10
+        # GRL lambda: ramp 0 -> 0.05 over epochs 1-20
+        if epoch <= 20:
+            grl_lambda = 0.05 * epoch / 20
         else:
             grl_lambda = 0.05
         model.grl.lambda_val = grl_lambda
 
-        # Train — BCE-only for stability, add contrastive after epoch 15
-        c_weight = 0.05 if epoch >= 15 else 0.0
-        t_weight = 0.02 if epoch >= 10 else 0.0
+        # Topic weight: 0.02 from epoch 15 onward
+        t_weight = 0.02 if epoch >= 15 else 0.0
+
         train_loss, train_f1 = train_epoch(
-            model, train_loader, optimizer, device, epoch,
-            bce_loss_fn, contrastive_loss_fn, topic_loss_fn,
-            contrastive_weight=c_weight,
+            model, train_loader, optimizer, device,
+            bce_loss_fn, topic_loss_fn,
             topic_weight=t_weight,
         )
         scheduler.step()
@@ -208,7 +195,7 @@ def main():
         elapsed = time.time() - t0
         print(f"Epoch {epoch:3d} | Loss: {train_loss:.4f} | "
               f"Train F1: {train_f1:.4f} | Dev F1: {dev_f1:.4f} | "
-              f"GRL λ: {grl_lambda:.3f} | Time: {elapsed:.1f}s")
+              f"GRL: {grl_lambda:.3f} | Time: {elapsed:.1f}s")
 
         # Save best model
         if dev_f1 > best_f1:
@@ -227,7 +214,9 @@ def main():
     print(f"  Best dev macro_f1: {best_f1:.4f}")
     print("=" * 60)
 
-    model.load_state_dict(torch.load(save_dir / 'av_cat_b_best.pt', weights_only=True))
+    model.load_state_dict(
+        torch.load(save_dir / 'av_cat_b_best.pt', weights_only=True)
+    )
     dev_preds, dev_probs, dev_true = evaluate(model, dev_loader, device)
     metrics = compute_all_metrics(dev_true, dev_preds)
     print_metrics(metrics, "AV Cat B — Final Dev Results")
