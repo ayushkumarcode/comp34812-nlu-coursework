@@ -1075,8 +1075,9 @@ def create_poster():
         {'text': 'Key Conclusions:',
          'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 3},
         _bullet('Both solutions significantly outperform their baselines'),
-        _bullet('Complementary approaches: feature engineering + neural'),
-        _bullet('Novel features and adversarial debiasing add measurable value'),
+        _bullet('Sol 1 excels at detecting different authors (75.6% acc)'),
+        _bullet('Sol 2 excels at confirming same author (75.1% acc)'),
+        _bullet('Complementary strengths suggest ensemble potential'),
     ]
     _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
                   col_w - 2 * PAD_INNER, eval_h - Emu(180000), eval_paras)
