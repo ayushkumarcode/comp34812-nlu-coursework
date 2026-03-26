@@ -735,8 +735,8 @@ def create_poster():
     # Title
     _textbox(slide, Emu(500000), Emu(120000),
              SLIDE_W - Emu(1000000), Emu(1100000),
-             'Authorship Verification: Combining Stylometric Feature\n'
-             'Engineering with Adversarial Neural Style-Content Disentanglement',
+             'Authorship Verification: Combining Stylometric Feature Engineering\n'
+             'with Adversarial Neural Style-Content Disentanglement',
              Pt(54), WHITE, bold=True, alignment=PP_ALIGN.CENTER,
              line_spacing=1.05)
 
