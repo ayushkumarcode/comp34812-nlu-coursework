@@ -421,8 +421,8 @@ def generate_architecture_diagram():
     draw_box(7.2, 1.65, 3.6, 0.6, 'GRL -> Topic Head', C_CORAL, 'white', 13, linewidth=2.5)
     ax.text(7.2, 1.0, 'Gradient Reversal Layer',
             ha='center', fontsize=11, color=C_CORAL, fontweight='bold')
-    ax.text(7.2, 0.6, 'lambda ramp 0->0.05 over 20 epochs',
-            ha='center', fontsize=9, color='#999', style='italic')
+    ax.text(7.2, 0.55, 'lambda: 0 -> 0.05 over 20 epochs',
+            ha='center', fontsize=10, color='#888', style='italic')
 
     arrow(4.0, 2.82, 3.0, 1.95, C_GREEN, 2)
     arrow(6.0, 2.82, 7.2, 1.95, C_CORAL, 2)
