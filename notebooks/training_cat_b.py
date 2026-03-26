@@ -2,11 +2,9 @@
 COMP34812 — Solution 2 (Category B) Training Notebook
 Group 34
 
-Neural architecture training for Authorship Verification / NLI.
-- AV: Adversarial Style-Content Disentanglement Network (Siamese Char-CNN+BiLSTM+GRL)
-- NLI: ESIM + KIM (BiLSTM + Cross-Attention + WordNet Knowledge)
+AV: Adversarial Style-Content Disentanglement Network (Siamese Char-CNN+BiLSTM+GRL)
 
-To convert: jupyter nbconvert --to notebook training_cat_b.py
+To convert: python scripts/convert_to_ipynb.py notebooks/training_cat_b.py
 """
 
 # %% [markdown]
@@ -14,8 +12,9 @@ To convert: jupyter nbconvert --to notebook training_cat_b.py
 # ## Adversarial Style-Content Disentanglement Network
 #
 # This notebook trains our Category B solution: a Siamese neural network
-# with character-level CNN, BiLSTM, additive attention, gradient reversal
-# for topic debiasing, and contrastive embedding loss.
+# with character-level CNN, BiLSTM, additive attention, and gradient reversal
+# for topic adversarial debiasing. NO contrastive loss is used in the final
+# version (v3) -- only BCE + topic adversarial CrossEntropy.
 
 # %%
 # !pip install torch scikit-learn numpy pandas tqdm
@@ -51,6 +50,7 @@ print(f"Train: {len(train_df)}, Dev: {len(dev_df)}")
 all_texts = list(train_df['text_1']) + list(train_df['text_2'])
 topic_labels = generate_topic_labels(all_texts, n_clusters=10)
 train_topics = topic_labels[:len(train_df)]
+num_topics = int(topic_labels.max()) + 1
 
 # %% [markdown]
 # ## 2. Create Datasets
@@ -62,42 +62,44 @@ train_dataset = AVCharDataset(train_df, max_len=1500, augment=True, topic_labels
 dev_dataset = AVCharDataset(dev_df, max_len=1500, augment=False)
 dev_dataset.labels = np.array(dev_labels, dtype=np.float32)
 
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=4)
-dev_loader = DataLoader(dev_dataset, batch_size=64, shuffle=False, num_workers=4)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=4, pin_memory=True)
+dev_loader = DataLoader(dev_dataset, batch_size=64, shuffle=False, num_workers=4, pin_memory=True)
 
 # %% [markdown]
 # ## 3. Build Model
 #
 # Architecture:
-# - Character Embedding (32d) -> Multi-width Conv1D (3,5,7) -> MaxPool
-# - BiLSTM (128 hidden) -> Additive Attention
+# - Character Embedding (32d) -> Multi-width Conv1D (3,5,7, 128 filters each) -> MaxPool
+# - BiLSTM (128 hidden, bidirectional) -> Additive Attention
 # - Projection to 128d style embedding
-# - Comparison: [v1, v2, |v1-v2|, v1*v2] -> MLP
-# - GRL topic adversarial head for style-content disentanglement
+# - Comparison: [v1, v2, |v1-v2|, v1*v2] = 512d -> MLP(512->256->64->1)
+# - GRL topic adversarial head (128->64->num_topics)
 
 # %%
-num_topics = int(topic_labels.max()) + 1
 model = AVCatBModel(
     vocab_size=VOCAB_SIZE, char_emb_dim=32,
     cnn_filters=128, lstm_hidden=128,
     proj_dim=128, num_topics=num_topics,
+    grl_lambda=0.0,  # Starts at 0, ramps to 0.05
 ).to(device)
 
 print(f"Parameters: {sum(p.numel() for p in model.parameters()):,}")
 
 # %% [markdown]
-# ## 4. Training Loop
-# See src/training/train_av_cat_b.py for the full training procedure.
-# Key training details:
-# - Composite loss: BCE + 0.2*Contrastive + 0.1*Adversarial
-# - AdamW optimizer, lr=1e-3, cosine annealing
-# - GRL lambda ramps from 0 to 0.1 over first 5 epochs
-# - Contrastive loss introduced at epoch 2
+# ## 4. Training Configuration
+#
+# Key training details (v3 — final version):
+# - Loss: BCE + topic adversarial ONLY (NO contrastive loss)
+# - AdamW optimizer, lr=2e-4, weight_decay=1e-4
+# - CosineAnnealingWarmRestarts scheduler, T_0=30, T_mult=2
+# - GRL lambda: linear ramp 0 -> 0.05 over epochs 1-20
+# - Topic adversarial weight: 0.02, introduced from epoch 15
 # - Character perturbation augmentation (5% per-char)
 # - Random truncation (80-100%) during training
-# - Early stopping with patience=7 on dev macro_f1
+# - Early stopping with patience=20 on dev macro_f1
+# - Gradient clipping: max_norm=5.0
 
 # %%
-print("Training details in src/training/train_av_cat_b.py")
-print("Run: python -m src.training.train_av_cat_b")
-print("Or:  sbatch scripts/train_av_cat_b.sh (GPU cluster)")
+print("Full training code: scripts/iter_av_b_v3.py")
+print("Run on GPU: python scripts/iter_av_b_v3.py")
+print("Or: sbatch scripts/train_av_cat_b.sh (CSF3 GPU cluster)")
