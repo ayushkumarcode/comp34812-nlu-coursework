@@ -172,27 +172,19 @@ def generate_f1_chart():
             path_effects.withStroke(linewidth=3, foreground='white')
         ])
 
-    # Significance stars
-    ax.text(3, scores[3] + 0.035, '***', fontsize=24, fontweight='bold',
-            ha='center', va='bottom', color=C_GREEN)
-    ax.text(4, scores[4] + 0.035, '***', fontsize=24, fontweight='bold',
-            ha='center', va='bottom', color=C_ORANGE)
+    # Improvement annotations — inside bars at bottom
+    ax.text(3, 0.08, '+30.8%\nvs SVM ***', fontsize=12,
+            fontweight='bold', color='white', ha='center', va='bottom',
+            bbox=dict(boxstyle='round,pad=0.25', facecolor=C_GREEN,
+                      edgecolor='white', alpha=0.85, linewidth=1.5))
 
-    # Clean improvement annotations — positioned below bars, no overlap
-    ax.text(3, 0.36, '+30.8% vs SVM', fontsize=14,
-            fontweight='bold', color='white', ha='center', va='center',
-            bbox=dict(boxstyle='round,pad=0.35', facecolor=C_GREEN,
-                      edgecolor='#1B8C4F', alpha=0.95))
+    ax.text(4, 0.08, '+19.2%\nvs LSTM ***', fontsize=12,
+            fontweight='bold', color='white', ha='center', va='bottom',
+            bbox=dict(boxstyle='round,pad=0.25', facecolor=C_ORANGE,
+                      edgecolor='white', alpha=0.85, linewidth=1.5))
 
-    ax.text(4, 0.36, '+19.2% vs LSTM', fontsize=14,
-            fontweight='bold', color='white', ha='center', va='center',
-            bbox=dict(boxstyle='round,pad=0.35', facecolor=C_ORANGE,
-                      edgecolor='#C56E1A', alpha=0.95))
-
-    # BERT baseline reference line
-    ax.axhline(y=0.7854, color='#BDC3C7', linestyle=':', linewidth=2, alpha=0.5)
-    ax.text(4.4, 0.788, 'BERT baseline', fontsize=12, color='#AAA',
-            ha='right', style='italic')
+    # BERT baseline reference line (no label -- already has score above bar)
+    ax.axhline(y=0.7854, color='#BDC3C7', linestyle=':', linewidth=1.5, alpha=0.4)
 
     ax.set_ylabel('Macro F1 Score', fontsize=20, fontweight='bold',
                    labelpad=12, color=C_DARK)
@@ -222,9 +214,9 @@ def generate_f1_chart():
               fontsize=14, loc='upper left', framealpha=0.95,
               edgecolor='#CCCCCC', fancybox=True)
 
-    ax.text(0.98, 0.02, '*** p < 0.001 (McNemar\'s test)',
-            transform=ax.transAxes, ha='right', fontsize=11,
-            color='#999999', style='italic')
+    ax.text(0.98, 0.97, '*** p < 0.001 (McNemar\'s test)',
+            transform=ax.transAxes, ha='right', va='top', fontsize=12,
+            color='#888888', style='italic')
 
     plt.tight_layout(pad=1.2)
     path = POSTER_DIR / 'f1_chart_a1.png'
@@ -375,10 +367,10 @@ def generate_architecture_diagram():
             fontweight='bold', color=C_NAVY)
 
     # MaxPool + concat annotation
-    ax.text(2.5, 7.3, 'MaxPool(3) + Concat -> 384d', ha='center', fontsize=10,
-            color='#888', style='italic')
-    ax.text(7.5, 7.3, 'MaxPool(3) + Concat -> 384d', ha='center', fontsize=10,
-            color='#888', style='italic')
+    ax.text(2.5, 7.3, 'MaxPool(3) + Concat = 384d', ha='center', fontsize=11,
+            color='#666', style='italic', fontweight='bold')
+    ax.text(7.5, 7.3, 'MaxPool(3) + Concat = 384d', ha='center', fontsize=11,
+            color='#666', style='italic', fontweight='bold')
 
     # BiLSTM (CORRECT: 128 hidden, 256 output)
     draw_box(2.5, 6.55, 3.2, 0.55, 'BiLSTM (128h -> 256d)', '#1565C0', 'white', 12)
@@ -1037,10 +1029,35 @@ def create_poster():
     ]
     _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
                   col_w - 2 * PAD_INNER, results_h - Emu(180000), results_paras)
-    y += results_h
+    y += results_h + SEC_GAP
+
+    # --- EVALUATION & CONCLUSIONS (moved to Column 2 for balance) ---
+    hdr_h = _section_header(slide, x, y, col_w, 'Evaluation & Conclusions', '8')
+    y += hdr_h
+
+    eval_h = Emu(2200000)
+    _section_body(slide, x, y, col_w, eval_h)
+
+    eval_paras = [
+        {'text': 'Evaluation Methods:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 3},
+        _bullet('Macro F1 (primary), MCC, per-class P/R'),
+        _bullet('McNemar\u2019s paired significance test (p < 0.001)'),
+        _bullet('Feature ablation (Sol 1) + GRL ablation (Sol 2)'),
+        _bullet('Inter-model agreement (Cohen\u2019s \u03ba \u2248 0.40)'),
+        {'text': '', 'font_size': Pt(3), 'space_after': 4},
+        {'text': 'Key Conclusions:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 3},
+        _bullet('Both solutions significantly outperform their baselines'),
+        _bullet('Complementary approaches: feature engineering + neural'),
+        _bullet('Novel features and adversarial debiasing add measurable value'),
+    ]
+    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
+                  col_w - 2 * PAD_INNER, eval_h - Emu(180000), eval_paras)
+    y += eval_h
 
     # =====================================================
-    # COLUMN 3: Charts + Error Analysis + Evaluation + Ethics
+    # COLUMN 3: Charts + Error Analysis + Ethics + References
     # =====================================================
     x = col_x[2]
     y = y_start
@@ -1120,26 +1137,8 @@ def create_poster():
                   col_w - 2 * PAD_INNER, error_h - Emu(180000), error_paras)
     y += error_h + SEC_GAP
 
-    # --- EVALUATION METHODOLOGY ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Evaluation Methodology', '8')
-    y += hdr_h
-
-    eval_h = Emu(1800000)
-    _section_body(slide, x, y, col_w, eval_h)
-
-    eval_paras = [
-        _bullet('Macro F1 (primary), MCC, per-class Precision/Recall'),
-        _bullet('McNemar\u2019s test for paired significance testing'),
-        _bullet('Feature ablation study (Sol 1) + GRL ablation (Sol 2)'),
-        _bullet('Inter-model agreement analysis (Cohen\u2019s \u03ba)'),
-        _bullet('Cross-domain error stratification'),
-    ]
-    _rich_textbox(slide, x + PAD_INNER, y + Emu(110000),
-                  col_w - 2 * PAD_INNER, eval_h - Emu(180000), eval_paras)
-    y += eval_h + SEC_GAP
-
     # --- LIMITATIONS & ETHICS ---
-    hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics', '9')
+    hdr_h = _section_header(slide, x, y, col_w, 'Limitations & Ethics')
     y += hdr_h
 
     lim_h = Emu(2300000)
