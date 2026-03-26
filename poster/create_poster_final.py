@@ -156,7 +156,7 @@ def generate_f1_chart():
               'Sol 1\n(Cat A)', 'Sol 2\n(Cat B)']
     scores = [0.5610, 0.6226, 0.7854, 0.7340, 0.7422]
 
-    fig, ax = plt.subplots(figsize=(14, 9))
+    fig, ax = plt.subplots(figsize=(14, 6))
 
     # Colors with gradient effect via edge
     bar_colors = ['#B0BEC5', '#B0BEC5', '#B0BEC5', C_GREEN, C_ORANGE]
@@ -253,7 +253,7 @@ def generate_confusion_matrices(gt, pred_a, pred_b):
     cm_a = confusion_matrix(gt, pred_a)
     cm_b = confusion_matrix(gt, pred_b)
 
-    fig, axes = plt.subplots(1, 2, figsize=(18, 8))
+    fig, axes = plt.subplots(1, 2, figsize=(18, 6))
 
     titles = ['Solution 1 (Cat A)\nStylometric LightGBM Ensemble',
               'Solution 2 (Cat B)\nAdversarial CNN-BiLSTM']
@@ -318,9 +318,9 @@ def generate_architecture_diagram():
     # Use DejaVu Sans for architecture to avoid missing glyph issues
     plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial']
 
-    fig, ax = plt.subplots(figsize=(15, 11))
+    fig, ax = plt.subplots(figsize=(15, 9))
     ax.set_xlim(-0.5, 10.5)
-    ax.set_ylim(-0.5, 11)
+    ax.set_ylim(-1.0, 11)
     ax.axis('off')
     fig.patch.set_facecolor('white')
 
@@ -476,7 +476,7 @@ def generate_feature_groups_chart():
     colors = [C_CORAL if n else C_TEAL for n in is_novel]
     edge_colors = ['#C43350' if n else '#1E6E8E' for n in is_novel]
 
-    fig, ax = plt.subplots(figsize=(13, 8))
+    fig, ax = plt.subplots(figsize=(13, 7))
     y_pos = np.arange(len(groups))
 
     bars = ax.barh(y_pos, counts, color=colors, edgecolor=edge_colors,
