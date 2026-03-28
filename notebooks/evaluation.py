@@ -81,10 +81,28 @@ print(f"Baselines loaded: {list(baselines.keys())}")
 dev_df = load_av_data(split='dev')
 print(f"Dev data: {len(dev_df)} pairs")
 
-# Sol 1 and Sol 2 dev predictions generated below
-y_pred_sol1 = np.zeros(len(dev_df), dtype=int)  # placeholder
-y_pred_sol2 = np.zeros(len(dev_df), dtype=int)  # placeholder
+# %% [markdown]
+# ### Solution 1 — Cat A (LightGBM) dev inference
+
+# %%
+# Generate Sol 1 dev predictions: load saved model artifacts, extract features
+sol1_scaler = joblib.load('models/av_cat_a_scaler.joblib')
+sol1_model = joblib.load('models/av_cat_a_lgbm.joblib')
+sol1_feat_names = joblib.load('models/av_cat_a_feature_names.joblib')
+
+extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
+extractor.tfidf = joblib.load('models/av_cat_a_tfidf.joblib')
+extractor.cosine = joblib.load('models/av_cat_a_cosine.joblib')
+extractor._fitted = True
+extractor._feature_names = sol1_feat_names
+
+X_dev, _ = extractor.transform(dev_df)
+X_dev_scaled = sol1_scaler.transform(X_dev)
+y_pred_sol1 = sol1_model.predict(X_dev_scaled)
 print(f"Solution 1 predictions: {len(y_pred_sol1)}")
+
+# Sol 2 placeholder — replaced in next commit
+y_pred_sol2 = np.zeros(len(dev_df), dtype=int)
 print(f"Solution 2 predictions: {len(y_pred_sol2)}")
 
 # %% [markdown]
