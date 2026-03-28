@@ -6,14 +6,14 @@ This repo has our two solutions for the COMP34812 AV shared task. The goal's pre
 
 We're submitting one solution from Category A and one from Category B:
 
-### Solution 1: Category A — LightGBM with Comprehensive Stylometric Features (F1=0.7340)
+### Solution 1: Cat A -- LightGBM + Stylometric Features (F1=0.7340)
 
-~695 features per text pair across 9 feature groups:
-- Lexical, character, function word, POS tag, structural features
-- Novel: syntactic complexity profiling, writing rhythm analysis, information-theoretic signatures
-- Diff-vector |f(text1) - f(text2)| + style-only diff-vector (topic-robustness)
-- Pairwise: NCD (gzip/lzma/bz2), cosine similarity, JSD, Burrows' Delta
-- LightGBM classifier (1000 trees, max_depth=7, lr=0.05)
+We built about 695 handcrafted features per text pair from 9 groups:
+- The usual stuff: lexical, character-level, function words, POS tags, structural
+- Three novel groups we came up with: syntactic complexity profiling, writing rhythm, and information-theoretic signatures
+- Diff-vector |f(text1) - f(text2)| plus a style-only diff-vector for topic robustness
+- Pairwise similarity measures: NCD (gzip/lzma/bz2), cosine sim, JSD, Burrows' Delta
+- LightGBM on top (1000 trees, max_depth=7, lr=0.05)
 
 ### Solution 2: Category B — Adversarial Style-Content Disentanglement Network (F1=0.7422)
 
