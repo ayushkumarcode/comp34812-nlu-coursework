@@ -992,3 +992,31 @@ def create_poster():
         {'runs': [
             {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
             {'text': 'Closed-mode training only — may not generalize to '
+                     'other domains or languages', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'English-only; cultural biases in "standard" writing patterns',
+             'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Style-based verification can be circumvented by '
+                     'deliberate style imitation', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 10},
+        {'text': 'Ethical Considerations:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': ACCENT_ORANGE, 'space_after': 4},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Potential misuse: surveillance, deanonymization of '
+                     'whistleblowers or activists', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Risk of false positives in forensic applications',
+             'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+    ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), limits_h - Emu(200000), limits_paras)
+
