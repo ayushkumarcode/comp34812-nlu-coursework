@@ -30,18 +30,7 @@ def confusion_matrix_stats(y_true, y_pred):
 
 
 def mcnemars_test(y_true, y_pred_a, y_pred_b):
-    """Perform McNemar's test comparing two classifiers.
-
-    Tests whether the two classifiers have the same error rate.
-
-    Args:
-        y_true: Ground truth labels.
-        y_pred_a: Predictions from classifier A (e.g., baseline).
-        y_pred_b: Predictions from classifier B (e.g., our model).
-
-    Returns:
-        Dict with contingency table, chi2 statistic, p-value, and significance.
-    """
+    """McNemar's test with continuity correction. Returns chi2, p-value, etc."""
     y_true = np.asarray(y_true, dtype=int)
     y_pred_a = np.asarray(y_pred_a, dtype=int)
     y_pred_b = np.asarray(y_pred_b, dtype=int)
@@ -56,7 +45,6 @@ def mcnemars_test(y_true, y_pred_a, y_pred_b):
 
     contingency = np.array([[n00, n01], [n10, n11]])
 
-    # McNemar's test (with continuity correction)
     b = float(n01)
     c = float(n10)
 
