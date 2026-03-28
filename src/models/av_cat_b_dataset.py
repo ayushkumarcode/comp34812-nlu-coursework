@@ -107,18 +107,7 @@ class AVCharDataset(Dataset):
 
 
 def generate_topic_labels(texts, n_clusters=10):
-    """Generate topic pseudo-labels via TF-IDF + K-Means clustering.
-
-    First tries heuristic corpus-type labels, falls back to clustering.
-
-    Args:
-        texts: List of text strings.
-        n_clusters: Number of K-Means clusters.
-
-    Returns:
-        numpy array of topic labels, int.
-    """
-    # Try heuristic labels first
+    """Generate topic pseudo-labels. Tries heuristic first, falls back to K-Means."""
     labels = []
     for text in texts:
         if _is_email(text):
@@ -133,12 +122,10 @@ def generate_topic_labels(texts, n_clusters=10):
     labels = np.array(labels)
     unique_counts = Counter(labels)
 
-    # If heuristic produces good coverage, use it
     if len(unique_counts) >= 3 and min(unique_counts.values()) > len(texts) * 0.05:
         print(f"Using heuristic topic labels: {dict(unique_counts)}")
         return labels
 
-    # Fall back to K-Means clustering
     print("Falling back to TF-IDF + K-Means clustering for topic labels...")
     tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
     features = tfidf.fit_transform(texts)
@@ -149,17 +136,17 @@ def generate_topic_labels(texts, n_clusters=10):
 
 
 def _is_email(text):
-    """Detect email-like text (Enron corpus)."""
+    """Looks for email headers (From/To/Subject lines)."""
     return bool(re.search(r'^(From|To|Subject|Date|Sent):', text, re.MULTILINE))
 
 
 def _is_blog(text):
-    """Detect blog-like text."""
+    """Blog posts often have urlLink markers."""
     return 'urlLink' in text or 'urllink' in text.lower()
 
 
 def _is_review(text):
-    """Detect review-like text."""
+    """Checks for review-ish patterns like ratings and stars."""
     review_patterns = [
         r'\b\d+/\d+\b',  # ratings like 8/10
         r'\bstars?\b',
