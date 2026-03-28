@@ -880,3 +880,31 @@ def create_poster():
             {'text': '0.7340', 'font_size': BODY_FONT, 'bold': True,
              'font_color': ACCENT_GREEN},
             {'text': '     0.469     ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': '+0.173 vs SVM***', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_GREEN}
+        ], 'font_size': BODY_FONT, 'space_after': 3},
+        {'runs': [
+            {'text': 'Sol 2 (Cat B)    ', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_ORANGE},
+            {'text': '0.7422', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_ORANGE},
+            {'text': '     0.484     ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': '+0.120 vs LSTM***', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_ORANGE}
+        ], 'font_size': BODY_FONT, 'space_after': 8},
+        {'text': '*** p < 0.001, McNemar\'s test (both statistically significant)',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'italic': True, 'space_after': 4},
+    ]
+    _add_rich_textbox(slide, x + Emu(200000), y + Emu(150000),
+                      col_w - Emu(400000), results_h - Emu(300000), results_paras)
+
+    y += results_h + SECTION_GAP
+
+    # --- F1 Bar Chart ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'F1 Score Comparison')
+    y += hdr_h
+
+    f1_chart_h = Emu(5400000)
+    _add_section_body_bg(slide, x, y, col_w, f1_chart_h)
+
+    if f1_chart_path.exists():
