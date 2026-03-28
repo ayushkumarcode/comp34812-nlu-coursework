@@ -34,3 +34,27 @@ def main():
     df['hypothesis'] = df['hypothesis'].apply(lambda x: clean_text(x, lowercase=False))
     df['premise'] = df['premise'].apply(lambda x: '.' if not x or x.isspace() else x)
     print(f"  Loaded {len(df)} pairs in {time.time()-t0:.1f}s", flush=True)
+
+    # Tokenize
+    print("\n[2/4] Tokenizing...", flush=True)
+    t0 = time.time()
+    from transformers import AutoTokenizer
+    tokenizer = AutoTokenizer.from_pretrained(
+        'microsoft/deberta-v3-base', use_fast=False
+    )
+    max_len = 256
+
+    all_input_ids = []
+    all_attention_masks = []
+    for _, row in df.iterrows():
+        encoded = tokenizer(
+            row['premise'], row['hypothesis'],
+            max_length=max_len, truncation=True, padding='max_length',
+            return_tensors='pt',
+        )
+        all_input_ids.append(encoded['input_ids'].squeeze(0))
+        all_attention_masks.append(encoded['attention_mask'].squeeze(0))
+
+    input_ids = torch.stack(all_input_ids)
+    attention_masks = torch.stack(all_attention_masks)
+    print(f"  Tokenized {len(df)} pairs in {time.time()-t0:.1f}s", flush=True)
