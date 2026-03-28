@@ -154,5 +154,10 @@ We beat both the SVM and LSTM baselines by a solid margin. It doesn't quite reac
   - We tried contrastive loss in earlier versions (v1, v2) but ended up dropping it in the final model (v3) because BCE + topic adversarial loss alone actually performed better
   - Learning rate went from 5e-4 (v2) down to 2e-4 (v3) for more stable training -- the higher rate caused some oscillation
   - We bumped early stopping patience from 15 to 20 epochs so the slow GRL ramp has time to take full effect before we give up
+  - We also experimented with R-Drop regularization (Liang et al., NeurIPS 2021) and FGM adversarial training (Miyato et al., ICLR 2017) in v4, which improved over v3's baseline by +0.026 but didn't quite beat the v3 model with the original training setup. The R-Drop idea came from the PAN 2024 winning system for writing style analysis -- the intuition is that making the model produce consistent outputs under dropout noise helps it generalize better
+
+- **Paper references (additional):**
+  - Liang et al. (2021) "R-Drop: Regularized Dropout for Neural Networks" NeurIPS -- R-Drop regularization
+  - Miyato et al. (2017) "Adversarial Training Methods for Semi-Supervised Text Classification" ICLR -- FGM adversarial training
 
 - **Code attribution:** PyTorch framework, GRL implementation adapted from Ganin & Lempitsky (2015) description. No external code copied directly.
