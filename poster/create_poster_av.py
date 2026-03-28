@@ -824,3 +824,31 @@ def create_poster():
     arch_h = Emu(7000000)
     _add_section_body_bg(slide, x, y, col_w, arch_h)
 
+    if arch_path.exists():
+        img_margin = Emu(150000)
+        img_w = col_w - 2 * img_margin
+        img_h = Emu(6400000)
+        slide.shapes.add_picture(str(arch_path),
+                                  x + img_margin, y + Emu(300000),
+                                  img_w, img_h)
+
+    y += arch_h + SECTION_GAP
+
+    # --- Results Table (as text, formatted) ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Development Set Results')
+    y += hdr_h
+
+    results_h = Emu(4200000)
+    _add_section_body_bg(slide, x, y, col_w, results_h)
+
+    # Build a results table as rich text
+    results_paras = [
+        {'runs': [
+            {'text': 'Model', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+            {'text': '                    ', 'font_size': BODY_FONT},
+            {'text': 'F1', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+            {'text': '           ', 'font_size': BODY_FONT},
+            {'text': 'MCC', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+            {'text': '         ', 'font_size': BODY_FONT},
+            {'text': 'vs Baseline', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
+        ], 'font_size': BODY_FONT, 'space_after': 6},
