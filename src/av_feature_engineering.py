@@ -384,25 +384,19 @@ def pairwise_features(text_1, text_2):
     """Pairwise similarity/distance features between two texts (~14 features)."""
     feats = {}
 
-    # NCD with gzip
     feats['ncd_gzip'] = _ncd(text_1, text_2, gzip.compress)
 
-    # NCD with lzma
     feats['ncd_lzma'] = _ncd(text_1, text_2, lzma.compress)
 
-    # NCD with bz2
     feats['ncd_bz2'] = _ncd(text_1, text_2, bz2.compress)
 
-    # Word overlap features
     words_1 = set(text_1.lower().split())
     words_2 = set(text_2.lower().split())
 
-    # Word overlap (Jaccard)
     union = words_1 | words_2
     intersection = words_1 & words_2
     feats['word_jaccard'] = len(intersection) / len(union) if union else 0.0
 
-    # Content word overlap (non-function words)
     fw_set = set(FUNCTION_WORDS)
     cw_1 = words_1 - fw_set
     cw_2 = words_2 - fw_set
@@ -410,28 +404,22 @@ def pairwise_features(text_1, text_2):
     cw_intersection = cw_1 & cw_2
     feats['content_word_overlap'] = len(cw_intersection) / len(cw_union) if cw_union else 0.0
 
-    # Length ratio
     len_1 = len(text_1)
     len_2 = len(text_2)
     feats['length_ratio'] = min(len_1, len_2) / max(len_1, len_2) if max(len_1, len_2) > 0 else 1.0
 
-    # Word count ratio
     wc_1 = len(text_1.split())
     wc_2 = len(text_2.split())
     feats['word_count_ratio'] = min(wc_1, wc_2) / max(wc_1, wc_2) if max(wc_1, wc_2) > 0 else 1.0
 
-    # Vocabulary size ratio
     v_1 = len(words_1)
     v_2 = len(words_2)
     feats['vocab_size_ratio'] = min(v_1, v_2) / max(v_1, v_2) if max(v_1, v_2) > 0 else 1.0
 
-    # Jensen-Shannon divergence of word frequency distributions
     feats['jsd_word_freq'] = _jsd_word_freq(text_1, text_2)
 
-    # Jensen-Shannon divergence of character bigram distributions
     feats['jsd_char_bigram'] = _jsd_char_bigram(text_1, text_2)
 
-    # Burrows' Delta
     feats['burrows_delta'] = _burrows_delta(text_1, text_2)
 
     return feats
