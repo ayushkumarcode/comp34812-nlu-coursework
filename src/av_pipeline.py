@@ -27,6 +27,8 @@ STYLE_FEATURE_PREFIXES = [
     'n_sentences', 'pct_short_sentences', 'pct_long_sentences',
     'exclamation_density', 'question_density', 'ellipsis_count_norm',
     'capitalization_ratio', 'quote_ratio',
+    # novel groups 10-13
+    'fft_', 'zipf_', 'benford_', 'hurst_',
 ]
 
 
