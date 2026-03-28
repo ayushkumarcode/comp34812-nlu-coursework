@@ -29,18 +29,15 @@ def pos_features(doc):
     tokens = [t for t in doc if not t.is_space]
     n_tokens = max(len(tokens), 1)
 
-    # POS tag frequencies
     pos_counts = Counter(t.pos_ for t in tokens)
     for tag in UPOS_TAGS:
         feats[f'pos_{tag}'] = pos_counts.get(tag, 0) / n_tokens
 
-    # POS bigram frequencies (top 28)
     if len(tokens) > 1:
         pos_seq = [t.pos_ for t in tokens]
         bigrams = list(zip(pos_seq[:-1], pos_seq[1:]))
         bigram_counts = Counter(bigrams)
         total_bigrams = len(bigrams)
-        # Use predefined common bigrams
         for bg in _TOP_POS_BIGRAMS:
             feats[f'pos_bg_{bg[0]}_{bg[1]}'] = bigram_counts.get(bg, 0) / total_bigrams
     else:
@@ -76,7 +73,6 @@ def syntactic_complexity_features(doc):
             'fronted_adverb_ratio',
         ]}
 
-    # Dependency parse depths
     depths = []
     max_depths = []
     branching_factors = []
@@ -87,7 +83,6 @@ def syntactic_complexity_features(doc):
         max_depths.append(sent_depth)
         depths.append(sent_depth)
 
-        # Branching factor
         non_leaf_children = []
         for token in sent:
             children = list(token.children)
@@ -100,24 +95,19 @@ def syntactic_complexity_features(doc):
     feats['max_dep_depth'] = max(max_depths) if max_depths else 0.0
     feats['avg_branching_factor'] = np.mean(branching_factors) if branching_factors else 0.0
 
-    # Subordination index (SCONJ-headed clauses per sentence)
     sconj_count = sum(1 for t in doc if t.dep_ == 'mark' and t.pos_ == 'SCONJ')
     feats['subordination_index'] = sconj_count / n_sents
 
-    # Average dependency arc length
     arc_lengths = [abs(t.i - t.head.i) for t in doc if t.dep_ != 'ROOT' and not t.is_space]
     feats['avg_dep_arc_length'] = np.mean(arc_lengths) if arc_lengths else 0.0
 
-    # Passive construction ratio
     passive_count = sum(1 for t in doc if t.dep_ == 'nsubjpass' or t.dep_ == 'auxpass')
     all_clauses = max(sum(1 for t in doc if t.dep_ == 'nsubj' or t.dep_ == 'nsubjpass'), 1)
     feats['passive_ratio'] = passive_count / all_clauses
 
-    # Relative clause count per sentence
     relcl_count = sum(1 for t in doc if t.dep_ == 'relcl')
     feats['relcl_ratio'] = relcl_count / n_sents
 
-    # Average conjuncts per coordination
     coord_heads = [t for t in doc if any(c.dep_ == 'conj' for c in t.children)]
     if coord_heads:
         conj_counts = [sum(1 for c in t.children if c.dep_ == 'conj') + 1 for t in coord_heads]
@@ -125,11 +115,9 @@ def syntactic_complexity_features(doc):
     else:
         feats['avg_conjuncts'] = 0.0
 
-    # Content clause ratio (ccomp + xcomp per sentence)
     cc_count = sum(1 for t in doc if t.dep_ in ('ccomp', 'xcomp'))
     feats['content_clause_ratio'] = cc_count / n_sents
 
-    # Fronted adverbials (advmod before root verb)
     fronted = 0
     for sent in sents:
         root = sent.root
