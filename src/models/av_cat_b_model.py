@@ -1,6 +1,6 @@
 """
-AV Category B — Adversarial Style-Content Disentanglement Network.
-Siamese Character-CNN + BiLSTM + Attention with GRL and Contrastive Loss.
+Cat B model: Siamese char-CNN + BiLSTM + attention with GRL for
+topic adversarial debiasing.
 """
 
 import torch
@@ -9,12 +9,8 @@ import torch.nn.functional as F
 from torch.autograd import Function
 
 
-# ============================================================
-# GRADIENT REVERSAL LAYER
-# ============================================================
-
 class GradientReversalFunction(Function):
-    """Gradient Reversal Layer (Ganin & Lempitsky, 2015)."""
+    """GRL from Ganin & Lempitsky (2015)."""
 
     @staticmethod
     def forward(ctx, x, lambda_val):
@@ -35,12 +31,8 @@ class GradientReversalLayer(nn.Module):
         return GradientReversalFunction.apply(x, self.lambda_val)
 
 
-# ============================================================
-# ADDITIVE (BAHDANAU) ATTENTION
-# ============================================================
-
 class AdditiveAttention(nn.Module):
-    """Bahdanau-style additive attention."""
+    """Bahdanau attention -- learns which timesteps matter most."""
 
     def __init__(self, hidden_size, attention_size=128):
         super().__init__()
