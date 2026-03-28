@@ -320,3 +320,31 @@ def generate_feature_groups_chart():
                    linewidth=1, height=0.65, zorder=3)
 
     # Value labels
+    for bar, count in zip(bars, counts):
+        ax.text(bar.get_width() + 2, bar.get_y() + bar.get_height()/2,
+                str(count), va='center', fontsize=18, fontweight='bold',
+                color='#2D2D2D')
+
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(groups, fontsize=18)
+    ax.set_xlabel('Number of Features', fontsize=20, fontweight='bold',
+                  labelpad=10, color='#2D2D2D')
+    ax.set_title('Solution 1 Feature Groups (695 Total)',
+                 fontsize=24, fontweight='bold', pad=15, color='#1B3A5C')
+    ax.set_xlim(0, 180)
+    ax.invert_yaxis()
+
+    ax.xaxis.grid(True, linestyle='--', alpha=0.3, zorder=0)
+    for spine in ['top', 'right']:
+        ax.spines[spine].set_visible(False)
+    ax.spines['left'].set_color('#CCCCCC')
+    ax.spines['bottom'].set_color('#CCCCCC')
+
+    # Legend
+    std_patch = mpatches.Patch(color='#2E86AB', label='Standard Features')
+    novel_patch = mpatches.Patch(color='#E67E22', label='Novel Features')
+    ax.legend(handles=[std_patch, novel_patch], fontsize=16,
+              loc='lower right', framealpha=0.9, edgecolor='#CCC')
+
+    plt.tight_layout()
+    path = POSTER_DIR / 'feature_groups_av.png'
