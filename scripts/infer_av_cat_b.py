@@ -29,3 +29,18 @@ def main():
 
     # Load test data
     print("\n[1/4] Loading test data...", flush=True)
+    t0 = time.time()
+    df = pd.read_csv(test_path, quotechar='"', engine='python')
+    df['text_1'] = df['text_1'].apply(lambda x: clean_text(x, lowercase=False))
+    df['text_2'] = df['text_2'].apply(lambda x: clean_text(x, lowercase=False))
+    print(f"  Loaded {len(df)} pairs in {time.time()-t0:.1f}s", flush=True)
+
+    # Encode characters
+    print("\n[2/4] Encoding characters...", flush=True)
+    t0 = time.time()
+    max_len = 1500
+    encoded_1 = [char_encode(t, max_len) for t in df['text_1']]
+    encoded_2 = [char_encode(t, max_len) for t in df['text_2']]
+    ids_1 = torch.tensor(np.array(encoded_1), dtype=torch.long)
+    ids_2 = torch.tensor(np.array(encoded_2), dtype=torch.long)
+    print(f"  Encoded in {time.time()-t0:.1f}s", flush=True)
