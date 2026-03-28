@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p serial
-#SBATCH --mem=16G
-#SBATCH --cpus-per-task=8
+#SBATCH --mem=5G
+#SBATCH --cpus-per-task=1
 #SBATCH --time=6:00:00
 #SBATCH --job-name=av_a_novel
 #SBATCH --output=logs/av_a_novel_%j.out
