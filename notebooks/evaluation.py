@@ -198,22 +198,21 @@ for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
               f"Only ours correct: {result['n_only_b_correct']}")
 
 print("""
-INTERPRETATION: McNemar's test compares paired error rates between our models
-and each baseline. A significant p-value (p < 0.05) indicates that the performance
-improvement is not due to chance. Both solutions achieve statistically significant
-improvements over the SVM and LSTM baselines. The comparison with BERT reveals
-whether our non-transformer approaches can match transformer-level performance
-on this task.
+McNemar's tests paired error rates between our models and each baseline.
+A significant p-value (p < 0.05) means the improvement isn't just luck.
+Both solutions should beat SVM and LSTM significantly. The BERT comparison
+is the interesting one — it tells us whether our non-transformer approaches
+can actually compete with a transformer on this task.
 """)
 
 # %% [markdown]
-# ## 5. Bootstrap Confidence Intervals
+# ## 5. Bootstrap confidence intervals
 
 # %%
-print("Bootstrap 95% Confidence Intervals (1000 iterations):")
+print("Bootstrap 95% CIs (1000 iterations):")
 print("=" * 60)
 
-for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     f1_ci = bootstrap_macro_f1_ci(y_true, y_pred)
     mcc_ci = bootstrap_mcc_ci(y_true, y_pred)
     print(f"\n{sol_name}:")
