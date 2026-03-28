@@ -277,7 +277,7 @@ summary_df = summary_df.sort_values('macro_f1', ascending=False)
 print(summary_df.to_string(index=False))
 
 # %% [markdown]
-# ## 9. F1 Score Comparison Bar Chart
+# ## 9. F1 score comparison bar chart
 
 # %%
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -287,7 +287,7 @@ scores = list(baseline_f1s.values()) + [
 colors = ['#95a5a6'] * len(baseline_f1s) + ['#2ecc71', '#e74c3c']
 bars = ax.bar(models, scores, color=colors, edgecolor='black', linewidth=0.5)
 ax.set_ylabel('Macro F1 Score', fontsize=14)
-ax.set_title('AV Performance Comparison: Our Solutions vs Baselines', fontsize=16)
+ax.set_title('AV Performance: Our Solutions vs Baselines', fontsize=16)
 for bar, score in zip(bars, scores):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
             f'{score:.4f}', ha='center', va='bottom', fontsize=11)
@@ -295,16 +295,16 @@ ax.set_ylim(0, max(scores) * 1.15)
 plt.tight_layout()
 plt.savefig('notebooks/f1_comparison.png', dpi=150, bbox_inches='tight')
 plt.show()
-print("Bar chart saved to notebooks/f1_comparison.png")
+print("saved to notebooks/f1_comparison.png")
 
 # %% [markdown]
-# ## 10. Ablation: What if we used only Sol 1 or Sol 2?
+# ## 10. Ablation: sol 1 vs sol 2 on different subsets
 #
-# We analyze how each solution performs on different subsets
-# of the data to understand their complementary strengths.
+# looking at how each model does on subsets of the data to
+# understand where their strengths are complementary.
 
 # %%
-# Agreement analysis
+# agreement analysis
 agree = y_pred_sol1 == y_pred_sol2
 disagree = ~agree
 print(f"Agreement rate: {agree.mean():.4f} ({agree.sum()}/{len(agree)})")
