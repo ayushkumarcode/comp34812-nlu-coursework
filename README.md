@@ -6,14 +6,14 @@ This repo has our two solutions for the COMP34812 AV shared task. The goal's pre
 
 We're submitting one solution from Category A and one from Category B:
 
-### Solution 1: Cat A -- LightGBM + Stylometric Features (F1=0.7340)
+### Solution 1: Cat A -- LightGBM + Stylometric Features (F1=0.7450)
 
-We built about 695 handcrafted features per text pair from 9 groups:
+We built about 736 handcrafted features per text pair from 13 groups:
 - The usual stuff: lexical, character-level, function words, POS tags, structural
-- Three novel groups we came up with: syntactic complexity profiling, writing rhythm, and information-theoretic signatures
+- Seven novel groups we came up with: syntactic complexity profiling, writing rhythm, information-theoretic signatures, FFT spectral analysis, Zipf-Mandelbrot law deviation, Benford's law on linguistic distributions, and Hurst exponent fractal analysis
 - Diff-vector |f(text1) - f(text2)| plus a style-only diff-vector for topic robustness
-- Pairwise similarity measures: NCD (gzip/lzma/bz2), cosine sim, JSD, Burrows' Delta
-- LightGBM on top (1000 trees, max_depth=7, lr=0.05)
+- Pairwise similarity measures: NCD (gzip/lzma/bz2), cosine sim, JSD, Burrows' Delta, Cosine Delta
+- LightGBM on top (2000 trees, max_depth=8, lr=0.03)
 
 ### Solution 2: Cat B -- Siamese Char-CNN + BiLSTM with Adversarial Debiasing (F1=0.7422)
 
@@ -30,7 +30,7 @@ This one's a neural approach, built from scratch:
 src/
   data_utils.py              -- loading + cleaning data
   scorer.py                  -- wrapper around official scorer metrics
-  av_feature_engineering.py  -- all 9 feature groups for Cat A
+  av_feature_engineering.py  -- all 13 feature groups for Cat A
   av_tfidf_features.py       -- char n-gram TF-IDF + SVD
   av_spacy_features.py       -- POS tags + syntactic features via spaCy
   av_pipeline.py             -- ties everything together for Cat A
@@ -86,7 +86,7 @@ Check `notebooks/demo_av_cat_a.py` and `notebooks/demo_av_cat_b.py` for demos.
 
 All under 10MB so they're in the repo directly:
 - `models/av_cat_b_best.pt` (3.1MB) -- the Siamese char-CNN+BiLSTM network
-- `models/av_cat_a_lgbm.joblib` (5.6MB) -- LightGBM classifier
+- `models/av_cat_a_lgbm.joblib` (9.6MB) -- LightGBM classifier (compressed)
 - `models/av_cat_a_scaler.joblib` -- StandardScaler for feature normalization
 - `models/av_cat_a_feature_names.joblib` -- feature name ordering
 - `models/av_cat_a_tfidf.joblib` -- fitted TF-IDF vectorizer
