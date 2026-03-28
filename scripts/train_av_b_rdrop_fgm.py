@@ -59,5 +59,28 @@ def rdrop_kl(logits1, logits2):
     return kl
 
 
+def train_epoch(model, dl, opt, device, bce_fn, topic_fn, fgm,
+                t_weight=0.02, rdrop_alpha=0.5):
+    """One training epoch with R-Drop + FGM."""
+    model.train()
+    total_loss, total_kl, total_adv = 0, 0, 0
+    all_p, all_l = [], []
+
+    for b in dl:
+        c1 = b['char_ids_1'].to(device)
+        c2 = b['char_ids_2'].to(device)
+        labels = b['label'].to(device)
+        opt.zero_grad()
+
+        # R-Drop: two forward passes with different dropout
+        logits1, tl1, _ = model(c1, c2, return_embeddings=True)
+        logits2, tl2, _ = model(c1, c2, return_embeddings=True)
+        l1, l2 = logits1.squeeze(-1), logits2.squeeze(-1)
+
+        # averaged BCE + KL consistency
+        bce = (bce_fn(l1, labels) + bce_fn(l2, labels)) / 2
+        kl = rdrop_kl(l1, l2)
+        loss = bce + rdrop_alpha * kl
+
 if __name__ == '__main__':
     pass
