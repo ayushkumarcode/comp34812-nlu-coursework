@@ -740,3 +740,31 @@ def create_poster():
         ], 'font_size': BODY_FONT_SM, 'space_after': 3},
         {'runs': [
             {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Topic-correlated feature penalty', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+    ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), sol1_h - Emu(200000), sol1_paras)
+
+    y += sol1_h + SECTION_GAP
+
+    # --- Solution 2 ---
+    hdr_h = _add_section_header(slide, x, y, col_w,
+                                 'Solution 2: Category B — Adversarial Disentanglement')
+    y += hdr_h
+
+    sol2_h = Emu(6200000)
+    _add_section_body_bg(slide, x, y, col_w, sol2_h)
+
+    sol2_paras = [
+        {'text': 'Siamese Architecture:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Character embedding', 'font_size': BODY_FONT_SM, 'bold': True},
+            {'text': ' (32-dim) for sub-word stylistic patterns', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Multi-width CNN', 'font_size': BODY_FONT_SM, 'bold': True},
+            {'text': ' (kernels: 3, 5, 7) for local patterns', 'font_size': BODY_FONT_SM}
