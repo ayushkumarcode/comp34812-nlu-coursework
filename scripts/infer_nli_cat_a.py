@@ -65,3 +65,20 @@ def main():
     preds = ensemble.predict(X_scaled)
     print(f"  Predictions: {len(preds)}", flush=True)
     print(f"  Class distribution: 0={sum(preds==0)}, 1={sum(preds==1)}", flush=True)
+
+    # Save
+    print("\n[6/6] Saving...", flush=True)
+    save_predictions(preds, out_path)
+    print(f"  Saved to {out_path}", flush=True)
+
+    # Sanity checks
+    assert len(preds) == 3302, f"Expected 3302 predictions, got {len(preds)}"
+    assert set(np.unique(preds)).issubset({0, 1}), "Non-binary predictions!"
+    ratio = sum(preds == 1) / len(preds)
+    print(f"  Positive ratio: {ratio:.3f}", flush=True)
+    assert 0.1 < ratio < 0.9, f"Suspicious class ratio: {ratio:.3f}"
+    print("\nDone!", flush=True)
+
+
+if __name__ == '__main__':
+    main()
