@@ -936,3 +936,31 @@ def create_poster():
         img_h = Emu(4600000)
         slide.shapes.add_picture(str(cm_path),
                                   x + img_margin, y + Emu(300000),
+                                  img_w, img_h)
+
+    y += cm_h + SECTION_GAP
+
+    # --- Error Analysis ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Error Analysis')
+    y += hdr_h
+
+    error_h = Emu(3600000)
+    _add_section_body_bg(slide, x, y, col_w, error_h)
+
+    error_paras = [
+        {'runs': [
+            {'text': 'Inter-model agreement: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': '~70% (Cohen\'s kappa = 0.40)', 'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 8},
+        {'text': 'Complementary failure modes:',
+         'font_size': BODY_FONT, 'bold': True, 'space_after': 6},
+        {'runs': [
+            {'text': '   \u2022 Cat A: ', 'font_size': BODY_FONT_SM, 'bold': True,
+             'font_color': ACCENT_GREEN},
+            {'text': 'Struggles with short texts — insufficient features '
+                     'for reliable stylometric profiling', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+        {'runs': [
+            {'text': '   \u2022 Cat B: ', 'font_size': BODY_FONT_SM, 'bold': True,
+             'font_color': ACCENT_ORANGE},
+            {'text': 'Struggles with formal texts — less character-level '
