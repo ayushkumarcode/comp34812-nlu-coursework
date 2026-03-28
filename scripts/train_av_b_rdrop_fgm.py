@@ -124,5 +124,29 @@ def evaluate(model, dl, device):
             all_l.extend(b['label'].numpy())
     return np.array(all_p), np.array(all_pr), np.array(all_l)
 
+def main():
+    RDROP_ALPHA, FGM_EPSILON, LR = 0.5, 0.5, 2e-4
+    MAX_EPOCHS, PATIENCE, BATCH_SIZE = 120, 20, 64
+
+    print("=" * 60)
+    print(f"  AV Cat B v4 — R-Drop(a={RDROP_ALPHA}) + FGM(e={FGM_EPSILON}), lr={LR}")
+    print("=" * 60)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Device: {device}")
+
+    print("\n[1/5] Loading data...")
+    train_df = load_av_data(split='train')
+    dev_df = load_av_data(split='dev')
+    dev_labels = load_solution_labels(task='av')
+    print(f"  Train: {len(train_df)}, Dev: {len(dev_df)}")
+
+    print("\n[2/5] Generating topic labels...")
+    all_texts = list(train_df['text_1']) + list(train_df['text_2'])
+    topic_all = generate_topic_labels(all_texts, n_clusters=10)
+    train_topic = topic_all[:len(train_df)]
+    num_topics = int(topic_all.max()) + 1
+
+
 if __name__ == '__main__':
-    pass
+    main()
