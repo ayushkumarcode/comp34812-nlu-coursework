@@ -48,3 +48,20 @@ def main():
     extractor = NLIFeatureExtractor(use_spacy=True, use_glove=False, n_svd_components=100)
     extractor.fit(train_df)
     print(f"  Fit time: {time.time()-t0:.1f}s", flush=True)
+
+    # Load saved feature names and set them
+    print("\n[4/6] Extracting test features...", flush=True)
+    saved_names = joblib.load(model_dir / 'nli_cat_a_feature_names.joblib')
+    extractor._feature_names = saved_names  # force feature alignment
+    t0 = time.time()
+    X_test, feat_names = extractor.transform(test_df, show_progress=True)
+    print(f"  Shape: {X_test.shape}, Time: {time.time()-t0:.1f}s", flush=True)
+
+    # Scale and predict
+    print("\n[5/6] Predicting...", flush=True)
+    scaler = joblib.load(model_dir / 'nli_cat_a_scaler.joblib')
+    ensemble = joblib.load(model_dir / 'nli_cat_a_ensemble.joblib')
+    X_scaled = scaler.transform(X_test)
+    preds = ensemble.predict(X_scaled)
+    print(f"  Predictions: {len(preds)}", flush=True)
+    print(f"  Class distribution: 0={sum(preds==0)}, 1={sum(preds==1)}", flush=True)
