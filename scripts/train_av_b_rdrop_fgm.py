@@ -171,6 +171,25 @@ def main():
     opt = AdamW(model.parameters(), lr=LR, weight_decay=1e-4)
     sched = CosineAnnealingWarmRestarts(opt, T_0=30, T_mult=2)
 
+    print("\n[5/5] Training with R-Drop + FGM...")
+    best_f1, patience_cnt = 0.0, 0
+    save_dir = PROJECT_ROOT / 'models'
+    save_dir.mkdir(exist_ok=True)
+
+    for epoch in range(1, MAX_EPOCHS + 1):
+        t0 = time.time()
+        grl_lambda = min(0.05, 0.05 * epoch / 20)
+        model.grl.lambda_val = grl_lambda
+        t_weight = 0.02 if epoch >= 15 else 0.0
+        loss, kl, adv, tf1 = train_epoch(
+            model, train_dl, opt, device, bce_fn, topic_fn, fgm,
+            t_weight=t_weight, rdrop_alpha=RDROP_ALPHA)
+        sched.step()
+        dp, dpr, dt = evaluate(model, dev_dl, device)
+        df1 = f1_score(dt, dp, average='macro', zero_division=0)
+        print(f"Epoch {epoch:3d} | Loss: {loss:.4f} (KL={kl:.4f}, Adv={adv:.4f}) "
+              f"| Train F1: {tf1:.4f} | Dev F1: {df1:.4f} | {time.time()-t0:.1f}s")
+
 
 if __name__ == '__main__':
     main()
