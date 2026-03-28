@@ -163,31 +163,31 @@ plt.tight_layout()
 plt.savefig('notebooks/confusion_matrices.png', dpi=150, bbox_inches='tight')
 plt.show()
 
-# Auto-generated interpretation
-for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+# print out the actual numbers for each solution
+for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     tn, fp, fn, tp = cm.ravel()
     total = len(y_true)
     print(f"\n{sol_name}: TN={tn}, FP={fp}, FN={fn}, TP={tp}")
     if fp > fn:
-        print(f"  Bias: More false positives than false negatives ({fp} vs {fn})")
+        print(f"  more false positives than false negatives ({fp} vs {fn})")
     elif fn > fp:
-        print(f"  Bias: More false negatives than false positives ({fn} vs {fp})")
+        print(f"  more false negatives than false positives ({fn} vs {fp})")
     else:
-        print(f"  Balanced error types ({fp} FP, {fn} FN)")
+        print(f"  balanced error types ({fp} FP, {fn} FN)")
 
 # %% [markdown]
-# ## 4. McNemar's Test vs Baselines
+# ## 4. McNemar's test vs baselines
 
 # %%
 baseline_names = ['SVM', 'LSTM', 'BERT']
 baseline_preds = {name: baselines[name] for name in baseline_names if name in baselines}
 
 print("=" * 70)
-print("McNemar's Test: Statistical Significance")
+print("McNemar's Test — Statistical Significance")
 print("=" * 70)
 
-for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     print(f"\n--- {sol_name} ---")
     for bl_name, bl_pred in baseline_preds.items():
         result = mcnemars_test(y_true, bl_pred, y_pred)
