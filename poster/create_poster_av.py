@@ -1048,3 +1048,27 @@ def create_poster():
     # =====================================================
     # FOOTER
     # =====================================================
+    footer_h = Emu(600000)
+    footer_y = SLIDE_H - footer_h
+    _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
+                          0, footer_y, SLIDE_W, footer_h, NAVY)
+
+    _add_textbox(slide, Emu(800000), footer_y + Emu(120000),
+                 SLIDE_W - Emu(1600000), footer_h - Emu(200000),
+                 'COMP34812 Natural Language Understanding  |  University of Manchester  |  '
+                 'Group 34  |  2025-26  |  github.com/ayush-kumar-prog',
+                 Pt(22), RGBColor(0xAA, 0xBB, 0xCC), bold=False,
+                 alignment=PP_ALIGN.CENTER)
+
+    # =====================================================
+    # SAVE
+    # =====================================================
+    prs.save(str(OUTPUT_PATH))
+    print(f"\nPoster saved to {OUTPUT_PATH}")
+    print(f"  Slide dimensions: {SLIDE_W} x {SLIDE_H} (40\" x 22.5\")")
+    print(f"  Suitable for A1 landscape printing")
+    print(f"  Export to PDF via PowerPoint/LibreOffice for final submission")
+
+
+if __name__ == '__main__':
+    create_poster()
