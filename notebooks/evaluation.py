@@ -121,8 +121,17 @@ enc_1 = [char_encode(t, max_len) for t in dev_df['text_1']]
 enc_2 = [char_encode(t, max_len) for t in dev_df['text_2']]
 ids_1 = torch.tensor(np.array(enc_1), dtype=torch.long)
 ids_2 = torch.tensor(np.array(enc_2), dtype=torch.long)
-# Inference loop in next cell
-y_pred_sol2 = np.zeros(len(dev_df), dtype=int)  # placeholder
+sol2_preds = []
+with torch.no_grad():
+    for start in range(0, len(dev_df), 64):
+        end = min(start + 64, len(dev_df))
+        b1 = ids_1[start:end].to(device)
+        b2 = ids_2[start:end].to(device)
+        logits, _ = sol2_model(b1, b2)
+        probs = torch.sigmoid(logits.squeeze(-1))
+        sol2_preds.extend((probs > 0.5).long().cpu().numpy())
+
+y_pred_sol2 = np.array(sol2_preds)
 print(f"Solution 2 predictions: {len(y_pred_sol2)}")
 
 # %% [markdown]
