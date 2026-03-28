@@ -79,3 +79,18 @@ def main():
     print(f"  Inference time: {time.time()-t0:.1f}s", flush=True)
     print(f"  Predictions: {len(all_preds)}", flush=True)
     print(f"  Class distribution: 0={sum(all_preds==0)}, 1={sum(all_preds==1)}", flush=True)
+
+    # Save
+    save_predictions(all_preds, out_path)
+    print(f"  Saved to {out_path}", flush=True)
+
+    # Sanity checks
+    assert len(all_preds) == 5985, f"Expected 5985 predictions, got {len(all_preds)}"
+    ratio = sum(all_preds == 1) / len(all_preds)
+    print(f"  Positive ratio: {ratio:.3f}", flush=True)
+    assert 0.1 < ratio < 0.9, f"Suspicious class ratio: {ratio:.3f}"
+    print("\nDone!", flush=True)
+
+
+if __name__ == '__main__':
+    main()
