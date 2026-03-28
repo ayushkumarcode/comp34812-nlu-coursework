@@ -59,9 +59,9 @@ scripts/                     -- Slurm job scripts (CSF3)
 models/                      -- saved weights + artifacts
 ```
 
-## Reproduction
+## How to Reproduce
 
-### Requirements
+### Setup
 
 ```
 pip install torch scikit-learn lightgbm spacy numpy pandas tqdm joblib
@@ -71,16 +71,16 @@ python -m spacy download en_core_web_md
 ### Training
 
 ```bash
-# Solution 1 (Category A) — CPU only
+# Sol 1 (Cat A) -- runs on CPU, takes ~20 min
 python scripts/iter_av_a_lgbm.py
 
-# Solution 2 (Category B) — GPU required
+# Sol 2 (Cat B) -- needs a GPU
 python scripts/iter_av_b_v3.py
 ```
 
-### Inference
+### Running Inference
 
-See `notebooks/demo_av_cat_a.py` and `notebooks/demo_av_cat_b.py`.
+Check `notebooks/demo_av_cat_a.py` and `notebooks/demo_av_cat_b.py` for demos.
 
 ## Trained Models
 
