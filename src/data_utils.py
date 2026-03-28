@@ -75,26 +75,23 @@ def load_av_data(split='train'):
 
 
 def load_nli_data(split='train'):
-    """Load NLI (Natural Language Inference) data.
+    """Load NLI data. Handles the weird edge case where some premises are empty.
 
     Args:
         split: 'train' or 'dev'.
 
     Returns:
-        DataFrame with columns: premise, hypothesis, label (int).
-        For dev split, label column may not be present.
+        DataFrame with premise, hypothesis, label columns.
     """
     path = NLI_TRAIN_PATH if split == 'train' else NLI_DEV_PATH
     df = pd.read_csv(path, quotechar='"', engine='python')
 
-    # Clean texts (lowercase for NLI feature extraction)
     df['premise'] = df['premise'].apply(lambda x: clean_text(x, lowercase=False))
     df['hypothesis'] = df['hypothesis'].apply(lambda x: clean_text(x, lowercase=False))
 
-    # Handle empty premise edge case (min word count = 0 in training)
+    # some training premises are completely empty, replace with '.'
     df['premise'] = df['premise'].apply(lambda x: '.' if not x or x.isspace() else x)
 
-    # Labels should already be int for NLI
     if 'label' in df.columns:
         df['label'] = df['label'].astype(int)
 
