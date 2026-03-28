@@ -58,3 +58,14 @@ def main():
     input_ids = torch.stack(all_input_ids)
     attention_masks = torch.stack(all_attention_masks)
     print(f"  Tokenized {len(df)} pairs in {time.time()-t0:.1f}s", flush=True)
+
+    # Load model
+    print("\n[3/4] Loading model...", flush=True)
+    model = NLIDeBERTaCrossEncoder(
+        model_name='microsoft/deberta-v3-base', grl_lambda=0.1
+    )
+    state = torch.load(model_path, map_location=device, weights_only=False)
+    model.load_state_dict(state)
+    model = model.to(device)
+    model.eval()
+    print("  Model loaded.", flush=True)
