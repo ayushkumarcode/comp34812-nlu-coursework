@@ -348,3 +348,31 @@ def generate_feature_groups_chart():
 
     plt.tight_layout()
     path = POSTER_DIR / 'feature_groups_av.png'
+    plt.savefig(str(path), dpi=250, bbox_inches='tight',
+                facecolor='white', edgecolor='none')
+    plt.close()
+    print(f"  Saved feature groups chart to {path}")
+    return path
+
+
+# ============================================================
+# POSTER LAYOUT HELPERS
+# ============================================================
+
+def _add_shape_with_fill(slide, shape_type, left, top, width, height,
+                         fill_color, line_color=None, line_width=None):
+    """Add a shape with fill and optional border."""
+    shape = slide.shapes.add_shape(shape_type, left, top, width, height)
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = fill_color
+    if line_color:
+        shape.line.color.rgb = line_color
+        if line_width:
+            shape.line.width = line_width
+    else:
+        shape.line.fill.background()
+    return shape
+
+
+def _add_textbox(slide, left, top, width, height, text, font_size,
+                 font_color=DARK, bold=False, alignment=PP_ALIGN.LEFT,
