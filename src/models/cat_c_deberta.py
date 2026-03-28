@@ -1,9 +1,6 @@
 """
-Category C — DeBERTa-v3-base Fine-Tuning.
-
-For AV: Siamese architecture with learnable layer-weighted representations
-        + contrastive loss + GRL topic debiasing.
-For NLI: Cross-encoder with hypothesis-only adversarial debiasing via GRL.
+Cat C DeBERTa models. AV uses a siamese setup with layer-weighted CLS,
+NLI uses a cross-encoder with hypothesis-only adversarial debiasing.
 """
 
 import torch
@@ -33,12 +30,10 @@ class GRL(nn.Module):
 
 
 class ScalarMix(nn.Module):
-    """Learnable scalar mixture of transformer layer outputs.
-    Inspired by Peters et al. 2018 (ELMo)."""
+    """Learnable scalar mixture of layer outputs (a la ELMo, Peters et al. 2018)."""
 
     def __init__(self, num_layers=12, style_bias=True):
         super().__init__()
-        # Initialize weights with slight bias toward early layers (style)
         if style_bias:
             init_weights = torch.tensor(
                 [0.12] * 4 + [0.07] * 8, dtype=torch.float
