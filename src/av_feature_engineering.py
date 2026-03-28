@@ -235,7 +235,6 @@ def writing_rhythm_features(text):
             'punct_diversity_entropy': 0.0,
         }
 
-    # Sentence length autocorrelation (lag-1)
     sl = np.array(sent_lengths, dtype=float)
     sl_mean = sl.mean()
     sl_var = sl.var()
@@ -245,14 +244,12 @@ def writing_rhythm_features(text):
     else:
         feats['sent_len_autocorr'] = 0.0
 
-    # Entropy of sentence length distribution
     bins = [0, 5, 10, 15, 20, 30, 50, 200]
     hist, _ = np.histogram(sent_lengths, bins=bins)
     probs = hist / hist.sum() if hist.sum() > 0 else hist
     probs = probs[probs > 0]
     feats['sent_len_entropy'] = -np.sum(probs * np.log2(probs)) if len(probs) > 0 else 0.0
 
-    # Burstiness of punctuation (CV of inter-punctuation distances)
     punct_positions = [i for i, c in enumerate(text) if c in '.,;:!?']
     if len(punct_positions) > 2:
         distances = np.diff(punct_positions).astype(float)
@@ -264,7 +261,6 @@ def writing_rhythm_features(text):
     else:
         feats['punct_burstiness'] = 0.0
 
-    # Sentence length variance ratio (first half vs second half)
     mid = len(sent_lengths) // 2
     if mid > 0:
         var_first = np.var(sent_lengths[:mid])
@@ -273,7 +269,6 @@ def writing_rhythm_features(text):
     else:
         feats['sent_len_var_ratio'] = 1.0
 
-    # Mean-reversion tendency
     if len(sent_lengths) > 2 and sl_var > 0:
         deviations = sl - sl_mean
         reversion = -np.corrcoef(deviations[:-1], np.diff(sl))[0, 1]
@@ -281,7 +276,6 @@ def writing_rhythm_features(text):
     else:
         feats['sent_len_mean_reversion'] = 0.0
 
-    # Punctuation diversity entropy
     punct_types = [c for c in text if c in '.,;:!?-\'"()']
     if punct_types:
         punct_counts = Counter(punct_types)
@@ -309,7 +303,6 @@ def info_theoretic_features(text):
             'rolling_ttr_entropy': 0.0,
         }
 
-    # Character bigram mutual information
     chars = list(text.lower())
     n = len(chars)
     unigram_counts = Counter(chars)
@@ -328,11 +321,9 @@ def info_theoretic_features(text):
     else:
         feats['char_bigram_mi'] = 0.0
 
-    # Text entropy rate (bits per character)
     probs = np.array([c / n for c in unigram_counts.values()])
     feats['text_entropy_rate'] = -np.sum(probs * np.log2(probs))
 
-    # Conditional entropy H(c_n | c_{n-1})
     if n_bigrams > 0:
         h_bigram = 0.0
         for count in bigram_counts.values():
@@ -344,7 +335,6 @@ def info_theoretic_features(text):
     else:
         feats['char_cond_entropy'] = 0.0
 
-    # Word length entropy
     words = text.split()
     if words:
         word_lens = [len(w) for w in words]
@@ -355,7 +345,6 @@ def info_theoretic_features(text):
     else:
         feats['word_length_entropy'] = 0.0
 
-    # Rolling TTR entropy (50-word windows)
     if len(words) >= 50:
         ttrs = []
         for i in range(0, len(words) - 49):
