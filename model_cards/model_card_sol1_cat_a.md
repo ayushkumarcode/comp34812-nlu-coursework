@@ -4,7 +4,7 @@
 
 # Model Card for AV-StyleLGBM: LightGBM with Comprehensive Stylometric Features
 
-A LightGBM gradient boosting classifier for authorship verification (AV) that figures out whether two texts were written by the same author. It uses ~695 stylometric features per text pair, including syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures that we designed ourselves.
+A LightGBM gradient boosting classifier for authorship verification (AV) that figures out whether two texts were written by the same author. It uses ~736 stylometric features per text pair, including syntactic complexity profiling, writing rhythm analysis, information-theoretic authorial signatures, FFT spectral analysis, Zipf-Mandelbrot law deviation, Benford's law analysis, and fractal/Hurst exponent features that we designed ourselves.
 
 ## Model Details
 
