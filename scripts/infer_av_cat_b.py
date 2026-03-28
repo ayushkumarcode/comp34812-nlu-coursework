@@ -44,3 +44,19 @@ def main():
     ids_1 = torch.tensor(np.array(encoded_1), dtype=torch.long)
     ids_2 = torch.tensor(np.array(encoded_2), dtype=torch.long)
     print(f"  Encoded in {time.time()-t0:.1f}s", flush=True)
+
+    # Load model
+    print("\n[3/4] Loading model...", flush=True)
+    model = AVCatBModel(
+        vocab_size=97, char_emb_dim=32, cnn_filters=128,
+        lstm_hidden=128, proj_dim=128, num_topics=10,
+    )
+    state = torch.load(model_path, map_location=device, weights_only=False)
+    model.load_state_dict(state)
+    model = model.to(device)
+    model.eval()
+    print("  Model loaded.", flush=True)
+
+    # Inference in batches
+    print("\n[4/4] Running inference...", flush=True)
+    t0 = time.time()
