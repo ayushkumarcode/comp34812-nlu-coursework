@@ -70,19 +70,7 @@ def mcnemars_test(y_true, y_pred_a, y_pred_b):
 
 def bootstrap_confidence_interval(y_true, y_pred, metric_fn, n_bootstrap=1000,
                                    ci=0.95, random_state=42):
-    """Compute bootstrap confidence interval for a metric.
-
-    Args:
-        y_true: Ground truth labels.
-        y_pred: Predicted labels.
-        metric_fn: Function(y_true, y_pred) -> float.
-        n_bootstrap: Number of bootstrap iterations.
-        ci: Confidence level (default 0.95).
-        random_state: Random seed for reproducibility.
-
-    Returns:
-        Dict with point estimate, CI lower, CI upper, and all bootstrap scores.
-    """
+    """Bootstrap CI for any metric. Pass metric_fn(y_true, y_pred) -> float."""
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
     rng = np.random.RandomState(random_state)
@@ -112,7 +100,7 @@ def bootstrap_confidence_interval(y_true, y_pred, metric_fn, n_bootstrap=1000,
 
 
 def bootstrap_macro_f1_ci(y_true, y_pred, n_bootstrap=1000, random_state=42):
-    """Convenience function for macro F1 bootstrap CI."""
+    """Bootstrap CI specifically for macro F1."""
     def macro_f1(y_t, y_p):
         return sklearn_metrics.f1_score(y_t, y_p, average='macro', zero_division=0)
     return bootstrap_confidence_interval(y_true, y_pred, macro_f1,
@@ -121,7 +109,7 @@ def bootstrap_macro_f1_ci(y_true, y_pred, n_bootstrap=1000, random_state=42):
 
 
 def bootstrap_mcc_ci(y_true, y_pred, n_bootstrap=1000, random_state=42):
-    """Convenience function for MCC bootstrap CI."""
+    """Bootstrap CI specifically for MCC."""
     def mcc(y_t, y_p):
         return sklearn_metrics.matthews_corrcoef(y_t, y_p)
     return bootstrap_confidence_interval(y_true, y_pred, mcc,
