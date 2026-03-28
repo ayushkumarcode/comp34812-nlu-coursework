@@ -361,8 +361,8 @@ def generate_architecture_diagram():
     draw_box(7.5, 9.2, 3.0, 0.7, 'Text 2', '#E3F2FD', C_NAVY, 17, edgecolor='#90CAF9')
 
     # ---- Char Embedding ----
-    draw_box(2.5, 7.9, 3.2, 0.65, 'Char Embed (64d)', '#42A5F5', 'white', 14)
-    draw_box(7.5, 7.9, 3.2, 0.65, 'Char Embed (64d)', '#42A5F5', 'white', 14)
+    draw_box(2.5, 7.9, 3.2, 0.65, 'Char Embed (32d)', '#42A5F5', 'white', 14)
+    draw_box(7.5, 7.9, 3.2, 0.65, 'Char Embed (32d)', '#42A5F5', 'white', 14)
 
     # ---- Multi-width CNN ----
     # Draw 3 sub-boxes for kernel sizes
@@ -379,8 +379,8 @@ def generate_architecture_diagram():
             fontweight='bold', color=C_NAVY)
 
     # ---- BiLSTM ----
-    draw_box(2.5, 5.5, 3.2, 0.65, 'BiLSTM (256h)', '#1565C0', 'white', 14)
-    draw_box(7.5, 5.5, 3.2, 0.65, 'BiLSTM (256h)', '#1565C0', 'white', 14)
+    draw_box(2.5, 5.5, 3.2, 0.65, 'BiLSTM (128h\u2192256d)', '#1565C0', 'white', 14)
+    draw_box(7.5, 5.5, 3.2, 0.65, 'BiLSTM (128h\u2192256d)', '#1565C0', 'white', 14)
 
     # ---- Attention ----
     draw_box(2.5, 4.3, 3.2, 0.65, 'Additive Attention', '#0D47A1', 'white', 14)
@@ -441,13 +441,13 @@ def generate_architecture_diagram():
     arrow(6.0, 2.42, 7.2, 1.55, C_CORAL, 2.5)
 
     # Dimension annotations
-    ax.text(0.3, 7.9, '64', ha='center', fontsize=11, color='#AAA',
+    ax.text(0.3, 7.9, '32', ha='center', fontsize=11, color='#AAA',
             bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
     ax.text(0.3, 6.65, '3\u00D7128', ha='center', fontsize=11, color='#AAA',
             bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
-    ax.text(0.3, 5.5, '512', ha='center', fontsize=11, color='#AAA',
+    ax.text(0.3, 5.5, '256', ha='center', fontsize=11, color='#AAA',
             bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
-    ax.text(0.3, 4.3, '512', ha='center', fontsize=11, color='#AAA',
+    ax.text(0.3, 4.3, '256', ha='center', fontsize=11, color='#AAA',
             bbox=dict(boxstyle='round', facecolor='#F5F5F5', edgecolor='#DDD'))
 
     plt.tight_layout(pad=1)
@@ -1019,11 +1019,11 @@ def create_poster():
     sol2_paras = [
         {'text': 'Siamese Encoder (813K params):',
          'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
-        _bullet_with_detail('Char embedding (64d)',
+        _bullet_with_detail('Char embedding (32d)',
                             'Sub-word stylistic patterns', DARK, MID_GRAY),
         _bullet_with_detail('Multi-width CNN (k=3,5,7)',
                             'Multi-scale local features', DARK, MID_GRAY),
-        _bullet_with_detail('BiLSTM (256 hidden)',
+        _bullet_with_detail('BiLSTM (128 hidden)',
                             'Sequential style dependencies', DARK, MID_GRAY),
         _bullet_with_detail('Additive Attention',
                             'Salient feature weighting', DARK, MID_GRAY),
