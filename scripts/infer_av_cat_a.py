@@ -43,3 +43,17 @@ def main():
     # Extract features using pre-fitted TF-IDF and cosine
     print("\n[3/5] Extracting features...", flush=True)
     t0 = time.time()
+    extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
+    extractor.tfidf = saved_tfidf
+    extractor.cosine = saved_cosine
+    extractor._fitted = True
+    extractor._feature_names = saved_names  # force feature alignment
+    X_test, feat_names = extractor.transform(df, show_progress=True)
+    print(f"  Shape: {X_test.shape}, Time: {time.time()-t0:.1f}s", flush=True)
+
+    # Scale and predict
+    print("\n[4/5] Predicting...", flush=True)
+    X_scaled = scaler.transform(X_test)
+    preds = lgbm.predict(X_scaled)
+    print(f"  Predictions: {len(preds)}", flush=True)
+    print(f"  Class distribution: 0={sum(preds==0)}, 1={sum(preds==1)}", flush=True)
