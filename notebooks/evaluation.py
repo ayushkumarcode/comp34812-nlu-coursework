@@ -317,21 +317,21 @@ print(f"  Sol 2 correct: {correct_sol2.sum()} ({correct_sol2.mean():.4f})")
 print(f"  Neither correct: {(~correct_sol1 & ~correct_sol2).sum()}")
 
 print("""
-INTERPRETATION: The agreement/disagreement analysis shows how often our
-two solutions agree on predictions. When they disagree, we examine which
-model is more often correct. This reveals their complementary strengths:
-Solution 1 (feature-based) captures explicit stylometric patterns while
-Solution 2 (neural) learns implicit character-level representations.
+The agreement/disagreement breakdown shows how often the two solutions
+make the same call. When they disagree, we check which one's right more
+often. Sol 1 (feature-based) picks up on explicit stylometric patterns
+while sol 2 (neural) learns implicit char-level representations, so they
+tend to catch different things.
 """)
 
 # %% [markdown]
-# ## 11. Per-Class Error Rate Analysis
+# ## 11. Per-class error rate analysis
 #
-# We examine which class each model struggles with most,
-# revealing systematic biases in the predictions.
+# which class does each model struggle with? this reveals any
+# systematic biases in the predictions.
 
 # %%
-for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     tn, fp, fn, tp = cm.ravel()
     fpr = fp / (fp + tn) if (fp + tn) > 0 else 0
