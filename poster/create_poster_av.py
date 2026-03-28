@@ -796,3 +796,31 @@ def create_poster():
             {'text': 'Forces model to learn style representations ',
              'font_size': BODY_FONT_SM},
             {'text': 'invariant to topic', 'font_size': BODY_FONT_SM, 'bold': True,
+             'italic': True}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 10},
+        {'text': 'Data Augmentation:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 6},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Character perturbation augmentation for stylistic invariance',
+             'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+    ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), sol2_h - Emu(200000), sol2_paras)
+
+    y += sol2_h
+
+    # =====================================================
+    # COLUMN 3: Architecture Diagram + Results + F1 Chart
+    # =====================================================
+    x = col_x[2]
+    y = y_start
+
+    # --- Architecture Diagram ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Sol 2 Architecture')
+    y += hdr_h
+
+    arch_h = Emu(7000000)
+    _add_section_body_bg(slide, x, y, col_w, arch_h)
+
