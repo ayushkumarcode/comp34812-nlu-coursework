@@ -190,6 +190,17 @@ def main():
         print(f"Epoch {epoch:3d} | Loss: {loss:.4f} (KL={kl:.4f}, Adv={adv:.4f}) "
               f"| Train F1: {tf1:.4f} | Dev F1: {df1:.4f} | {time.time()-t0:.1f}s")
 
+        if df1 > best_f1:
+            best_f1, patience_cnt = df1, 0
+            torch.save(model.state_dict(), save_dir / 'av_cat_b_rdrop_fgm_best.pt')
+            np.save(save_dir / 'av_cat_b_rdrop_fgm_probs.npy', dpr)
+            print(f"  -> New best (F1={best_f1:.4f})")
+        else:
+            patience_cnt += 1
+            if patience_cnt >= PATIENCE:
+                print(f"Early stopping at epoch {epoch}")
+                break
+
 
 if __name__ == '__main__':
     main()
