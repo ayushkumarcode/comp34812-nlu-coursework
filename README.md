@@ -15,14 +15,14 @@ We built about 695 handcrafted features per text pair from 9 groups:
 - Pairwise similarity measures: NCD (gzip/lzma/bz2), cosine sim, JSD, Burrows' Delta
 - LightGBM on top (1000 trees, max_depth=7, lr=0.05)
 
-### Solution 2: Category B — Adversarial Style-Content Disentanglement Network (F1=0.7422)
+### Solution 2: Cat B -- Siamese Char-CNN + BiLSTM with Adversarial Debiasing (F1=0.7422)
 
-Siamese char-CNN + BiLSTM + GRL neural architecture:
-- Character-level encoding (97-char vocab, max 1500 chars)
-- Multi-width Conv1D (3,5,7 kernels, 128 filters each) + BiLSTM(128) + Additive Attention
-- Gradient Reversal Layer for topic adversarial debiasing
-- Stylistic invariance training (char perturbation + truncation augmentation)
-- Beats LSTM baseline by +0.120 (statistically significant)
+This one's a neural approach, built from scratch:
+- Character-level encoding with a 97-char vocab, up to 1500 chars
+- Multi-width Conv1D (kernel sizes 3, 5, 7 with 128 filters each), then BiLSTM + additive attention
+- Gradient Reversal Layer (Ganin & Lempitsky 2015) to debias away topic signal
+- Data augmentation via random char perturbation and truncation
+- Beats the LSTM baseline by +0.120 (statistically significant, McNemar's p < 0.01)
 
 ## Repository Structure
 
