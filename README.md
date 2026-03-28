@@ -34,21 +34,21 @@ src/
   av_tfidf_features.py       -- char n-gram TF-IDF + SVD
   av_spacy_features.py       -- POS tags + syntactic features via spaCy
   av_pipeline.py             -- ties everything together for Cat A
-│   ├── models/
-│   │   ├── av_cat_b_model.py      # AV Cat B neural model
-│   │   ├── av_cat_b_dataset.py    # AV Cat B dataset + char encoding
-│   │   └── cat_c_deberta.py       # Cat C DeBERTa models
-│   ├── training/
-│   │   ├── train_av_ensemble.py   # AV Cat A ensemble training
-│   │   └── train_av_cat_b.py      # AV Cat B neural training
-│   └── evaluation/
-│       └── eval_utils.py          # Evaluation utilities
-├── notebooks/
-│   ├── demo_av_cat_a.py/.ipynb    # Cat A inference demo
-│   ├── demo_av_cat_b.py/.ipynb    # Cat B inference demo
-│   ├── training_cat_a.py/.ipynb   # Cat A training notebook
-│   ├── training_cat_b.py/.ipynb   # Cat B training notebook
-│   └── evaluation.py/.ipynb       # Comprehensive evaluation
+  models/
+    av_cat_b_model.py        -- the neural model (Cat B)
+    av_cat_b_dataset.py      -- char encoding + dataset class
+    cat_c_deberta.py         -- DeBERTa fine-tuning (Cat C, experimental)
+  training/
+    train_av_ensemble.py     -- Cat A LightGBM training
+    train_av_cat_b.py        -- Cat B training loop
+  evaluation/
+    eval_utils.py            -- McNemar's, bootstrap CIs, error analysis
+notebooks/
+  demo_av_cat_a.py/.ipynb    -- Cat A inference demo
+  demo_av_cat_b.py/.ipynb    -- Cat B inference demo
+  training_cat_a.py/.ipynb   -- Cat A training walkthrough
+  training_cat_b.py/.ipynb   -- Cat B training walkthrough
+  evaluation.py/.ipynb       -- full evaluation + significance tests
 ├── model_cards/
 │   ├── model_card_sol1_cat_a.md   # Model card for Solution 1
 │   └── model_card_sol2_cat_b.md   # Model card for Solution 2
