@@ -572,3 +572,31 @@ def create_poster():
 
     intro_h = Emu(3200000)
     _add_section_body_bg(slide, x, y, col_w, intro_h)
+
+    intro_paras = [
+        {'text': 'Authorship Verification (AV): given two texts, determine '
+                 'whether they were written by the same author.',
+         'font_size': BODY_FONT, 'space_after': 10},
+        {'text': 'Key Challenge: ', 'font_size': BODY_FONT, 'bold': True,
+         'runs': [
+             {'text': 'Key Challenge: ', 'font_size': BODY_FONT, 'bold': True},
+             {'text': 'Style-content confound — models may exploit topic '
+                      'similarity as a proxy for authorship, leading to '
+                      'spurious correlations.', 'font_size': BODY_FONT}
+         ], 'space_after': 10},
+        {'text': 'Our Approach: ', 'font_size': BODY_FONT, 'bold': True,
+         'runs': [
+             {'text': 'Our Approach: ', 'font_size': BODY_FONT, 'bold': True},
+             {'text': 'Two complementary solutions — a feature-engineered '
+                      'ensemble (Cat A) and an adversarially-trained neural '
+                      'model with gradient reversal (Cat B).', 'font_size': BODY_FONT}
+         ], 'space_after': 6},
+    ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), intro_h - Emu(200000), intro_paras)
+
+    y += intro_h + SECTION_GAP
+
+    # --- Dataset ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Dataset Summary')
+    y += hdr_h
