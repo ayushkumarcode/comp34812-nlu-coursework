@@ -83,7 +83,7 @@ try:
         max_depth=7, learning_rate=0.02,
         num_leaves=63, min_child_samples=10,
         subsample=0.8, colsample_bytree=0.7,
-        verbose=-1, random_state=42, n_jobs=1,
+        verbose=-1, random_state=42, n_jobs=-1,
     )
     m_old.fit(X_old_tr, y_train)
     p_old = m_old.predict_proba(X_old_dv)[:, 1]
@@ -108,7 +108,7 @@ m1 = LGBMClassifier(
     subsample=0.8, colsample_bytree=0.7,
     reg_alpha=0.1, reg_lambda=1.0,
     drop_rate=0.1,
-    verbose=-1, random_state=42, n_jobs=1,
+    verbose=-1, random_state=42, n_jobs=-1,
 )
 m1.fit(X_tr, y_train)
 p1 = m1.predict_proba(X_dv)[:, 1]
@@ -126,7 +126,7 @@ m2 = LGBMClassifier(
     max_depth=5, learning_rate=0.01,
     num_leaves=31, min_child_samples=20,
     reg_alpha=0.5, reg_lambda=2.0,
-    verbose=-1, random_state=42, n_jobs=1,
+    verbose=-1, random_state=42, n_jobs=-1,
 )
 m2.fit(X_tr, y_train)
 p2 = m2.predict_proba(X_dv)[:, 1]
@@ -146,7 +146,7 @@ m3 = XGBClassifier(
     reg_alpha=1.0, reg_lambda=3.0,
     min_child_weight=10, gamma=0.2,
     eval_metric='logloss',
-    random_state=42, n_jobs=1,
+    random_state=42, n_jobs=-1,
 )
 m3.fit(X_tr, y_train)
 p3 = m3.predict_proba(X_dv)[:, 1]
@@ -164,7 +164,7 @@ m4 = LGBMClassifier(
     learning_rate=0.01, num_leaves=31,
     min_child_samples=20,
     subsample=0.7, colsample_bytree=0.6,
-    verbose=-1, random_state=42, n_jobs=1,
+    verbose=-1, random_state=42, n_jobs=-1,
 )
 m4.fit(X_tr, y_train)
 p4 = m4.predict_proba(X_dv)[:, 1]
