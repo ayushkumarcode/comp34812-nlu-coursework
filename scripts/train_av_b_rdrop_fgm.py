@@ -48,5 +48,16 @@ class FGM:
         self.backup = {}
 
 
+def rdrop_kl(logits1, logits2):
+    """Symmetric KL divergence for binary classification logits."""
+    p1 = torch.sigmoid(logits1)
+    p2 = torch.sigmoid(logits2)
+    d1 = torch.stack([p1, 1 - p1], dim=-1).clamp(min=1e-7)
+    d2 = torch.stack([p2, 1 - p2], dim=-1).clamp(min=1e-7)
+    kl = (F.kl_div(d1.log(), d2, reduction='batchmean') +
+          F.kl_div(d2.log(), d1, reduction='batchmean')) / 2
+    return kl
+
+
 if __name__ == '__main__':
     pass
