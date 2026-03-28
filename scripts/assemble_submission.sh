@@ -54,7 +54,7 @@ rm -f submission/src/training/train_av_ensemble.py
 mkdir -p submission/models
 # Cat B model is 3.1MB — include
 cp models/av_cat_b_best.pt submission/models/ 2>/dev/null
-# Cat A models (LightGBM ~1MB, scaler ~17KB, etc) — include
+# Cat A models (LightGBM 9.6MB compressed, scaler ~18KB, etc) — include
 cp models/av_cat_a_lgbm.joblib submission/models/ 2>/dev/null
 cp models/av_cat_a_scaler.joblib submission/models/ 2>/dev/null
 cp models/av_cat_a_feature_names.joblib submission/models/ 2>/dev/null

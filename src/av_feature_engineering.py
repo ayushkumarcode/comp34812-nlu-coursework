@@ -1,6 +1,6 @@
 """
 AV Cat A feature engineering -- the stylometric feature extraction.
-13 feature groups total, ~715 features per text pair when combined with
+13 feature groups total, ~736 features per text pair when combined with
 pairwise measures and diff-vectors. Groups 7-13 are our novel contributions.
 """
 
