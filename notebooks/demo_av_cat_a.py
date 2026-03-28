@@ -20,14 +20,18 @@ LightGBM with 695 stylometric features.
 # %%
 import sys
 import numpy as np
+import pandas as pd
 import joblib
 from pathlib import Path
 
 PROJECT_ROOT = Path('.').resolve()
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.data_utils import load_av_data, save_predictions
+from src.data_utils import load_av_data, clean_text, save_predictions
 from src.av_pipeline import AVFeatureExtractor
+
+# Set INPUT_FILE to a CSV path for custom inference, or None for dev data.
+INPUT_FILE = None  # e.g. 'test_data_av.csv'
 
 # %% [markdown]
 # ## 1. Load Trained Model
@@ -51,8 +55,15 @@ print(f"Model loaded. Features: {len(feature_names)}")
 # and all novel feature groups.
 
 # %%
-# For demo, use dev data. Replace with test data path for submission.
-test_df = load_av_data(split='dev')
+# Load data: use INPUT_FILE if set, otherwise default to dev split.
+if INPUT_FILE is not None:
+    test_df = pd.read_csv(INPUT_FILE, quotechar='"', engine='python')
+    test_df['text_1'] = test_df['text_1'].apply(
+        lambda x: clean_text(x, lowercase=False))
+    test_df['text_2'] = test_df['text_2'].apply(
+        lambda x: clean_text(x, lowercase=False))
+else:
+    test_df = load_av_data(split='dev')
 print(f"Test data: {len(test_df)} pairs")
 
 extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
