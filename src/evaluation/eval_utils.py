@@ -1,7 +1,6 @@
 """
-Evaluation utilities for COMP34812 NLU Coursework.
-Confusion matrices, McNemar's test, bootstrap CIs, calibration, ROC/PR curves.
-Shared across both AV and NLI tracks.
+Evaluation utilities shared by both tracks. Confusion matrices,
+McNemar's test, bootstrap CIs, error overlap analysis.
 """
 
 import numpy as np
@@ -10,15 +9,7 @@ from scipy import stats
 
 
 def confusion_matrix_stats(y_true, y_pred):
-    """Compute confusion matrix and derived statistics.
-
-    Args:
-        y_true: Ground truth labels (0/1).
-        y_pred: Predicted labels (0/1).
-
-    Returns:
-        Dict with confusion matrix, per-class precision/recall/F1, counts.
-    """
+    """Confusion matrix plus per-class P/R/F1."""
     y_true = np.asarray(y_true, dtype=int)
     y_pred = np.asarray(y_pred, dtype=int)
 
@@ -58,10 +49,6 @@ def mcnemars_test(y_true, y_pred_a, y_pred_b):
     correct_a = (y_pred_a == y_true)
     correct_b = (y_pred_b == y_true)
 
-    # Contingency table
-    # b_correct  b_wrong
-    # a_correct    n00      n01
-    # a_wrong      n10      n11
     n00 = np.sum(correct_a & correct_b)
     n01 = np.sum(correct_a & ~correct_b)
     n10 = np.sum(~correct_a & correct_b)
