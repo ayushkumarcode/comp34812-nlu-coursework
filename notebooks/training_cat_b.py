@@ -63,12 +63,12 @@ train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_worker
 dev_loader = DataLoader(dev_dataset, batch_size=64, shuffle=False, num_workers=4, pin_memory=True)
 
 # %% [markdown]
-# ## 3. Build Model
+# ## 3. Build model
 #
-# Architecture:
-# - Character Embedding (32d) -> Multi-width Conv1D (3,5,7, 128 filters each) -> MaxPool
-# - BiLSTM (128 hidden, bidirectional) -> Additive Attention
-# - Projection to 128d style embedding
+# Architecture breakdown:
+# - Char embedding (32d) -> multi-width Conv1D (3,5,7 with 128 filters each) -> maxpool
+# - BiLSTM (128 hidden, bidirectional) -> additive attention
+# - Project to 128d style embedding
 # - Comparison: [v1, v2, |v1-v2|, v1*v2] = 512d -> MLP(512->256->64->1)
 # - GRL topic adversarial head (128->64->num_topics)
 
