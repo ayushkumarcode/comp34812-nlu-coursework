@@ -32,26 +32,12 @@ class CharNgramTFIDF:
         return self
 
     def transform(self, texts):
-        """Transform texts to dense SVD features.
-
-        Args:
-            texts: List of text strings.
-
-        Returns:
-            numpy array of shape (n_texts, n_components).
-        """
+        """Transform texts to dense SVD features -> (n_texts, n_components)."""
         tfidf_matrix = self.vectorizer.transform(texts)
         return self.svd.transform(tfidf_matrix)
 
     def transform_to_dict(self, text):
-        """Transform a single text and return as feature dict.
-
-        Args:
-            text: Single text string.
-
-        Returns:
-            Dict with keys 'tfidf_svd_0', 'tfidf_svd_1', etc.
-        """
+        """Transform one text, return as dict with tfidf_svd_0, tfidf_svd_1, etc."""
         vec = self.transform([text])[0]
         return {f'tfidf_svd_{i}': float(v) for i, v in enumerate(vec)}
 
