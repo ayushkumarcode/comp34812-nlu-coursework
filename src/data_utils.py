@@ -29,31 +29,22 @@ URL_PATTERN = re.compile(
 
 
 def clean_text(text, lowercase=False):
-    """Clean text while preserving stylistic signals.
+    """Clean text while keeping stylistic signals intact.
 
     Args:
-        text: Raw input text string.
-        lowercase: If True, lowercase the text (used for NLI, not AV).
+        text: raw input string.
+        lowercase: set True for NLI, False for AV (we need case info).
 
     Returns:
-        Cleaned text string.
+        cleaned string.
     """
     if not isinstance(text, str):
         text = str(text) if text is not None else ""
 
-    # Decode HTML entities
     text = html.unescape(text)
-
-    # Normalize Unicode to NFC form
     text = unicodedata.normalize('NFC', text)
-
-    # Replace URLs with <URL> token
     text = URL_PATTERN.sub('<URL>', text)
-
-    # Normalize multiple spaces to single space
     text = re.sub(r' {2,}', ' ', text)
-
-    # Strip leading/trailing whitespace
     text = text.strip()
 
     if lowercase:
