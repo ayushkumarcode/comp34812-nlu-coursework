@@ -121,6 +121,7 @@ enc_1 = [char_encode(t, max_len) for t in dev_df['text_1']]
 enc_2 = [char_encode(t, max_len) for t in dev_df['text_2']]
 ids_1 = torch.tensor(np.array(enc_1), dtype=torch.long)
 ids_2 = torch.tensor(np.array(enc_2), dtype=torch.long)
+
 sol2_preds = []
 with torch.no_grad():
     for start in range(0, len(dev_df), 64):
