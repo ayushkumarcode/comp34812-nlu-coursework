@@ -77,26 +77,27 @@ model = AVCatBModel(
     vocab_size=VOCAB_SIZE, char_emb_dim=32,
     cnn_filters=128, lstm_hidden=128,
     proj_dim=128, num_topics=num_topics,
-    grl_lambda=0.0,  # Starts at 0, ramps to 0.05
+    grl_lambda=0.0,  # starts at 0, ramps to 0.05
 ).to(device)
 
 print(f"Parameters: {sum(p.numel() for p in model.parameters()):,}")
 
 # %% [markdown]
-# ## 4. Training Configuration
+# ## 4. Training config
 #
-# Key training details (v3 — final version):
-# - Loss: BCE + topic adversarial ONLY (NO contrastive loss)
-# - AdamW optimizer, lr=2e-4, weight_decay=1e-4
-# - CosineAnnealingWarmRestarts scheduler, T_0=30, T_mult=2
-# - GRL lambda: linear ramp 0 -> 0.05 over epochs 1-20
-# - Topic adversarial weight: 0.02, introduced from epoch 15
-# - Character perturbation augmentation (5% per-char)
+# Key details for v3 (final version):
+# - Loss: BCE + topic adversarial only (no contrastive)
+# - AdamW, lr=2e-4, weight_decay=1e-4
+# - CosineAnnealingWarmRestarts, T_0=30, T_mult=2
+# - GRL lambda ramps linearly 0 -> 0.05 over epochs 1-20
+# - Topic adversarial weight: 0.02, kicks in at epoch 15
+# - Char perturbation augmentation (5% per-char)
 # - Random truncation (80-100%) during training
-# - Early stopping with patience=20 on dev macro_f1
+# - Early stopping patience=20 on dev macro_f1
 # - Gradient clipping: max_norm=5.0
 
 # %%
+# training was done on GPU — see the actual training script for the full loop
 print("Full training code: scripts/iter_av_b_v3.py")
 print("Run on GPU: python scripts/iter_av_b_v3.py")
 print("Or: sbatch scripts/train_av_cat_b.sh (CSF3 GPU cluster)")
