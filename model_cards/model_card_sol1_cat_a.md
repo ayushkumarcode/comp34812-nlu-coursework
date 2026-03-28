@@ -63,27 +63,32 @@ What makes this approach work is three things:
    - Group 7: Syntactic complexity features (10, NOVEL) -- dependency parse depth, branching factor, subordination index, arc length, passive constructions, relative clauses, coordination complexity, content clauses, fronted adverbials
    - Group 8: Writing rhythm features (6, NOVEL) -- sentence length autocorrelation, sentence length entropy, punctuation burstiness, variance ratio, mean-reversion tendency, punctuation diversity entropy
    - Group 9: Information-theoretic features (5, NOVEL) -- character bigram mutual information, text entropy rate, conditional entropy, word length entropy, rolling TTR entropy
+   - Group 10: FFT Spectral Analysis (8, NOVEL) -- dominant frequency, spectral centroid, spectral entropy, low/mid/high band energies, peak-to-average ratio, spectral rolloff of sentence-length series via FFT
+   - Group 11: Zipf-Mandelbrot Law Deviation (5, NOVEL) -- alpha exponent, beta parameter, goodness-of-fit residual, KL divergence from fitted Zipf-Mandelbrot distribution, R-squared
+   - Group 12: Benford's Law on Linguistic Distributions (4, NOVEL) -- chi-squared, KL divergence, correlation, and MAD from Benford's theoretical first-digit distribution applied to word frequency counts
+   - Group 13: Hurst Exponent / Fractal Analysis (3, NOVEL) -- Hurst exponent via R/S analysis on sentence-length series, log-log intercept, stability (R-squared of fit)
 
-2. **Diff-vector computation:** |f(text_1) - f(text_2)| for all per-text features (~435 dims)
+2. **Diff-vector computation:** |f(text_1) - f(text_2)| for all per-text features (~456 dims)
 
-3. **Style-only diff-vector (NOVEL topic-robustness):** We compute a separate diff-vector using only function words, POS tags, syntactic, rhythm, and information-theoretic features (~246 dims). The idea is to strip out anything that might be topic-related and focus purely on style.
+3. **Style-only diff-vector (NOVEL topic-robustness):** We compute a separate diff-vector using only function words, POS tags, syntactic, rhythm, information-theoretic, spectral, Zipf, Benford, and Hurst features (~266 dims). The idea is to strip out anything that might be topic-related and focus purely on style.
 
-4. **Pairwise features (14):** NCD (gzip, lzma, bz2), cosine similarity of character 3/4/5-gram TF-IDF vectors, Jensen-Shannon divergence (word, char bigram), Jaccard overlap, content word overlap, length/word count/vocabulary ratios, Burrows' Delta (with 200-word stability guard)
+4. **Pairwise features (14):** NCD (gzip, lzma, bz2), cosine similarity of character 3/4/5-gram TF-IDF vectors, Jensen-Shannon divergence (word, char bigram), Jaccard overlap, content word overlap, length/word count/vocabulary ratios, Burrows' Delta (with 200-word stability guard), Cosine Delta (Evert et al. 2017 -- cosine distance after z-score normalization of word frequencies)
 
-5. **Total feature vector: ~695 features per pair**
+5. **Total feature vector: ~736 features per pair**
 
 #### Training Hyperparameters
 
 - **Classifier:** LGBMClassifier
-  - n_estimators: 1000
-  - max_depth: 7
-  - learning_rate: 0.05
-  - num_leaves: 63
+  - n_estimators: 2000
+  - max_depth: 8
+  - learning_rate: 0.03
+  - num_leaves: 127
   - subsample: 0.8
-  - colsample_bytree: 0.8
-  - min_child_samples: 20
-  - reg_alpha: 0.1
-  - reg_lambda: 1
+  - colsample_bytree: 0.7
+  - min_child_samples: 15
+  - reg_alpha: 0.05
+  - reg_lambda: 0.5
+  - boosting_type: gbdt
   - random_state: 42
 - **Feature scaling:** StandardScaler (fitted on training data only)
 
