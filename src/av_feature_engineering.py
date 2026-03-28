@@ -14,16 +14,10 @@ from collections import Counter
 import numpy as np
 
 
-# ============================================================
-# GROUP 1: LEXICAL FEATURES (30 features)
-# ============================================================
+# -- group 1: lexical features (~30) --
 
 def lexical_features(text):
-    """Extract lexical features from text.
-
-    Returns:
-        Dict mapping feature name to float value. ~30 features.
-    """
+    """Extract lexical features like TTR, Yule's K, hapax ratios, etc."""
     words = text.split()
     n_words = len(words)
     if n_words == 0:
