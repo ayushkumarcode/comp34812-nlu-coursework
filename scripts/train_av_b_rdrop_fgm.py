@@ -221,6 +221,18 @@ def main():
     print_metrics(m, "AV Cat B v4 (R-Drop+FGM) — Final")
     save_predictions(fp, PROJECT_ROOT / 'predictions' / 'av_Group_34_B_rdrop_fgm.csv')
 
+    # baseline comparison
+    baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
+    f1 = m['macro_f1']
+    for name, bf1 in baselines.items():
+        gap = f1 - bf1
+        print(f"  vs {name} ({bf1:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
+
+    print(f"\nPrevious best (v3): ~0.7123")
+    print(f"This run (v4 R-Drop+FGM): {f1:.4f}")
+    print(f"Delta: {f1 - 0.7123:+.4f}")
+    print("Done!")
+
 
 if __name__ == '__main__':
     main()
