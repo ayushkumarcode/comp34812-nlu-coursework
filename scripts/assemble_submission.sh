@@ -36,6 +36,17 @@ cp notebooks/evaluation.ipynb submission/notebooks/
 cp -r src submission/
 rm -rf submission/src/__pycache__ submission/src/**/__pycache__
 
+# Remove NLI-specific dead code (we submitted AV track only)
+rm -f submission/src/nli_feature_engineering.py
+rm -f submission/src/nli_pipeline.py
+rm -f submission/src/nli_spacy_features.py
+rm -f submission/src/nli_tfidf_features.py
+rm -f submission/src/models/nli_cat_b_model.py
+rm -f submission/src/models/nli_cat_b_dataset.py
+rm -f submission/src/training/train_nli_cat_b.py
+rm -f submission/src/training/train_nli_ensemble.py
+rm -f submission/src/training/run_nli_cat_a.py
+
 # Models that are small enough (<10MB)
 mkdir -p submission/models
 # Cat B model is 3.1MB — include
