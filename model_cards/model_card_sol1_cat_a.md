@@ -13,14 +13,14 @@ A LightGBM gradient boosting classifier for authorship verification (AV) that fi
 AV-StyleLGBM is our Category A (traditional ML) solution for the COMP34812 Authorship Verification shared task. Given a pair of texts, we extract a big set of stylometric features from each text independently, compute element-wise absolute difference vectors (diff-vectors) to capture how much the authorial styles diverge, and then classify the pair as same-author (1) or different-author (0) with LightGBM.
 
 What makes this approach work is three things:
-1. **Comprehensive feature engineering** across 9 feature groups (435 features per text), including novel syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures
+1. **Comprehensive feature engineering** across 13 feature groups (456 features per text), including novel syntactic complexity profiling, writing rhythm analysis, information-theoretic authorial signatures, FFT spectral analysis of sentence rhythms, Zipf-Mandelbrot law deviation, Benford's law on linguistic distributions, and fractal analysis via Hurst exponents
 2. **A topic-robustness mechanism** using function-word-only style diff-vectors and topic-correlated feature filtering -- this tackles the style-content confound without needing neural adversarial training
-3. **LightGBM classifier** with tuned hyperparameters that handles the high-dimensional stylometric feature space well
+3. **LightGBM classifier** with tuned hyperparameters (2000 trees, depth 8) that handles the high-dimensional stylometric feature space well
 
 - **Developed by:** Group 34
 - **Language(s):** English
 - **Model type:** Gradient boosting classifier (traditional ML, Category A)
-- **Model architecture:** StandardScaler -> LGBMClassifier (1000 trees, max_depth=7, 63 leaves)
+- **Model architecture:** StandardScaler -> LGBMClassifier (2000 trees, max_depth=8, 127 leaves)
 - **Finetuned from model [optional]:** N/A (trained from scratch)
 
 ### Model Resources
