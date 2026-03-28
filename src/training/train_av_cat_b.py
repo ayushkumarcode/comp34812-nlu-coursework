@@ -97,21 +97,18 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
 
-    # Load data
     print("\n[1/5] Loading data...")
     train_df = load_av_data(split='train')
     dev_df = load_av_data(split='dev')
     dev_labels = load_solution_labels(task='av')
     print(f"  Train: {len(train_df)}, Dev: {len(dev_df)}")
 
-    # Generate topic pseudo-labels
     print("\n[2/5] Generating topic labels...")
     all_texts = list(train_df['text_1']) + list(train_df['text_2'])
     topic_labels_all = generate_topic_labels(all_texts, n_clusters=10)
     train_topic = topic_labels_all[:len(train_df)]
     num_topics = int(topic_labels_all.max()) + 1
 
-    # Create datasets
     print("\n[3/5] Creating datasets...")
     train_dataset = AVCharDataset(
         train_df, max_len=1500, augment=True, topic_labels=train_topic
@@ -130,7 +127,6 @@ def main():
         num_workers=4, pin_memory=True
     )
 
-    # Build model
     print("\n[4/5] Building model...")
     model = AVCatBModel(
         vocab_size=VOCAB_SIZE,
@@ -144,15 +140,12 @@ def main():
     total_params = sum(p.numel() for p in model.parameters())
     print(f"  Total parameters: {total_params:,}")
 
-    # Loss functions (NO contrastive loss in v3)
     bce_loss_fn = nn.BCEWithLogitsLoss()
     topic_loss_fn = nn.CrossEntropyLoss()
 
-    # Optimizer and scheduler (v3: lr=2e-4, T_0=30)
     optimizer = AdamW(model.parameters(), lr=2e-4, weight_decay=1e-4)
     scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=30, T_mult=2)
 
-    # Training loop
     print("\n[5/5] Training...")
     best_f1 = 0.0
     patience_counter = 0
@@ -164,14 +157,13 @@ def main():
     for epoch in range(1, max_epochs + 1):
         t0 = time.time()
 
-        # GRL lambda: ramp 0 -> 0.05 over epochs 1-20
+        # ramp GRL lambda over first 20 epochs
         if epoch <= 20:
             grl_lambda = 0.05 * epoch / 20
         else:
             grl_lambda = 0.05
         model.grl.lambda_val = grl_lambda
 
-        # Topic weight: 0.02 from epoch 15 onward
         t_weight = 0.02 if epoch >= 15 else 0.0
 
         train_loss, train_f1 = train_epoch(
@@ -181,7 +173,6 @@ def main():
         )
         scheduler.step()
 
-        # Evaluate
         dev_preds, dev_probs, dev_true = evaluate(model, dev_loader, device)
         dev_f1 = f1_score(dev_true, dev_preds, average='macro', zero_division=0)
 
@@ -190,7 +181,6 @@ def main():
               f"Train F1: {train_f1:.4f} | Dev F1: {dev_f1:.4f} | "
               f"GRL: {grl_lambda:.3f} | Time: {elapsed:.1f}s")
 
-        # Save best model
         if dev_f1 > best_f1:
             best_f1 = dev_f1
             patience_counter = 0
@@ -202,7 +192,6 @@ def main():
                 print(f"Early stopping at epoch {epoch}")
                 break
 
-    # Load best model and final evaluation
     print("\n" + "=" * 60)
     print(f"  Best dev macro_f1: {best_f1:.4f}")
     print("=" * 60)
@@ -214,12 +203,10 @@ def main():
     metrics = compute_all_metrics(dev_true, dev_preds)
     print_metrics(metrics, "AV Cat B — Final Dev Results")
 
-    # Save predictions
     pred_path = PROJECT_ROOT / 'predictions' / 'av_Group_34_B.csv'
     pred_path.parent.mkdir(exist_ok=True)
     save_predictions(dev_preds, pred_path)
 
-    # Baseline comparison
     baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
     f1 = metrics['macro_f1']
     for name, baseline_f1 in baselines.items():
