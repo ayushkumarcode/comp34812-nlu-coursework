@@ -600,3 +600,31 @@ def create_poster():
     # --- Dataset ---
     hdr_h = _add_section_header(slide, x, y, col_w, 'Dataset Summary')
     y += hdr_h
+
+    dataset_h = Emu(3000000)
+    _add_section_body_bg(slide, x, y, col_w, dataset_h)
+
+    dataset_paras = [
+        {'runs': [
+            {'text': 'Training: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': '27,643 text pairs', 'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 8},
+        {'runs': [
+            {'text': 'Development: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': '5,993 text pairs', 'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 8},
+        {'runs': [
+            {'text': 'Classes: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': 'Near-balanced (~50/50 same/different author)', 'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 8},
+        {'runs': [
+            {'text': 'Domains: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': 'Cross-domain — emails (Enron corpus), blog posts, and product reviews',
+             'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 8},
+        {'runs': [
+            {'text': 'Representation: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': 'Each pair represented as a diff-vector |f(t1) - f(t2)|',
+             'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 6},
+    ]
