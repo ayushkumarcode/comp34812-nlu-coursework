@@ -488,3 +488,31 @@ def _add_section_body_bg(slide, left, top, width, height):
     shape = _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
                                   left, top, width, height,
                                   LIGHT_BG, BORDER_COLOR, Pt(1))
+    return shape
+
+
+# ============================================================
+# MAIN POSTER CREATION
+# ============================================================
+
+def create_poster():
+    """Create the full AV track academic poster."""
+    print("Creating AV track academic poster...")
+
+    # Generate charts
+    print("\nGenerating visualizations...")
+    f1_chart_path = generate_f1_chart()
+    cm_path = generate_confusion_matrices()
+    arch_path = generate_architecture_diagram()
+    feat_path = generate_feature_groups_chart()
+
+    # Create presentation
+    prs = Presentation()
+    prs.slide_width = SLIDE_W
+    prs.slide_height = SLIDE_H
+
+    # Use blank layout
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+    # Background
+    bg = slide.background
