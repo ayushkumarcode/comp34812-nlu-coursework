@@ -29,15 +29,15 @@ from src.models.av_cat_b_dataset import char_encode, VOCAB_SIZE
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {device}")
 
-# Set INPUT_FILE to a CSV path for custom inference, or None for dev data.
+# set this to a csv path for custom inference, or leave as None for dev
 INPUT_FILE = None  # e.g. 'test_data_av.csv'
 
 # %% [markdown]
-# ## 1. Load Trained Model
+# ## 1. Load the trained model
 #
-# We instantiate the model with the exact architecture used during
-# training (97-char vocab, 128 CNN filters, 128 BiLSTM hidden,
-# 10 topic clusters) and load the trained weights.
+# We set up the model with the same architecture used during training
+# (97-char vocab, 128 CNN filters, 128 BiLSTM hidden, 10 topic
+# clusters) and load the saved weights.
 
 # %%
 model = AVCatBModel(
