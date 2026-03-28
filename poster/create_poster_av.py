@@ -544,3 +544,31 @@ def create_poster():
     # Subtitle
     _add_textbox(slide, Emu(800000), Emu(2000000),
                  SLIDE_W - Emu(1600000), Emu(800000),
+                 'COMP34812 Natural Language Understanding  |  Group 34  |  University of Manchester  |  2025-26',
+                 SUBTITLE_FONT, RGBColor(0xCC, 0xDD, 0xEE), bold=False,
+                 alignment=PP_ALIGN.CENTER)
+
+    # =====================================================
+    # COLUMN LAYOUT: 4 columns
+    # =====================================================
+    usable_w = SLIDE_W - 2 * MARGIN
+    n_cols = 4
+    col_w = (usable_w - (n_cols - 1) * COL_GAP) // n_cols
+    y_start = title_h + Emu(400000)
+
+    col_x = []
+    for i in range(n_cols):
+        col_x.append(MARGIN + i * (col_w + COL_GAP))
+
+    # =====================================================
+    # COLUMN 1: Introduction + Dataset + Feature Groups
+    # =====================================================
+    x = col_x[0]
+    y = y_start
+
+    # --- Introduction ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Introduction')
+    y += hdr_h
+
+    intro_h = Emu(3200000)
+    _add_section_body_bg(slide, x, y, col_w, intro_h)
