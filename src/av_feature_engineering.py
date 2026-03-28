@@ -360,6 +360,273 @@ def info_theoretic_features(text):
     return feats
 
 
+# -- group 10: FFT spectral analysis of sentence lengths (8) -- NOVEL
+
+def spectral_features(text):
+    """FFT of sentence-length series: dominant freq, centroid, band energies."""
+    feats = {}
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    sentences = [s for s in sentences if s.strip()]
+    sent_lengths = np.array([len(s.split()) for s in sentences], dtype=float)
+
+    if len(sent_lengths) < 4:
+        return {
+            'fft_dominant_freq': 0.0,
+            'fft_spectral_centroid': 0.0,
+            'fft_spectral_entropy': 0.0,
+            'fft_energy_low': 0.0,
+            'fft_energy_mid': 0.0,
+            'fft_energy_high': 0.0,
+            'fft_peak_to_avg': 0.0,
+            'fft_spectral_rolloff': 0.0,
+        }
+
+    # zero-mean before FFT
+    sl = sent_lengths - sent_lengths.mean()
+    spectrum = np.abs(np.fft.rfft(sl))
+    freqs = np.fft.rfftfreq(len(sl))
+
+    # skip DC component (index 0)
+    spectrum = spectrum[1:]
+    freqs = freqs[1:]
+
+    if len(spectrum) == 0 or spectrum.sum() == 0:
+        return {k: 0.0 for k in [
+            'fft_dominant_freq', 'fft_spectral_centroid',
+            'fft_spectral_entropy', 'fft_energy_low',
+            'fft_energy_mid', 'fft_energy_high',
+            'fft_peak_to_avg', 'fft_spectral_rolloff',
+        ]}
+
+    total_energy = spectrum.sum()
+    feats['fft_dominant_freq'] = freqs[np.argmax(spectrum)]
+    feats['fft_spectral_centroid'] = np.sum(freqs * spectrum) / total_energy
+
+    # spectral entropy
+    probs = spectrum / total_energy
+    probs = probs[probs > 0]
+    feats['fft_spectral_entropy'] = -np.sum(probs * np.log2(probs))
+
+    # band energies (low/mid/high thirds)
+    n_bins = len(spectrum)
+    third = max(n_bins // 3, 1)
+    feats['fft_energy_low'] = spectrum[:third].sum() / total_energy
+    feats['fft_energy_mid'] = spectrum[third:2*third].sum() / total_energy
+    feats['fft_energy_high'] = spectrum[2*third:].sum() / total_energy
+
+    feats['fft_peak_to_avg'] = spectrum.max() / (total_energy / n_bins)
+
+    # spectral rolloff (freq below which 85% of energy lives)
+    cumulative = np.cumsum(spectrum)
+    rolloff_idx = np.searchsorted(cumulative, 0.85 * total_energy)
+    rolloff_idx = min(rolloff_idx, len(freqs) - 1)
+    feats['fft_spectral_rolloff'] = freqs[rolloff_idx]
+
+    return feats
+
+
+# -- group 11: Zipf-Mandelbrot law deviation (5) -- NOVEL
+
+def zipf_features(text):
+    """Fit Zipf-Mandelbrot law to word freq distribution, measure deviation."""
+    feats = {}
+    words = text.lower().split()
+
+    if len(words) < 20:
+        return {
+            'zipf_alpha': 0.0,
+            'zipf_beta': 0.0,
+            'zipf_gof_residual': 0.0,
+            'zipf_kl_div': 0.0,
+            'zipf_r_squared': 0.0,
+        }
+
+    freq = Counter(words)
+    counts = sorted(freq.values(), reverse=True)
+    ranks = np.arange(1, len(counts) + 1, dtype=float)
+    observed = np.array(counts, dtype=float)
+    observed_norm = observed / observed.sum()
+
+    # Zipf-Mandelbrot: f(r) = C / (r + beta)^alpha
+    def zipf_mandelbrot(r, alpha, beta, c):
+        return c / (r + beta) ** alpha
+
+    try:
+        popt, _ = curve_fit(
+            zipf_mandelbrot, ranks, observed,
+            p0=[1.0, 0.0, observed[0]],
+            bounds=([0.01, -0.5, 0.01], [5.0, 50.0, observed[0] * 10]),
+            maxfev=2000,
+        )
+        alpha, beta, c = popt
+    except (RuntimeError, ValueError):
+        alpha, beta, c = 1.0, 0.0, observed[0]
+
+    feats['zipf_alpha'] = alpha
+    feats['zipf_beta'] = beta
+
+    # goodness of fit (normalized chi-squared residual)
+    expected = zipf_mandelbrot(ranks, alpha, beta, c)
+    expected_norm = expected / expected.sum()
+    residuals = (observed_norm - expected_norm) ** 2
+    feats['zipf_gof_residual'] = residuals.sum()
+
+    # KL divergence from fitted distribution
+    eps = 1e-10
+    feats['zipf_kl_div'] = np.sum(
+        observed_norm * np.log((observed_norm + eps) / (expected_norm + eps))
+    )
+
+    # R-squared of the fit
+    ss_res = np.sum((observed - expected) ** 2)
+    ss_tot = np.sum((observed - observed.mean()) ** 2)
+    feats['zipf_r_squared'] = 1.0 - ss_res / (ss_tot + eps)
+
+    return feats
+
+
+# -- group 12: Benford's law on linguistic distributions (4) -- NOVEL
+
+def benford_features(text):
+    """Check first-digit distribution of word freq ranks vs Benford's law."""
+    feats = {}
+    words = text.lower().split()
+
+    if len(words) < 20:
+        return {
+            'benford_chi2': 0.0,
+            'benford_kl_div': 0.0,
+            'benford_correlation': 0.0,
+            'benford_mad': 0.0,
+        }
+
+    # Benford's theoretical distribution for digits 1-9
+    benford_probs = np.array([
+        math.log10(1 + 1.0/d) for d in range(1, 10)
+    ])
+
+    freq = Counter(words)
+    counts = sorted(freq.values(), reverse=True)
+
+    # first digits of word frequency counts (only multi-digit)
+    first_digits = []
+    for c in counts:
+        if c >= 1:
+            first_digits.append(int(str(c)[0]))
+
+    if len(first_digits) < 10:
+        return {
+            'benford_chi2': 0.0,
+            'benford_kl_div': 0.0,
+            'benford_correlation': 0.0,
+            'benford_mad': 0.0,
+        }
+
+    digit_counts = Counter(first_digits)
+    total = sum(digit_counts.values())
+    observed = np.array([digit_counts.get(d, 0) / total for d in range(1, 10)])
+
+    # chi-squared statistic
+    expected = benford_probs
+    chi2 = np.sum((observed - expected) ** 2 / (expected + 1e-10))
+    feats['benford_chi2'] = chi2
+
+    # KL divergence
+    eps = 1e-10
+    feats['benford_kl_div'] = np.sum(
+        observed * np.log((observed + eps) / (expected + eps))
+    )
+
+    # correlation with Benford
+    if np.std(observed) > 0:
+        feats['benford_correlation'] = np.corrcoef(observed, expected)[0, 1]
+    else:
+        feats['benford_correlation'] = 0.0
+
+    # mean absolute deviation
+    feats['benford_mad'] = np.mean(np.abs(observed - expected))
+
+    return feats
+
+
+# -- group 13: Hurst exponent / fractal analysis (3) -- NOVEL
+
+def hurst_features(text):
+    """Hurst exponent via R/S analysis on sentence-length series."""
+    feats = {}
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    sentences = [s for s in sentences if s.strip()]
+    sent_lengths = np.array([len(s.split()) for s in sentences], dtype=float)
+
+    if len(sent_lengths) < 8:
+        return {
+            'hurst_exponent': 0.5,
+            'hurst_rs_intercept': 0.0,
+            'hurst_stability': 0.0,
+        }
+
+    n = len(sent_lengths)
+
+    # R/S analysis across multiple window sizes
+    # use sizes from 4 up to n/2
+    min_window = 4
+    max_window = n // 2
+    if max_window < min_window:
+        return {
+            'hurst_exponent': 0.5,
+            'hurst_rs_intercept': 0.0,
+            'hurst_stability': 0.0,
+        }
+
+    sizes = []
+    rs_values = []
+    size = min_window
+    while size <= max_window:
+        sizes.append(size)
+        size = int(size * 1.5) + 1
+
+    for size in sizes:
+        rs_list = []
+        for start in range(0, n - size + 1, max(size // 2, 1)):
+            window = sent_lengths[start:start + size]
+            mean_val = window.mean()
+            deviations = window - mean_val
+            cumsum = np.cumsum(deviations)
+            r = cumsum.max() - cumsum.min()
+            s = window.std(ddof=1)
+            if s > 0:
+                rs_list.append(r / s)
+        if rs_list:
+            rs_values.append(np.mean(rs_list))
+        else:
+            rs_values.append(0.0)
+
+    # filter out zeros for log
+    valid = [(s, rs) for s, rs in zip(sizes, rs_values) if rs > 0 and s > 0]
+    if len(valid) < 2:
+        return {
+            'hurst_exponent': 0.5,
+            'hurst_rs_intercept': 0.0,
+            'hurst_stability': 0.0,
+        }
+
+    log_sizes = np.log(np.array([v[0] for v in valid]))
+    log_rs = np.log(np.array([v[1] for v in valid]))
+
+    # linear regression in log-log space: H = slope
+    coeffs = np.polyfit(log_sizes, log_rs, 1)
+    feats['hurst_exponent'] = np.clip(coeffs[0], 0.0, 1.5)
+    feats['hurst_rs_intercept'] = coeffs[1]
+
+    # stability: how well the log-log fit explains the data
+    predicted = np.polyval(coeffs, log_sizes)
+    ss_res = np.sum((log_rs - predicted) ** 2)
+    ss_tot = np.sum((log_rs - log_rs.mean()) ** 2)
+    feats['hurst_stability'] = 1.0 - ss_res / (ss_tot + 1e-10)
+
+    return feats
+
+
 # -- pairwise features (14) --
 
 def pairwise_features(text_1, text_2):
@@ -403,6 +670,9 @@ def pairwise_features(text_1, text_2):
     feats['jsd_char_bigram'] = _jsd_char_bigram(text_1, text_2)
 
     feats['burrows_delta'] = _burrows_delta(text_1, text_2)
+
+    # Cosine Delta (Evert et al. 2017) -- cosine distance after z-score norm
+    feats['cosine_delta'] = _cosine_delta(text_1, text_2)
 
     return feats
 
@@ -498,10 +768,57 @@ def _burrows_delta(text_1, text_2, n_top=100):
     return delta / len(top_words) if top_words else 0.0
 
 
+def _cosine_delta(text_1, text_2, n_top=100):
+    """Cosine Delta (Evert et al. 2017): cosine distance after z-score norm."""
+    words_1 = text_1.lower().split()
+    words_2 = text_2.lower().split()
+
+    if len(words_1) < 200 or len(words_2) < 200:
+        return 0.0
+
+    freq_1 = Counter(words_1)
+    freq_2 = Counter(words_2)
+    n1 = len(words_1)
+    n2 = len(words_2)
+
+    combined = Counter(words_1 + words_2)
+    top_words = [w for w, _ in combined.most_common(n_top)]
+
+    all_words = words_1 + words_2
+    combined_freq = Counter(all_words)
+    n_total = len(all_words)
+
+    # build z-scored vectors for each text
+    z1 = []
+    z2 = []
+    for word in top_words:
+        f1 = freq_1.get(word, 0) / n1
+        f2 = freq_2.get(word, 0) / n2
+        mean_f = combined_freq.get(word, 0) / n_total
+        std_f = max(abs(f1 - mean_f), abs(f2 - mean_f))
+        if std_f > 0:
+            z1.append((f1 - mean_f) / std_f)
+            z2.append((f2 - mean_f) / std_f)
+        else:
+            z1.append(0.0)
+            z2.append(0.0)
+
+    z1 = np.array(z1)
+    z2 = np.array(z2)
+
+    # cosine distance = 1 - cosine_similarity
+    dot = np.dot(z1, z2)
+    norm1 = np.linalg.norm(z1)
+    norm2 = np.linalg.norm(z2)
+    if norm1 > 0 and norm2 > 0:
+        return 1.0 - dot / (norm1 * norm2)
+    return 0.0
+
+
 # -- combined feature extraction --
 
 def extract_per_text_features(text):
-    """All per-text features (groups 1,2,4,6,8,9). TF-IDF and spaCy are separate."""
+    """All per-text features (groups 1-13). TF-IDF and spaCy are separate."""
     feats = {}
     feats.update(lexical_features(text))
     feats.update(character_features(text))
@@ -509,6 +826,11 @@ def extract_per_text_features(text):
     feats.update(structural_features(text))
     feats.update(writing_rhythm_features(text))
     feats.update(info_theoretic_features(text))
+    # novel groups 10-13
+    feats.update(spectral_features(text))
+    feats.update(zipf_features(text))
+    feats.update(benford_features(text))
+    feats.update(hurst_features(text))
     return feats
 
 
