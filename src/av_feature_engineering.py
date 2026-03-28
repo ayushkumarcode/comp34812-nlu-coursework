@@ -1,7 +1,7 @@
 """
 AV Cat A feature engineering -- the stylometric feature extraction.
-9 feature groups total, ~695 features per text pair when combined with
-pairwise measures and diff-vectors. Groups 7-9 are our novel contributions.
+13 feature groups total, ~715 features per text pair when combined with
+pairwise measures and diff-vectors. Groups 7-13 are our novel contributions.
 """
 
 import math
@@ -12,6 +12,7 @@ import re
 from collections import Counter
 
 import numpy as np
+from scipy.optimize import curve_fit
 
 
 # -- group 1: lexical features (~30) --
