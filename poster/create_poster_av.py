@@ -684,3 +684,31 @@ def create_poster():
         {'runs': [
             {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
             {'text': 'TF-IDF + SVD (100)', 'font_size': BODY_FONT_SM},
+            {'text': ' — latent semantic features', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Function words (150)', 'font_size': BODY_FONT_SM},
+            {'text': ' — style-indicative closed-class words', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'POS tags (45)', 'font_size': BODY_FONT_SM},
+            {'text': ' — syntactic profile distributions', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Structural (15)', 'font_size': BODY_FONT_SM},
+            {'text': ' — sentence length, paragraph patterns', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 8},
+        # Novel features
+        {'text': 'Novel Features (21):',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': ACCENT_ORANGE, 'space_after': 4},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Syntactic complexity (10)', 'font_size': BODY_FONT_SM},
+            {'text': ' — parse tree depth, clause density', 'font_size': SMALL_FONT,
