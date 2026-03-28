@@ -138,16 +138,9 @@ class AVDeBERTaSiamese(nn.Module):
         return logits, topic_logits, (v1, v2)
 
 
-# ============================================================
-# NLI Cat C — Cross-Encoder DeBERTa
-# ============================================================
-
 class NLIDeBERTaCrossEncoder(nn.Module):
-    """Cross-encoder DeBERTa for NLI with hypothesis-only adversarial debiasing.
-
-    Input: [CLS] premise [SEP] hypothesis [SEP]
-    Adversarial: GRL on hypothesis-only representation.
-    """
+    """NLI cross-encoder with GRL on hypothesis-only representation
+    to prevent the model from relying on hypothesis artifacts."""
 
     def __init__(self, model_name='microsoft/deberta-v3-base',
                  grl_lambda=0.1):
@@ -157,7 +150,6 @@ class NLIDeBERTaCrossEncoder(nn.Module):
         self.encoder = AutoModel.from_pretrained(model_name)
         hidden_size = self.encoder.config.hidden_size  # 768
 
-        # Main classifier
         self.classifier = nn.Sequential(
             nn.Dropout(0.1),
             nn.Linear(hidden_size, 256),
@@ -166,10 +158,8 @@ class NLIDeBERTaCrossEncoder(nn.Module):
             nn.Linear(256, 1),
         )
 
-        # Hypothesis-only encoder (for adversarial debiasing)
         self.hyp_encoder = AutoModel.from_pretrained(model_name)
 
-        # Adversarial head
         self.grl = GRL(grl_lambda)
         self.adversarial_head = nn.Sequential(
             nn.Linear(hidden_size, 128),
@@ -190,12 +180,10 @@ class NLIDeBERTaCrossEncoder(nn.Module):
             logits: (batch, 1)
             adv_logits: (batch, 1) or None
         """
-        # Main forward pass
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
         cls_repr = outputs.last_hidden_state[:, 0, :]
         logits = self.classifier(cls_repr)
 
-        # Adversarial debiasing
         adv_logits = None
         if hyp_input_ids is not None:
             hyp_outputs = self.hyp_encoder(
