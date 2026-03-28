@@ -31,3 +31,20 @@ def main():
     train_df['premise'] = train_df['premise'].apply(lambda x: clean_text(x, lowercase=False))
     train_df['hypothesis'] = train_df['hypothesis'].apply(lambda x: clean_text(x, lowercase=False))
     train_df['premise'] = train_df['premise'].apply(lambda x: '.' if not x or x.isspace() else x)
+    print(f"  Train: {len(train_df)} pairs in {time.time()-t0:.1f}s", flush=True)
+
+    # Load test data
+    print("\n[2/6] Loading test data...", flush=True)
+    t0 = time.time()
+    test_df = pd.read_csv(test_path, quotechar='"', engine='python')
+    test_df['premise'] = test_df['premise'].apply(lambda x: clean_text(x, lowercase=False))
+    test_df['hypothesis'] = test_df['hypothesis'].apply(lambda x: clean_text(x, lowercase=False))
+    test_df['premise'] = test_df['premise'].apply(lambda x: '.' if not x or x.isspace() else x)
+    print(f"  Test: {len(test_df)} pairs in {time.time()-t0:.1f}s", flush=True)
+
+    # Fit feature extractor on training data
+    print("\n[3/6] Fitting feature extractor on training data...", flush=True)
+    t0 = time.time()
+    extractor = NLIFeatureExtractor(use_spacy=True, use_glove=False, n_svd_components=100)
+    extractor.fit(train_df)
+    print(f"  Fit time: {time.time()-t0:.1f}s", flush=True)
