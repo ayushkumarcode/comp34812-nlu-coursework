@@ -53,7 +53,7 @@ What makes this approach work is three things:
 
 #### Feature Engineering Pipeline
 
-1. **Per-text features (435 features per text):**
+1. **Per-text features (456 features per text):**
    - Group 1: Lexical features (29) -- word length distribution, vocabulary richness (TTR, Yule's K, Simpson's D, Honore's R, Brunet's W)
    - Group 2: Character-level features (56) -- letter, digit, and special character frequency distributions
    - Group 3: Character n-gram TF-IDF + SVD (100) -- char (3,5)-gram TF-IDF reduced to 100 dimensions via TruncatedSVD
