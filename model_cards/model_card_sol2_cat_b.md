@@ -66,7 +66,7 @@ Additional contributions include:
 | MLP | 512->256(ReLU, Dropout 0.4)->64(ReLU, Dropout 0.3)->1 |
 | Topic head | GRL(lambda)->Linear(128->64, ReLU, Dropout 0.3)->Linear(64->10) |
 
-**Total parameters:** ~2.5M
+**Total parameters:** ~814K
 
 #### Training Hyperparameters
 
@@ -84,7 +84,7 @@ Additional contributions include:
 #### Speeds, Sizes, Times
 
 - **Training time:** ~1-3 hours on A100 GPU (120 max epochs)
-- **Model size:** 3.1MB (state_dict)
+- **Model size:** 3.3MB (state_dict)
 - **Inference speed:** ~500 pairs/second on GPU, ~50 pairs/second on CPU
 
 ## Evaluation
