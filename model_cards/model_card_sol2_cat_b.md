@@ -118,7 +118,7 @@ We also added a few other things that helped:
 | LSTM baseline | 0.6226 | +0.1196 |
 | BERT baseline | 0.7854 | -0.0432 |
 
-The model significantly outperforms both the SVM and LSTM baselines. While it does not surpass the BERT transformer baseline, it achieves strong performance using only character-level features and no pre-trained language representations. The adversarial topic debiasing contributes to cross-domain robustness.
+We beat both the SVM and LSTM baselines by a solid margin. It doesn't quite reach BERT, but for a model that's trained entirely from scratch on raw characters with no pre-trained language representations, we're pretty happy with 0.7422. The gap to BERT is only about 4 points, and the adversarial topic debiasing does seem to help with cross-domain robustness.
 
 ## Technical Specifications
 
@@ -136,23 +136,23 @@ The model significantly outperforms both the SVM and LSTM baselines. While it do
 
 ## Bias, Risks, and Limitations
 
-- **Character-level representation:** The model operates on raw characters without linguistic preprocessing. While this preserves stylistic signals (spacing, punctuation, casing), it may be sensitive to OCR artifacts or encoding inconsistencies.
-- **Domain shift:** The GRL topic debiasing helps but may not generalize to entirely unseen domains (e.g., legal documents, code-switching texts).
-- **Sequence length:** Texts are truncated to 1500 characters. Important stylistic features at the end of very long texts may be lost.
-- **Attention interpretability:** While attention weights provide some interpretability, they should not be interpreted as definitive feature importance (Jain & Wallace, 2019).
-- **Topic cluster quality:** Topic pseudo-labels from TF-IDF + KMeans may not perfectly capture domain boundaries, potentially limiting the adversarial debiasing effectiveness.
+- **Character-level representation:** Since we operate on raw characters without any linguistic preprocessing, we preserve stylistic signals like spacing, punctuation, and casing. The downside is that OCR artifacts or encoding inconsistencies could throw things off.
+- **Domain shift:** The GRL topic debiasing helps with cross-domain generalization, but it probably won't fully transfer to completely unseen domains like legal documents or code-switching texts.
+- **Sequence length:** We truncate to 1500 characters, so any stylistic patterns near the end of very long texts get lost. We tried longer sequences but it didn't improve results enough to justify the memory cost.
+- **Attention interpretability:** The attention weights give us some window into what the model focuses on, but they shouldn't be taken as definitive feature importance scores (Jain & Wallace, 2019).
+- **Topic cluster quality:** Our topic pseudo-labels come from TF-IDF + KMeans, which isn't perfect at capturing domain boundaries. This could limit how well the adversarial debiasing works in practice.
 
 ## Additional Information
 
 - **Novel contributions:**
-  1. Adversarial style-content disentanglement via GRL for AV (Ganin & Lempitsky 2015 adapted to AV domain)
-  2. Careful GRL scheduling (slow lambda ramp over 20 epochs, delayed topic loss from epoch 15) to prevent training instability
+  1. Adversarial style-content disentanglement via GRL for AV -- we adapted Ganin & Lempitsky (2015)'s domain adaptation idea to the authorship verification setting
+  2. Careful GRL scheduling (slow lambda ramp over 20 epochs, delayed topic loss from epoch 15) -- we found this was essential to prevent training instability
   3. Stylistic invariance training via character perturbation augmentation
   4. Interpretable attention weights (XAI contribution via Bahdanau attention)
 
 - **Design decisions:**
-  - Contrastive loss was tested in earlier versions (v1, v2) but removed in the final model (v3) as BCE + topic adversarial loss alone yielded better performance
-  - Learning rate was reduced from 5e-4 (v2) to 2e-4 (v3) for more stable training
-  - Early stopping patience was increased from 15 to 20 epochs to allow the slow GRL ramp to take full effect
+  - We tried contrastive loss in earlier versions (v1, v2) but ended up dropping it in the final model (v3) because BCE + topic adversarial loss alone actually performed better
+  - Learning rate went from 5e-4 (v2) down to 2e-4 (v3) for more stable training -- the higher rate caused some oscillation
+  - We bumped early stopping patience from 15 to 20 epochs so the slow GRL ramp has time to take full effect before we give up
 
 - **Code attribution:** PyTorch framework, GRL implementation adapted from Ganin & Lempitsky (2015) description. No external code copied directly.
