@@ -1,5 +1,5 @@
 """
-cat A training — lightgbm with ~695 stylometric features for AV (group 34).
+cat A training — lightgbm with ~736 stylometric features for AV (group 34).
 
 to convert: python scripts/convert_to_ipynb.py notebooks/training_cat_a.py
 """
@@ -9,9 +9,10 @@ to convert: python scripts/convert_to_ipynb.py notebooks/training_cat_a.py
 # ## LightGBM with stylometric features
 #
 # this notebook trains our cat A solution: a LightGBM gradient boosting
-# classifier using ~695 stylometric features per text pair. we've got
+# classifier using ~736 stylometric features per text pair. we've got
 # novel features in there too — syntactic complexity, writing rhythm,
-# and information-theoretic stuff.
+# information-theoretic stuff, FFT spectral analysis, zipf-mandelbrot
+# law deviation, benford's law, and hurst exponents.
 
 # %%
 # !pip install scikit-learn lightgbm spacy numpy pandas tqdm joblib
@@ -49,13 +50,15 @@ print(f"Train label dist: {np.bincount(y_train)}")
 # %% [markdown]
 # ## 2. Feature extraction
 #
-# We extract ~468 per-text features across 9 groups:
-# - Lexical (30), Character (56), TF-IDF+SVD (100), Function words (150)
+# We extract ~456 per-text features across 13 groups:
+# - Lexical (29), Character (56), TF-IDF+SVD (100), Function words (169)
 # - POS tags (45), Structural (15), Syntactic complexity (10, novel)
 # - Writing rhythm (6, novel), Information-theoretic (5, novel)
+# - FFT spectral (8, novel), Zipf-Mandelbrot (5, novel)
+# - Benford's law (4, novel), Hurst exponent (3, novel)
 #
 # Then we compute diff-vectors |f(text1) - f(text2)| plus style-only
-# diffs plus 14 pairwise features, giving us ~695 total per pair.
+# diffs plus 14 pairwise features + cosine delta, giving us ~736 total.
 
 # %%
 extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
@@ -77,10 +80,10 @@ X_tr = scaler.fit_transform(X_train)
 X_dv = scaler.transform(X_dev)
 
 model = LGBMClassifier(
-    n_estimators=1000, max_depth=7, learning_rate=0.05,
-    num_leaves=63, subsample=0.8, colsample_bytree=0.8,
-    min_child_samples=20, reg_alpha=0.1, reg_lambda=1,
-    verbose=-1, random_state=42, n_jobs=1,
+    n_estimators=2000, max_depth=8, learning_rate=0.03,
+    num_leaves=127, subsample=0.8, colsample_bytree=0.7,
+    min_child_samples=15, reg_alpha=0.05, reg_lambda=0.5,
+    boosting_type='gbdt', verbose=-1, random_state=42, n_jobs=1,
 )
 model.fit(X_tr, y_train)
 
@@ -105,7 +108,7 @@ for name, baseline in baselines.items():
 # %%
 save_dir = Path('models')
 save_dir.mkdir(exist_ok=True)
-joblib.dump(model, save_dir / 'av_cat_a_lgbm.joblib')
+joblib.dump(model, save_dir / 'av_cat_a_lgbm.joblib', compress=3)
 joblib.dump(scaler, save_dir / 'av_cat_a_scaler.joblib')
 joblib.dump(feature_names, save_dir / 'av_cat_a_feature_names.joblib')
 joblib.dump(extractor.tfidf, save_dir / 'av_cat_a_tfidf.joblib')
