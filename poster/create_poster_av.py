@@ -628,3 +628,31 @@ def create_poster():
              'font_size': BODY_FONT}
         ], 'font_size': BODY_FONT, 'space_after': 6},
     ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), dataset_h - Emu(200000), dataset_paras)
+
+    y += dataset_h + SECTION_GAP
+
+    # --- Feature Groups Chart ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Sol 1 Feature Architecture')
+    y += hdr_h
+
+    feat_chart_h = Emu(6600000)
+    _add_section_body_bg(slide, x, y, col_w, feat_chart_h)
+
+    if feat_path.exists():
+        img_margin = Emu(200000)
+        img_w = col_w - 2 * img_margin
+        img_h = Emu(5800000)
+        slide.shapes.add_picture(str(feat_path),
+                                  x + img_margin, y + Emu(400000),
+                                  img_w, img_h)
+
+    y += feat_chart_h
+
+    # =====================================================
+    # COLUMN 2: Solution 1 (Cat A) + Solution 2 (Cat B)
+    # =====================================================
+    x = col_x[1]
+    y = y_start
+
