@@ -156,11 +156,7 @@ FUNCTION_WORDS = [
 
 
 def function_word_features(text):
-    """Extract function word frequency features.
-
-    Returns:
-        Dict with one feature per function word (~150 features).
-    """
+    """Frequency of each function word, normalized by total word count."""
     words = text.lower().split()
     n_words = len(words)
     word_counts = Counter(words)
@@ -174,11 +170,7 @@ def function_word_features(text):
 # -- group 6: structural features (15) --
 
 def structural_features(text):
-    """Extract structural features from text.
-
-    Returns:
-        Dict with ~15 structural features.
-    """
+    """Sentence lengths, paragraph counts, punctuation densities, etc."""
     feats = {}
 
     # Sentence splitting (simple heuristic: split on .!? followed by space or end)
@@ -226,11 +218,7 @@ def structural_features(text):
 # -- group 8: writing rhythm features (6) -- NOVEL
 
 def writing_rhythm_features(text):
-    """Extract writing rhythm features capturing temporal/sequential patterns.
-
-    Returns:
-        Dict with 6 rhythm features.
-    """
+    """Writing rhythm: autocorrelation, burstiness, mean-reversion patterns."""
     feats = {}
 
     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
