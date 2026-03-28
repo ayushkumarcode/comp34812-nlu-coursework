@@ -47,15 +47,15 @@ print(f"Dev: {len(dev_df)} pairs")
 print(f"Train label dist: {np.bincount(y_train)}")
 
 # %% [markdown]
-# ## 2. Feature Extraction
+# ## 2. Feature extraction
 #
 # We extract ~468 per-text features across 9 groups:
 # - Lexical (30), Character (56), TF-IDF+SVD (100), Function words (150)
-# - POS tags (45), Structural (15), Syntactic complexity (10, NOVEL)
-# - Writing rhythm (6, NOVEL), Information-theoretic (5, NOVEL)
+# - POS tags (45), Structural (15), Syntactic complexity (10, novel)
+# - Writing rhythm (6, novel), Information-theoretic (5, novel)
 #
-# Then compute diff-vectors |f(text1) - f(text2)| + style-only diff-vectors
-# + 14 pairwise features = ~695 total features per pair.
+# Then we compute diff-vectors |f(text1) - f(text2)| plus style-only
+# diffs plus 14 pairwise features, giving us ~695 total per pair.
 
 # %%
 extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
@@ -69,7 +69,7 @@ print(f"Dev features: {X_dev.shape}")
 print(f"Feature count: {len(feature_names)}")
 
 # %% [markdown]
-# ## 3. Train LightGBM Classifier
+# ## 3. Train LightGBM
 
 # %%
 scaler = StandardScaler()
@@ -90,9 +90,9 @@ model.fit(X_tr, y_train)
 # %%
 y_pred = model.predict(X_dv)
 metrics = compute_all_metrics(y_dev, y_pred)
-print_metrics(metrics, "Category A — Dev Set Results (LightGBM)")
+print_metrics(metrics, "Cat A — Dev Set (LightGBM)")
 
-# Baseline comparison
+# check against baselines
 baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
 f1 = metrics['macro_f1']
 for name, baseline in baselines.items():
@@ -100,7 +100,7 @@ for name, baseline in baselines.items():
     print(f"vs {name} ({baseline:.4f}): {'BEATS' if gap > 0 else 'BELOW'} by {gap:+.4f}")
 
 # %% [markdown]
-# ## 5. Save Model
+# ## 5. Save model
 
 # %%
 save_dir = Path('models')

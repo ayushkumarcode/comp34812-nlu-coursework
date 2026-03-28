@@ -54,23 +54,20 @@ def clean_text(text, lowercase=False):
 
 
 def load_av_data(split='train'):
-    """Load AV (Authorship Verification) data.
+    """Load AV data and clean it. Case is preserved for stylometric features.
 
     Args:
         split: 'train' or 'dev'.
 
     Returns:
-        DataFrame with columns: text_1, text_2, label (int).
-        For dev split, label column may not be present.
+        DataFrame with text_1, text_2, and label (int) columns.
     """
     path = AV_TRAIN_PATH if split == 'train' else AV_DEV_PATH
     df = pd.read_csv(path, quotechar='"', engine='python')
 
-    # Clean texts (preserve case for AV stylometric features)
     df['text_1'] = df['text_1'].apply(lambda x: clean_text(x, lowercase=False))
     df['text_2'] = df['text_2'].apply(lambda x: clean_text(x, lowercase=False))
 
-    # Convert labels to int if present
     if 'label' in df.columns:
         df['label'] = df['label'].astype(int)
 
