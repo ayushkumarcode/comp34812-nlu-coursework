@@ -236,3 +236,31 @@ def generate_architecture_diagram():
 
     # Input layer
     draw_box(2.5, 8.5, 2.8, 0.8, 'Text 1', '#E8F0FE', '#1B3A5C', 16)
+    draw_box(7.5, 8.5, 2.8, 0.8, 'Text 2', '#E8F0FE', '#1B3A5C', 16)
+
+    # Char embedding
+    draw_box(2.5, 7.2, 3.0, 0.7, 'Char Embedding\n(32-dim)', '#3498DB', 'white', 13)
+    draw_box(7.5, 7.2, 3.0, 0.7, 'Char Embedding\n(32-dim)', '#3498DB', 'white', 13)
+
+    # CNN
+    draw_box(2.5, 5.9, 3.2, 0.7, 'Multi-width CNN\n(3, 5, 7)', '#2980B9', 'white', 13)
+    draw_box(7.5, 5.9, 3.2, 0.7, 'Multi-width CNN\n(3, 5, 7)', '#2980B9', 'white', 13)
+
+    # BiLSTM
+    draw_box(2.5, 4.6, 3.0, 0.7, 'BiLSTM\n(128h\u2192256d)', '#1B6CA8', 'white', 13)
+    draw_box(7.5, 4.6, 3.0, 0.7, 'BiLSTM\n(128h\u2192256d)', '#1B6CA8', 'white', 13)
+
+    # Attention
+    draw_box(2.5, 3.3, 3.0, 0.7, 'Additive Attention', '#1B3A5C', 'white', 13)
+    draw_box(7.5, 3.3, 3.0, 0.7, 'Additive Attention', '#1B3A5C', 'white', 13)
+
+    # "Shared weights" label
+    ax.annotate('', xy=(3.9, 7.2), xytext=(6.1, 7.2),
+                arrowprops=dict(arrowstyle='<->', color='#E67E22', lw=2.5))
+    ax.text(5, 7.45, 'Shared Weights', ha='center', fontsize=13,
+            color='#E67E22', fontweight='bold', style='italic')
+
+    # Arrows down (left tower)
+    for y_top, y_bot in [(8.1, 7.55), (6.85, 6.25), (5.55, 4.95), (4.25, 3.65)]:
+        ax.annotate('', xy=(2.5, y_bot), xytext=(2.5, y_top),
+                    arrowprops=dict(arrowstyle='->', color='#666', lw=1.5))
