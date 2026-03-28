@@ -69,3 +69,23 @@ def main():
     model = model.to(device)
     model.eval()
     print("  Model loaded.", flush=True)
+
+    # Inference in batches
+    print("\n[4/4] Running inference...", flush=True)
+    t0 = time.time()
+    batch_size = 32
+    all_probs = []
+
+    with torch.no_grad():
+        for start in range(0, len(df), batch_size):
+            end = min(start + batch_size, len(df))
+            ids = input_ids[start:end].to(device)
+            mask = attention_masks[start:end].to(device)
+            logits, _ = model(ids, mask)
+            probs = torch.sigmoid(logits).squeeze(-1).cpu().numpy()
+            all_probs.extend(probs)
+            if (start // batch_size) % 20 == 0:
+                print(f"  Batch {start//batch_size}: {start}/{len(df)}", flush=True)
+
+    all_probs = np.array(all_probs)
+    print(f"  Inference time: {time.time()-t0:.1f}s", flush=True)
