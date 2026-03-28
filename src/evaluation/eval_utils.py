@@ -119,19 +119,7 @@ def bootstrap_mcc_ci(y_true, y_pred, n_bootstrap=1000, random_state=42):
 
 def paired_bootstrap_test(y_true, y_pred_a, y_pred_b, metric_fn,
                            n_bootstrap=1000, random_state=42):
-    """Test whether model B is significantly better than model A via paired bootstrap.
-
-    Args:
-        y_true: Ground truth labels.
-        y_pred_a: Predictions from model A.
-        y_pred_b: Predictions from model B.
-        metric_fn: Function(y_true, y_pred) -> float.
-        n_bootstrap: Number of bootstrap iterations.
-        random_state: Random seed.
-
-    Returns:
-        Dict with point estimates, mean difference, p-value, CI of difference.
-    """
+    """Paired bootstrap test: is model B significantly better than A?"""
     y_true = np.asarray(y_true)
     y_pred_a = np.asarray(y_pred_a)
     y_pred_b = np.asarray(y_pred_b)
