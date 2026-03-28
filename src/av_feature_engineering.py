@@ -531,17 +531,7 @@ def _burrows_delta(text_1, text_2, n_top=100):
 # -- combined feature extraction --
 
 def extract_per_text_features(text):
-    """Extract all per-text features (Groups 1, 2, 4, 6, 8, 9).
-
-    Groups 3 (char n-gram TF-IDF) and 5 (POS tags + syntactic) require
-    fitted vectorizers and spaCy, so they are handled separately.
-
-    Args:
-        text: Cleaned text string.
-
-    Returns:
-        Dict mapping feature name to float value.
-    """
+    """All per-text features (groups 1,2,4,6,8,9). TF-IDF and spaCy are separate."""
     feats = {}
     feats.update(lexical_features(text))
     feats.update(character_features(text))
@@ -553,28 +543,16 @@ def extract_per_text_features(text):
 
 
 def extract_pair_features(text_1, text_2, include_per_text=True):
-    """Extract features for a text pair (diff-vector + pairwise features).
-
-    Args:
-        text_1: First text.
-        text_2: Second text.
-        include_per_text: If True, compute diff-vector from per-text features.
-
-    Returns:
-        Dict mapping feature name to float value.
-    """
+    """Diff-vector + pairwise features for a text pair."""
     feats = {}
 
     if include_per_text:
-        # Per-text features
         feats_1 = extract_per_text_features(text_1)
         feats_2 = extract_per_text_features(text_2)
 
-        # Diff-vector: |f(text_1) - f(text_2)|
         for key in feats_1:
             feats[f'diff_{key}'] = abs(feats_1[key] - feats_2[key])
 
-    # Pairwise features
     pair_feats = pairwise_features(text_1, text_2)
     feats.update(pair_feats)
 
