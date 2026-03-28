@@ -60,12 +60,8 @@ class AdditiveAttention(nn.Module):
         return attended, weights
 
 
-# ============================================================
-# SHARED ENCODER (SIAMESE)
-# ============================================================
-
 class SharedEncoder(nn.Module):
-    """Character-level CNN + BiLSTM + Attention encoder."""
+    """Shared encoder: char embeddings -> multi-width CNN -> BiLSTM -> attention."""
 
     def __init__(self, vocab_size=97, char_emb_dim=32,
                  cnn_filters=128, lstm_hidden=128,
@@ -74,16 +70,14 @@ class SharedEncoder(nn.Module):
 
         self.char_emb = nn.Embedding(vocab_size, char_emb_dim, padding_idx=0)
 
-        # Multi-width Conv1D
         self.conv3 = nn.Conv1d(char_emb_dim, cnn_filters, kernel_size=3, padding=1)
         self.conv5 = nn.Conv1d(char_emb_dim, cnn_filters, kernel_size=5, padding=2)
         self.conv7 = nn.Conv1d(char_emb_dim, cnn_filters, kernel_size=7, padding=3)
 
-        total_filters = cnn_filters * 3  # 384
+        total_filters = cnn_filters * 3
         self.pool = nn.MaxPool1d(kernel_size=3, stride=3)
         self.cnn_dropout = nn.Dropout(dropout)
 
-        # BiLSTM
         self.lstm = nn.LSTM(
             input_size=total_filters,
             hidden_size=lstm_hidden,
@@ -91,12 +85,10 @@ class SharedEncoder(nn.Module):
             batch_first=True,
             bidirectional=True,
         )
-        lstm_output_size = lstm_hidden * 2  # 256
+        lstm_output_size = lstm_hidden * 2
 
-        # Attention
         self.attention = AdditiveAttention(lstm_output_size, 128)
 
-        # Projection
         self.proj = nn.Sequential(
             nn.Linear(lstm_output_size, proj_dim),
             nn.ReLU(),
