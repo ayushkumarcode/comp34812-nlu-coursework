@@ -82,5 +82,32 @@ def train_epoch(model, dl, opt, device, bce_fn, topic_fn, fgm,
         kl = rdrop_kl(l1, l2)
         loss = bce + rdrop_alpha * kl
 
+        if t_weight > 0 and 'topic' in b:
+            tgt = b['topic'].to(device)
+            loss = loss + t_weight * (topic_fn(tl1, tgt) + topic_fn(tl2, tgt)) / 2
+
+        loss.backward()
+
+        # FGM adversarial step
+        fgm.attack()
+        adv_logits, _, _ = model(c1, c2, return_embeddings=True)
+        adv_loss = bce_fn(adv_logits.squeeze(-1), labels)
+        adv_loss.backward()
+        fgm.restore()
+
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+        opt.step()
+
+        total_loss += loss.item()
+        total_kl += kl.item()
+        total_adv += adv_loss.item()
+        avg_logits = (l1 + l2) / 2
+        all_p.extend((torch.sigmoid(avg_logits) > 0.5).long().cpu().numpy())
+        all_l.extend(labels.cpu().numpy())
+
+    n = len(dl)
+    f1 = f1_score(all_l, all_p, average='macro', zero_division=0)
+    return total_loss / n, total_kl / n, total_adv / n, f1
+
 if __name__ == '__main__':
     pass
