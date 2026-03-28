@@ -153,33 +153,14 @@ def paired_bootstrap_test(y_true, y_pred_a, y_pred_b, metric_fn,
 
 
 def cohens_kappa(y_pred_a, y_pred_b):
-    """Compute Cohen's kappa between two sets of predictions.
-
-    Args:
-        y_pred_a: Predictions from model A.
-        y_pred_b: Predictions from model B.
-
-    Returns:
-        Float kappa value.
-    """
+    """Cohen's kappa between two sets of predictions."""
     return sklearn_metrics.cohen_kappa_score(
         np.asarray(y_pred_a), np.asarray(y_pred_b)
     )
 
 
 def error_overlap_analysis(y_true, y_pred_a, y_pred_b, name_a='Model A', name_b='Model B'):
-    """Analyze overlap in errors between two models.
-
-    Args:
-        y_true: Ground truth labels.
-        y_pred_a: Predictions from model A.
-        y_pred_b: Predictions from model B.
-        name_a: Display name for model A.
-        name_b: Display name for model B.
-
-    Returns:
-        Dict with error counts and overlap statistics.
-    """
+    """See which errors are shared vs unique between two models."""
     y_true = np.asarray(y_true, dtype=int)
     y_pred_a = np.asarray(y_pred_a, dtype=int)
     y_pred_b = np.asarray(y_pred_b, dtype=int)
