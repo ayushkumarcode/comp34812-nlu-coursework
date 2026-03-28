@@ -28,11 +28,16 @@ What makes this approach work is three things:
 - **Repository:** https://github.com/ayushkumarcode/comp34812-nlu-coursework
 - **Paper or documentation:**
   - Stamatatos et al. (2023) "Same or Different? Diff-Vectors for Authorship Analysis" -- diff-vector representation
-  - Abbasi & Chen (2008) "Writeprints" -- baseline feature set (we extended it with our novel Groups 7-9)
+  - Abbasi & Chen (2008) "Writeprints" -- baseline feature set (we extended it with our novel Groups 7-13)
   - Jiang et al. (2023) "Low-Resource Text Classification: A Parameter-Free Classification Method with Compressors" -- NCD features
   - Bevendorff et al. (2022) PAN 2022 -- character n-gram cosine similarity baseline
   - Ke et al. (2017) "LightGBM: A Highly Efficient Gradient Boosting Decision Tree" -- LightGBM classifier
   - Burrows (2002) "Delta" -- stylometric distance with stability guard for short texts
+  - Evert et al. (2017) "Understanding and explaining Delta measures for authorship attribution" -- Cosine Delta distance
+  - Ausloos (2012) "Generalized Hurst exponent and multifractal function of original and translated texts" Phys. Rev. E -- Hurst exponent for text analysis
+  - Ausloos (2014) "Measuring complexity with multifractals in texts. Translation effects" -- Zipf-Mandelbrot law fitting for style
+  - Moreno-Sanchez et al. (2016) "Large-Scale Analysis of Zipf's Law in English Texts" PLOS ONE -- Zipf law parameter estimation
+  - Sambridge & Tkalcic (2010) "Benford's Law of First Digits: A Universal Phenomenon" -- Benford's law as a fingerprint for data distributions
 
 ## Training Details
 
