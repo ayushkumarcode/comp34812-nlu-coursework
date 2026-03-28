@@ -124,3 +124,31 @@ def generate_f1_chart():
 
     # Baseline reference line
     ax.axhline(y=0.5610, color='#BDC3C7', linestyle=':', linewidth=1.5,
+               alpha=0.7, zorder=1)
+    ax.text(4.5, 0.565, 'SVM Baseline', fontsize=14, color='#95a5a6',
+            ha='right', style='italic')
+
+    # Legend
+    baseline_patch = mpatches.Patch(color='#95a5a6', label='Baselines')
+    sol1_patch = mpatches.Patch(color='#27AE60', label='Our Sol 1 (Cat A)')
+    sol2_patch = mpatches.Patch(color='#E67E22', label='Our Sol 2 (Cat B)')
+    ax.legend(handles=[baseline_patch, sol1_patch, sol2_patch],
+              fontsize=18, loc='upper left', framealpha=0.9,
+              edgecolor='#CCCCCC')
+
+    # Statistical significance annotations
+    ax.annotate('', xy=(3, 0.74), xytext=(0, 0.57),
+                arrowprops=dict(arrowstyle='->', color='#27AE60',
+                               lw=2, connectionstyle='arc3,rad=0.15'))
+    ax.text(1.5, 0.68, '+0.173***', fontsize=16, color='#27AE60',
+            fontweight='bold', ha='center', rotation=15)
+
+    ax.annotate('', xy=(4, 0.75), xytext=(1, 0.63),
+                arrowprops=dict(arrowstyle='->', color='#E67E22',
+                               lw=2, connectionstyle='arc3,rad=0.15'))
+    ax.text(2.5, 0.72, '+0.120***', fontsize=16, color='#E67E22',
+            fontweight='bold', ha='center', rotation=12)
+
+    plt.tight_layout()
+    path = POSTER_DIR / 'f1_chart_av.png'
+    plt.savefig(str(path), dpi=250, bbox_inches='tight',
