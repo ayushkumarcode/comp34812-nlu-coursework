@@ -25,39 +25,32 @@ def lexical_features(text):
 
     feats = {}
 
-    # Average word length
     word_lengths = [len(w) for w in words]
     feats['avg_word_length'] = np.mean(word_lengths)
 
-    # Word length distribution (length 1-20)
     length_counts = Counter(min(l, 20) for l in word_lengths)
     for i in range(1, 21):
         feats[f'word_len_prop_{i}'] = length_counts.get(i, 0) / n_words
 
-    # Vocabulary richness
     word_lower = [w.lower() for w in words]
     freq = Counter(word_lower)
     vocab_size = len(freq)
 
-    # TTR
     feats['ttr'] = vocab_size / n_words if n_words > 0 else 0
 
-    # Hapax legomena ratio
     hapax = sum(1 for c in freq.values() if c == 1)
     feats['hapax_ratio'] = hapax / n_words if n_words > 0 else 0
 
-    # Hapax dis legomena ratio
     hapax_dis = sum(1 for c in freq.values() if c == 2)
     feats['hapax_dis_ratio'] = hapax_dis / n_words if n_words > 0 else 0
 
     if n_words < 50:
-        # Guard: vocabulary richness unreliable for short texts
+        # too few words for reliable richness measures
         feats['yules_k'] = 0.0
         feats['simpsons_d'] = 0.0
         feats['honores_r'] = 0.0
         feats['brunets_w'] = 0.0
     else:
-        # Yule's K
         freq_spectrum = Counter(freq.values())
         sum_fi2 = sum(i * i * vi for i, vi in freq_spectrum.items())
         if n_words > 1:
@@ -65,7 +58,6 @@ def lexical_features(text):
         else:
             feats['yules_k'] = 0.0
 
-        # Simpson's Diversity Index
         n_pairs = n_words * (n_words - 1)
         if n_pairs > 0:
             sum_ni = sum(c * (c - 1) for c in freq.values())
@@ -73,13 +65,11 @@ def lexical_features(text):
         else:
             feats['simpsons_d'] = 0.0
 
-        # Honore's R
         if hapax < vocab_size and vocab_size > 0 and n_words > 0:
             feats['honores_r'] = 100 * math.log(n_words) / (1 - hapax / vocab_size)
         else:
             feats['honores_r'] = 0.0
 
-        # Brunet's W
         if vocab_size > 0 and n_words > 0:
             feats['brunets_w'] = n_words ** (vocab_size ** -0.172)
         else:
