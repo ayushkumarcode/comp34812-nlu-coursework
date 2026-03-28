@@ -1,11 +1,6 @@
 """
-AV Category A — Full training pipeline (LightGBM).
-Run on CSF3: python -m src.training.run_av_cat_a
-
-Trains LightGBM classifier with ~695 stylometric features.
-Hyperparameters: n_estimators=1000, max_depth=7, lr=0.05,
-num_leaves=63, subsample=0.8, colsample_bytree=0.8,
-min_child_samples=20, reg_alpha=0.1, reg_lambda=1.
+Cat A training script. Extracts ~695 stylometric features then
+trains a LightGBM classifier. Run with: python -m src.training.run_av_cat_a
 """
 
 import sys
@@ -29,7 +24,6 @@ def main():
     print("  AV Category A — LightGBM Training")
     print("=" * 60)
 
-    # Load data
     print("\n[1/5] Loading data...")
     t0 = time.time()
     train_df = load_av_data(split='train')
@@ -39,7 +33,6 @@ def main():
     print(f"  Train: {len(train_df)}, Dev: {len(dev_df)}")
     print(f"  Time: {time.time() - t0:.1f}s")
 
-    # Feature extraction
     print("\n[2/5] Extracting features...")
     t0 = time.time()
     extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
@@ -50,7 +43,6 @@ def main():
     print(f"  Features: {len(feature_names)}")
     print(f"  Time: {time.time() - t0:.1f}s")
 
-    # Scale features
     print("\n[3/5] Training LightGBM...")
     scaler = StandardScaler()
     X_tr = scaler.fit_transform(X_train)
@@ -66,12 +58,10 @@ def main():
     model.fit(X_tr, y_train)
     print(f"  Training time: {time.time() - t0:.1f}s")
 
-    # Evaluate
     y_pred = model.predict(X_dv)
     metrics = compute_all_metrics(y_dev, y_pred)
     print_metrics(metrics, "AV Cat A — Dev Results")
 
-    # Save model artifacts
     print("\n[4/5] Saving model...")
     save_dir = PROJECT_ROOT / 'models'
     save_dir.mkdir(exist_ok=True)
@@ -82,13 +72,11 @@ def main():
     joblib.dump(extractor.cosine, save_dir / 'av_cat_a_cosine.joblib')
     print("  Saved all artifacts to models/")
 
-    # Save predictions
     print("\n[5/5] Saving predictions...")
     pred_path = PROJECT_ROOT / 'predictions' / 'Group_34_A.csv'
     save_predictions(y_pred, pred_path)
     print(f"  Saved to {pred_path}")
 
-    # Baseline comparison
     baselines = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
     f1 = metrics['macro_f1']
     for name, baseline_f1 in baselines.items():
