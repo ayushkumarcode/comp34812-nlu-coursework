@@ -162,6 +162,11 @@ We significantly outperform both the SVM and LSTM baselines. It doesn't beat BER
   1. Syntactic complexity profiling for AV (dependency depth, subordination, arc length) -- we drew on Feng et al. (2012)'s work on syntactic stylometry
   2. Writing rhythm analysis (sentence-length autocorrelation, punctuation burstiness) -- basically applying time-series analysis to linguistic sequences, which turned out to capture authorial habits pretty well
   3. Information-theoretic authorial signatures (char bigram MI, entropy rate, conditional entropy) -- these give a finer-grained picture than NCD alone
-  4. Topic-robustness mechanism for Cat A (style-only diff-vector, function-word subspace) -- our way of handling the style-content confound without needing any neural adversarial training
+  4. FFT spectral analysis of sentence-length series -- treating the sequence of sentence lengths as a signal and extracting frequency-domain features (dominant frequency, spectral centroid, band energies). The idea is that writers have characteristic rhythmic "frequencies" in how they vary their sentence structure
+  5. Zipf-Mandelbrot law deviation -- fitting the Zipf-Mandelbrot distribution to each text's word frequency ranks and using the deviation parameters (alpha, beta, R-squared) as style features. Different authors exhibit different deviations from Zipf's law (Ausloos 2014, Moreno-Sanchez et al. 2016)
+  6. Benford's law on linguistic distributions -- checking whether the first-digit distribution of word frequency counts follows Benford's law, and using the deviation (chi-squared, KL divergence, MAD) as a stylometric signal
+  7. Hurst exponent / fractal analysis -- computing the Hurst exponent via R/S analysis on sentence-length series to measure long-range dependence in writing patterns. H > 0.5 means the author tends to follow long sentences with long sentences (persistent), H < 0.5 means they alternate (anti-persistent)
+  8. Cosine Delta (Evert et al. 2017) -- a variant of Burrows' Delta that uses cosine distance after z-score normalization, shown to outperform classic Delta for authorship attribution
+  9. Topic-robustness mechanism for Cat A (style-only diff-vector, function-word subspace) -- our way of handling the style-content confound without needing any neural adversarial training
 
 - **Code attribution:** scikit-learn StandardScaler, LightGBM classifier, spaCy NLP pipeline, standard Python libraries. No external code copied directly.
