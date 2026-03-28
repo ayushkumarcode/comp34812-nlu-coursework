@@ -19,19 +19,22 @@ Adversarial Style-Content Disentanglement Network.
 # %%
 import sys
 import numpy as np
+import pandas as pd
 import torch
 from pathlib import Path
 
 PROJECT_ROOT = Path('.').resolve()
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.data_utils import load_av_data, save_predictions
+from src.data_utils import load_av_data, clean_text, save_predictions
 from src.models.av_cat_b_model import AVCatBModel
-from src.models.av_cat_b_dataset import AVCharDataset, VOCAB_SIZE
-from torch.utils.data import DataLoader
+from src.models.av_cat_b_dataset import char_encode, VOCAB_SIZE
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {device}")
+
+# Set INPUT_FILE to a CSV path for custom inference, or None for dev data.
+INPUT_FILE = None  # e.g. 'test_data_av.csv'
 
 # %% [markdown]
 # ## 1. Load Trained Model
