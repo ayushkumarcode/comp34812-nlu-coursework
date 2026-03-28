@@ -62,10 +62,23 @@ print("Model loaded.")
 # No augmentation is applied during inference.
 
 # %%
-test_df = load_av_data(split='dev')  # Replace with test data for submission
-test_dataset = AVCharDataset(test_df, max_len=1500, augment=False)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+# Load data: use INPUT_FILE if set, otherwise default to dev split.
+if INPUT_FILE is not None:
+    test_df = pd.read_csv(INPUT_FILE, quotechar='"', engine='python')
+    test_df['text_1'] = test_df['text_1'].apply(
+        lambda x: clean_text(x, lowercase=False))
+    test_df['text_2'] = test_df['text_2'].apply(
+        lambda x: clean_text(x, lowercase=False))
+else:
+    test_df = load_av_data(split='dev')
 print(f"Test data: {len(test_df)} pairs")
+
+# Encode characters directly (no label column required)
+max_len = 1500
+encoded_1 = [char_encode(t, max_len) for t in test_df['text_1']]
+encoded_2 = [char_encode(t, max_len) for t in test_df['text_2']]
+ids_1 = torch.tensor(np.array(encoded_1), dtype=torch.long)
+ids_2 = torch.tensor(np.array(encoded_2), dtype=torch.long)
 
 # %% [markdown]
 # ## 3. Generate Predictions
@@ -74,12 +87,14 @@ print(f"Test data: {len(test_df)} pairs")
 # probabilities, then threshold at 0.5 for binary predictions.
 
 # %%
+batch_size = 64
 all_preds = []
 with torch.no_grad():
-    for batch in test_loader:
-        char_1 = batch['char_ids_1'].to(device)
-        char_2 = batch['char_ids_2'].to(device)
-        logits, _ = model(char_1, char_2)
+    for start in range(0, len(test_df), batch_size):
+        end = min(start + batch_size, len(test_df))
+        b1 = ids_1[start:end].to(device)
+        b2 = ids_2[start:end].to(device)
+        logits, _ = model(b1, b2)
         probs = torch.sigmoid(logits.squeeze(-1))
         preds = (probs > 0.5).long()
         all_preds.extend(preds.cpu().numpy())
