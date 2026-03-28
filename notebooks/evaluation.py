@@ -121,35 +121,35 @@ with torch.no_grad():
         sol2_preds.extend((probs > 0.5).long().cpu().numpy())
 
 y_pred_sol2 = np.array(sol2_preds)
-print(f"Solution 2 predictions: {len(y_pred_sol2)}")
+print(f"Sol 2 predictions: {len(y_pred_sol2)}")
 
 # %% [markdown]
-# ## 2. Full Metric Suite
+# ## 2. Full metric suite
 
 # %%
 metrics_sol1 = compute_all_metrics(y_true, y_pred_sol1)
 metrics_sol2 = compute_all_metrics(y_true, y_pred_sol2)
 
-print_metrics(metrics_sol1, "Solution 1 (Category A — LightGBM)")
+print_metrics(metrics_sol1, "Sol 1 (Cat A — LightGBM)")
 print()
-print_metrics(metrics_sol2, "Solution 2 (Category B — Char-CNN+BiLSTM+GRL)")
+print_metrics(metrics_sol2, "Sol 2 (Cat B — Char-CNN+BiLSTM+GRL)")
 
-# Comparison table
+# side-by-side comparison
 metrics_df = pd.DataFrame({
-    'Solution 1': metrics_sol1,
-    'Solution 2': metrics_sol2,
+    'Sol 1': metrics_sol1,
+    'Sol 2': metrics_sol2,
 }).round(4)
 print("\n" + metrics_df.to_string())
 
 # %% [markdown]
-# ## 3. Confusion Matrices
+# ## 3. Confusion matrices
 
 # %%
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 for ax, y_pred, title in [
-    (axes[0], y_pred_sol1, 'Solution 1 (Cat A — LightGBM)'),
-    (axes[1], y_pred_sol2, 'Solution 2 (Cat B — Char-CNN+BiLSTM+GRL)'),
+    (axes[0], y_pred_sol1, 'Sol 1 (Cat A — LightGBM)'),
+    (axes[1], y_pred_sol2, 'Sol 2 (Cat B — Char-CNN+BiLSTM+GRL)'),
 ]:
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
