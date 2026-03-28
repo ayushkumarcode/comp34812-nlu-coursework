@@ -448,7 +448,7 @@ def _ncd(text_1, text_2, compress_fn):
 
 
 def _jsd_word_freq(text_1, text_2):
-    """Jensen-Shannon divergence of word frequency distributions."""
+    """JSD between word frequency distributions of two texts."""
     words_1 = text_1.lower().split()
     words_2 = text_2.lower().split()
     if not words_1 or not words_2:
@@ -468,7 +468,7 @@ def _jsd_word_freq(text_1, text_2):
 
 
 def _jsd_char_bigram(text_1, text_2):
-    """Jensen-Shannon divergence of character bigram distributions."""
+    """JSD between char bigram distributions."""
     bg_1 = Counter(zip(text_1.lower()[:-1], text_1.lower()[1:]))
     bg_2 = Counter(zip(text_2.lower()[:-1], text_2.lower()[1:]))
     if not bg_1 or not bg_2:
@@ -485,9 +485,8 @@ def _jsd_char_bigram(text_1, text_2):
 
 
 def _jsd(p, q):
-    """Jensen-Shannon divergence between two probability distributions."""
+    """JSD between two probability vectors."""
     m = 0.5 * (p + q)
-    # Add small epsilon to avoid log(0)
     eps = 1e-10
     kl_pm = np.sum(p * np.log2((p + eps) / (m + eps)))
     kl_qm = np.sum(q * np.log2((q + eps) / (m + eps)))
@@ -495,16 +494,12 @@ def _jsd(p, q):
 
 
 def _burrows_delta(text_1, text_2, n_top=100):
-    """Burrows' Delta stylometric distance.
-
-    Only reliable when both texts have >= 200 words.
-    Returns 0.0 as placeholder when texts are too short.
-    """
+    """Burrows' Delta -- only meaningful when both texts have 200+ words."""
     words_1 = text_1.lower().split()
     words_2 = text_2.lower().split()
 
     if len(words_1) < 200 or len(words_2) < 200:
-        return 0.0  # Will be imputed with training median later
+        return 0.0  # gets imputed later
 
     freq_1 = Counter(words_1)
     freq_2 = Counter(words_2)
