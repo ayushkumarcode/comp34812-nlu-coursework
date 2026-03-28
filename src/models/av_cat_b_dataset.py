@@ -37,28 +37,17 @@ def char_encode(text, max_len=1500):
 
 
 def augment_text(char_ids, perturb_prob=0.05, truncate_range=(0.8, 1.0)):
-    """Apply stylistic invariance training augmentation.
-
-    Args:
-        char_ids: numpy array of character indices.
-        perturb_prob: Per-character perturbation probability.
-        truncate_range: Range of text to keep (as fraction).
-
-    Returns:
-        Augmented character indices.
-    """
+    """Augment by randomly truncating and perturbing characters."""
     ids = char_ids.copy()
 
-    # Random truncation
     non_pad = np.sum(ids > 0)
     if non_pad > 10:
         keep_ratio = np.random.uniform(*truncate_range)
         keep_len = int(non_pad * keep_ratio)
         ids[keep_len:] = PAD_IDX
 
-    # Character perturbation
     mask = np.random.random(len(ids)) < perturb_prob
-    mask &= (ids > 0)  # Only perturb non-padding
+    mask &= (ids > 0)
 
     for i in np.where(mask)[0]:
         c = ids[i]
@@ -73,7 +62,7 @@ def augment_text(char_ids, perturb_prob=0.05, truncate_range=(0.8, 1.0)):
 
 
 class AVCharDataset(Dataset):
-    """PyTorch Dataset for AV character-level data."""
+    """PyTorch dataset for char-level AV data with optional augmentation."""
 
     def __init__(self, df, max_len=1500, augment=False,
                  topic_labels=None):
@@ -91,7 +80,6 @@ class AVCharDataset(Dataset):
         self.augment = augment
         self.topic_labels = topic_labels
 
-        # Pre-encode characters
         self.encoded_1 = [char_encode(t, max_len) for t in self.texts_1]
         self.encoded_2 = [char_encode(t, max_len) for t in self.texts_2]
 
