@@ -264,3 +264,31 @@ def generate_architecture_diagram():
     for y_top, y_bot in [(8.1, 7.55), (6.85, 6.25), (5.55, 4.95), (4.25, 3.65)]:
         ax.annotate('', xy=(2.5, y_bot), xytext=(2.5, y_top),
                     arrowprops=dict(arrowstyle='->', color='#666', lw=1.5))
+    # Arrows down (right tower)
+    for y_top, y_bot in [(8.1, 7.55), (6.85, 6.25), (5.55, 4.95), (4.25, 3.65)]:
+        ax.annotate('', xy=(7.5, y_bot), xytext=(7.5, y_top),
+                    arrowprops=dict(arrowstyle='->', color='#666', lw=1.5))
+
+    # Merge: |h1 - h2|
+    ax.annotate('', xy=(4.5, 2.3), xytext=(2.5, 2.95),
+                arrowprops=dict(arrowstyle='->', color='#666', lw=1.5))
+    ax.annotate('', xy=(5.5, 2.3), xytext=(7.5, 2.95),
+                arrowprops=dict(arrowstyle='->', color='#666', lw=1.5))
+    draw_box(5, 2.1, 3.5, 0.7, '|h1 - h2| Diff-Vector', '#8E44AD', 'white', 14)
+
+    # Two branches from diff-vector
+    # Branch 1: Authorship classifier
+    ax.annotate('', xy=(3.5, 1.0), xytext=(4.3, 1.75),
+                arrowprops=dict(arrowstyle='->', color='#27AE60', lw=2))
+    draw_box(3.0, 0.7, 3.2, 0.65, 'Authorship Classifier\n(Same / Different)',
+             '#27AE60', 'white', 13)
+
+    # Branch 2: GRL + Topic classifier
+    ax.annotate('', xy=(6.5, 1.0), xytext=(5.7, 1.75),
+                arrowprops=dict(arrowstyle='->', color='#E74C3C', lw=2))
+    draw_box(7.2, 0.7, 3.4, 0.65, 'GRL + Topic Classifier\n(Adversarial Debiasing)',
+             '#E74C3C', 'white', 13)
+
+    # GRL explanation
+    ax.text(7.2, 0.1, 'Gradient Reversal Layer\n(Ganin & Lempitsky 2015)',
+            ha='center', fontsize=11, color='#999999', style='italic')
