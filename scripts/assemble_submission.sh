@@ -47,6 +47,9 @@ rm -f submission/src/training/train_nli_cat_b.py
 rm -f submission/src/training/train_nli_ensemble.py
 rm -f submission/src/training/run_nli_cat_a.py
 
+# Remove stacking ensemble leftover (different model than submitted)
+rm -f submission/src/training/train_av_ensemble.py
+
 # Models that are small enough (<10MB)
 mkdir -p submission/models
 # Cat B model is 3.1MB — include
