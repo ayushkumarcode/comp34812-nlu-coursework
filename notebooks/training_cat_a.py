@@ -110,11 +110,11 @@ joblib.dump(scaler, save_dir / 'av_cat_a_scaler.joblib')
 joblib.dump(feature_names, save_dir / 'av_cat_a_feature_names.joblib')
 joblib.dump(extractor.tfidf, save_dir / 'av_cat_a_tfidf.joblib')
 joblib.dump(extractor.cosine, save_dir / 'av_cat_a_cosine.joblib')
-print("All model artifacts saved to models/")
+print("all model artifacts saved to models/")
 
 # %% [markdown]
-# ## 6. Generate Predictions
+# ## 6. Generate predictions
 
 # %%
 save_predictions(y_pred, 'predictions/Group_34_A.csv')
-print("Saved to predictions/Group_34_A.csv")
+print("saved to predictions/Group_34_A.csv")
