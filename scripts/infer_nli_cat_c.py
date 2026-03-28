@@ -89,3 +89,33 @@ def main():
 
     all_probs = np.array(all_probs)
     print(f"  Inference time: {time.time()-t0:.1f}s", flush=True)
+
+    # Threshold sweep (save both default and optimal)
+    for thresh in [0.50, 0.55, 0.58, 0.60]:
+        preds = (all_probs > thresh).astype(int)
+        n0 = sum(preds == 0)
+        n1 = sum(preds == 1)
+        ratio = n1 / len(preds)
+        print(f"  Threshold {thresh:.2f}: 0={n0}, 1={n1}, ratio={ratio:.3f}", flush=True)
+
+    # Use 0.5 as default threshold
+    final_preds = (all_probs > 0.5).astype(int)
+
+    # Save predictions
+    save_predictions(final_preds, out_path)
+    print(f"  Saved to {out_path}", flush=True)
+
+    # Also save probabilities for later threshold tuning
+    np.save(out_path.parent / 'nli_test_c_probs.npy', all_probs)
+    print(f"  Saved probabilities to predictions/nli_test_c_probs.npy", flush=True)
+
+    # Sanity checks
+    assert len(final_preds) == 3302, f"Expected 3302, got {len(final_preds)}"
+    ratio = sum(final_preds == 1) / len(final_preds)
+    print(f"  Final positive ratio: {ratio:.3f}", flush=True)
+    assert 0.1 < ratio < 0.9, f"Suspicious class ratio: {ratio:.3f}"
+    print("\nDone!", flush=True)
+
+
+if __name__ == '__main__':
+    main()
