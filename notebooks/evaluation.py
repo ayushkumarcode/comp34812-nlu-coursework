@@ -231,44 +231,43 @@ print(f"  Diff: {paired['observed_diff']:+.4f}, p={paired['p_value']:.4f}")
 print(f"  95% CI of diff: [{paired['ci_lower']:+.4f}, {paired['ci_upper']:+.4f}]")
 
 # %% [markdown]
-# ## 6. Error Overlap Analysis
+# ## 6. Error overlap analysis
 
 # %%
 overlap = error_overlap_analysis(y_true, y_pred_sol1, y_pred_sol2,
                                   'Sol 1', 'Sol 2')
-print("Error Overlap Analysis:")
+print("Error Overlap:")
 for k, v in overlap.items():
     if not k.endswith('_indices'):
         print(f"  {k}: {v}")
 
 print(f"""
-INTERPRETATION: The error overlap analysis reveals whether our two solutions
-make similar or complementary errors. {overlap['shared_errors']} errors are
-shared between both models, while {overlap.get('only_Sol 1_errors', 0)} errors
-are unique to Solution 1 and {overlap.get('only_Sol 2_errors', 0)} to Solution 2.
-Since the models use fundamentally different approaches (handcrafted features vs
-neural character-level encoding), low overlap supports the value of submitting
-solutions from different categories.
+The error overlap tells us whether our two solutions mess up on the same
+examples or different ones. {overlap['shared_errors']} errors are shared,
+while {overlap.get('only_Sol 1_errors', 0)} are unique to sol 1 and
+{overlap.get('only_Sol 2_errors', 0)} to sol 2. Since the models use
+totally different approaches (handcrafted features vs neural char-level
+encoding), low overlap supports the value of submitting from different
+categories.
 """)
 
 # %% [markdown]
-# ## 7. Per-Class Performance
+# ## 7. Per-class performance
 
 # %%
-for sol_name, y_pred in [('Solution 1', y_pred_sol1), ('Solution 2', y_pred_sol2)]:
+for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     print(f"\n{sol_name} — Classification Report:")
     print(classification_report(y_true, y_pred, labels=[0, 1],
                                  target_names=['Diff Author', 'Same Author']))
 
 # %% [markdown]
-# ## 8. Summary Table
+# ## 8. Summary table
 
 # %%
-# Create summary comparison table
 baseline_f1s = {'SVM': 0.5610, 'LSTM': 0.6226, 'BERT': 0.7854}
 
 summary = {
-    'Model': list(baseline_f1s.keys()) + ['Solution 1\n(Cat A)', 'Solution 2\n(Cat B)'],
+    'Model': list(baseline_f1s.keys()) + ['Sol 1\n(Cat A)', 'Sol 2\n(Cat B)'],
     'macro_f1': list(baseline_f1s.values()) + [
         metrics_sol1['macro_f1'], metrics_sol2['macro_f1']
     ],
