@@ -64,6 +64,10 @@ sns.set_palette('Set2')
 # %%
 TASK = 'av'
 
+# NOTE: predictions/Group_34_A.csv and Group_34_B.csv contain TEST predictions
+# (5985 rows). Evaluation here is performed on DEV data by running inference
+# directly, so that predictions align with dev ground truth labels.
+
 # Load ground truth
 y_true = np.array(load_solution_labels(task=TASK))
 print(f"Ground truth: {len(y_true)} samples")
