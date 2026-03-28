@@ -1,7 +1,5 @@
 """
-AV Feature Engineering — TF-IDF and cosine similarity features.
-Group 3: Char n-gram TF-IDF + SVD (100 features per text).
-Pairwise cosine similarity features (3 features).
+Char n-gram TF-IDF + SVD features (group 3) and cosine similarity.
 """
 
 import numpy as np
@@ -11,10 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 class CharNgramTFIDF:
-    """Character n-gram TF-IDF + SVD dimensionality reduction.
-
-    Fits on training texts, transforms to dense features.
-    """
+    """Char n-gram TF-IDF followed by SVD to get dense features."""
 
     def __init__(self, ngram_range=(3, 5), max_features=10000, n_components=100):
         self.ngram_range = ngram_range
@@ -30,11 +25,7 @@ class CharNgramTFIDF:
         self._fitted = False
 
     def fit(self, texts):
-        """Fit on all training texts (both text_1 and text_2 columns).
-
-        Args:
-            texts: List of all training text strings.
-        """
+        """Fit on all training texts (both columns combined)."""
         tfidf_matrix = self.vectorizer.fit_transform(texts)
         self.svd.fit(tfidf_matrix)
         self._fitted = True
