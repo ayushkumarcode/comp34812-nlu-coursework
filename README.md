@@ -98,11 +98,11 @@ All under 10MB so they're in the repo directly:
 - We use spaCy's `en_core_web_md` for POS tagging and dependency parsing
 - No external datasets -- this is closed mode
 
-## Code Attribution
+## Attribution
 
-- scikit-learn (Pedregosa et al., 2011) — ML framework, StandardScaler
-- LightGBM (Ke et al., 2017) — gradient boosting classifier
-- spaCy (Honnibal & Montani, 2017) — NLP pipeline for POS/syntactic features
-- PyTorch (Paszke et al., 2019) — deep learning framework
-- Gradient Reversal Layer adapted from Ganin & Lempitsky (2015)
-- All code written by Group 34 unless otherwise noted
+- scikit-learn (Pedregosa et al., 2011)
+- LightGBM (Ke et al., 2017)
+- spaCy (Honnibal & Montani, 2017)
+- PyTorch (Paszke et al., 2019)
+- GRL implementation adapted from Ganin & Lempitsky (2015)
+- Everything else written by Group 34
