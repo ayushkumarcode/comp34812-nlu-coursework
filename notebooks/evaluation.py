@@ -221,7 +221,7 @@ for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     print(f"  MCC:      {mcc_ci['point_estimate']:.4f} "
           f"[{mcc_ci['ci_lower']:.4f}, {mcc_ci['ci_upper']:.4f}]")
 
-# Paired bootstrap: Sol 1 vs Sol 2
+# paired bootstrap: sol 1 vs sol 2
 paired = paired_bootstrap_test(
     y_true, y_pred_sol1, y_pred_sol2,
     lambda yt, yp: f1_score(yt, yp, average='macro', zero_division=0)
