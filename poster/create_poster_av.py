@@ -68,3 +68,31 @@ HEADER_FONT    = Pt(36)
 BODY_FONT      = Pt(24)
 BODY_FONT_SM   = Pt(22)
 SMALL_FONT     = Pt(20)
+TINY_FONT      = Pt(18)
+
+# Layout constants
+MARGIN = Emu(600000)          # ~0.24 inches
+COL_GAP = Emu(500000)         # ~0.2 inches
+SECTION_GAP = Emu(400000)     # gap between sections vertically
+
+# ============================================================
+# CHART GENERATION
+# ============================================================
+
+def generate_f1_chart():
+    """Generate F1 comparison bar chart with professional styling."""
+    models = ['SVM\nBaseline', 'LSTM\nBaseline', 'BERT\nBaseline',
+              'Sol 1\n(Cat A)', 'Sol 2\n(Cat B)']
+    scores = [0.5610, 0.6226, 0.7854, 0.7340, 0.7422]
+
+    fig, ax = plt.subplots(figsize=(14, 9))
+
+    # Colors: gray baselines, green/orange for our solutions
+    colors = ['#95a5a6', '#95a5a6', '#95a5a6', '#27AE60', '#E67E22']
+    edge_colors = ['#7f8c8d', '#7f8c8d', '#7f8c8d', '#1E8449', '#CA6F1E']
+
+    bars = ax.bar(models, scores, color=colors, edgecolor=edge_colors,
+                  linewidth=2, width=0.65, zorder=3)
+
+    # Value labels on top
+    for bar, score in zip(bars, scores):
