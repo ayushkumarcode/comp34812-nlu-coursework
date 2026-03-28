@@ -24,16 +24,16 @@ This one's a neural approach, built from scratch:
 - Data augmentation via random char perturbation and truncation
 - Beats the LSTM baseline by +0.120 (statistically significant, McNemar's p < 0.01)
 
-## Repository Structure
+## Repo Layout
 
 ```
-├── src/
-│   ├── data_utils.py              # Data loading and preprocessing
-│   ├── scorer.py                  # Scorer wrapper
-│   ├── av_feature_engineering.py  # AV Cat A feature extraction (9 groups)
-│   ├── av_tfidf_features.py       # TF-IDF + SVD features
-│   ├── av_spacy_features.py       # spaCy-based POS + syntactic features
-│   ├── av_pipeline.py             # Complete AV Cat A pipeline
+src/
+  data_utils.py              -- loading + cleaning data
+  scorer.py                  -- wrapper around official scorer metrics
+  av_feature_engineering.py  -- all 9 feature groups for Cat A
+  av_tfidf_features.py       -- char n-gram TF-IDF + SVD
+  av_spacy_features.py       -- POS tags + syntactic features via spaCy
+  av_pipeline.py             -- ties everything together for Cat A
 │   ├── models/
 │   │   ├── av_cat_b_model.py      # AV Cat B neural model
 │   │   ├── av_cat_b_dataset.py    # AV Cat B dataset + char encoding
