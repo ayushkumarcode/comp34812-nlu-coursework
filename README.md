@@ -1,10 +1,10 @@
-# COMP34812 NLU Coursework — Group 34
+# COMP34812 NLU Coursework -- Group 34
 
 ## Authorship Verification Shared Task
 
-This repository contains our solutions for the COMP34812 NLU shared task on Authorship Verification (AV). Given a pair of texts, the task is to determine whether they were written by the same author (1) or different authors (0).
+This repo has our two solutions for the COMP34812 AV shared task. The goal's pretty straightforward: given two texts, predict whether they're by the same author (1) or not (0).
 
-We submit two solutions from **two different categories** (A and B):
+We're submitting one solution from Category A and one from Category B:
 
 ### Solution 1: Category A — LightGBM with Comprehensive Stylometric Features (F1=0.7340)
 
