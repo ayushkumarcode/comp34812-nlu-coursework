@@ -13,7 +13,7 @@ A LightGBM gradient boosting classifier for authorship verification (AV) that de
 AV-StyleLGBM is a Category A (traditional ML) solution for the COMP34812 Authorship Verification shared task. Given a pair of texts, it extracts comprehensive stylometric features from each text independently, computes element-wise absolute difference vectors (diff-vectors) to capture authorial style divergence, and classifies the pair as same-author (1) or different-author (0) using LightGBM.
 
 The key innovations are:
-1. **Comprehensive feature engineering** spanning 9 feature groups (~468 features per text), including novel syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures
+1. **Comprehensive feature engineering** spanning 9 feature groups (435 features per text), including novel syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures
 2. **Topic-robustness mechanism** via function-word-only style diff-vectors and topic-correlated feature filtering, addressing the style-content confound without neural adversarial training
 3. **LightGBM classifier** with tuned hyperparameters for optimal gradient boosting on high-dimensional stylometric feature spaces
 
@@ -48,20 +48,20 @@ The key innovations are:
 
 #### Feature Engineering Pipeline
 
-1. **Per-text features (~468 features per text):**
-   - Group 1: Lexical features (30) -- word length distribution, vocabulary richness (TTR, Yule's K, Simpson's D, Honore's R, Brunet's W)
+1. **Per-text features (435 features per text):**
+   - Group 1: Lexical features (29) -- word length distribution, vocabulary richness (TTR, Yule's K, Simpson's D, Honore's R, Brunet's W)
    - Group 2: Character-level features (56) -- letter, digit, and special character frequency distributions
    - Group 3: Character n-gram TF-IDF + SVD (100) -- char (3,5)-gram TF-IDF reduced to 100 dimensions via TruncatedSVD
-   - Group 4: Function word frequencies (150) -- normalized frequencies of 150 English function words
+   - Group 4: Function word frequencies (169) -- normalized frequencies of 169 English function words
    - Group 5: POS tag features (45) -- 17 universal POS tag frequencies + 28 POS bigram frequencies (spaCy en_core_web_md)
    - Group 6: Structural features (15) -- sentence length statistics, paragraph structure, punctuation density, capitalization
    - Group 7: Syntactic complexity features (10, NOVEL) -- dependency parse depth, branching factor, subordination index, arc length, passive constructions, relative clauses, coordination complexity, content clauses, fronted adverbials
    - Group 8: Writing rhythm features (6, NOVEL) -- sentence length autocorrelation, sentence length entropy, punctuation burstiness, variance ratio, mean-reversion tendency, punctuation diversity entropy
    - Group 9: Information-theoretic features (5, NOVEL) -- character bigram mutual information, text entropy rate, conditional entropy, word length entropy, rolling TTR entropy
 
-2. **Diff-vector computation:** |f(text_1) - f(text_2)| for all per-text features (~468 dims)
+2. **Diff-vector computation:** |f(text_1) - f(text_2)| for all per-text features (~435 dims)
 
-3. **Style-only diff-vector (NOVEL topic-robustness):** Separate diff-vector using only function words, POS tags, syntactic, rhythm, and information-theoretic features (~213 dims)
+3. **Style-only diff-vector (NOVEL topic-robustness):** Separate diff-vector using only function words, POS tags, syntactic, rhythm, and information-theoretic features (~246 dims)
 
 4. **Pairwise features (14):** NCD (gzip, lzma, bz2), cosine similarity of character 3/4/5-gram TF-IDF vectors, Jensen-Shannon divergence (word, char bigram), Jaccard overlap, content word overlap, length/word count/vocabulary ratios, Burrows' Delta (with 200-word stability guard)
 
@@ -87,7 +87,7 @@ The key innovations are:
 - **Feature extraction:** ~15-30 minutes on CPU (27K pairs with spaCy processing)
 - **Model training:** ~2-5 minutes on CPU
 - **Total training time:** ~20-35 minutes
-- **Model size:** ~5MB (LightGBM model + scaler + TF-IDF vectorizers)
+- **Model size:** ~14.6MB (5 files: LightGBM model + scaler + TF-IDF vectorizers + feature names)
 - **Inference speed:** ~100 pairs/second (bottleneck is spaCy feature extraction)
 
 ## Evaluation
