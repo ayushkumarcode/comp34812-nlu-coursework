@@ -712,3 +712,31 @@ def create_poster():
             {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
             {'text': 'Syntactic complexity (10)', 'font_size': BODY_FONT_SM},
             {'text': ' — parse tree depth, clause density', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Writing rhythm (6)', 'font_size': BODY_FONT_SM},
+            {'text': ' — syllable variance, punctuation cadence', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Information-theoretic (5)', 'font_size': BODY_FONT_SM},
+            {'text': ' — entropy, compression ratio', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 10},
+        # Classifier
+        {'text': 'Classifier & Topic Robustness:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'LightGBM', 'font_size': BODY_FONT_SM, 'bold': True},
+            {'text': ' (1000 trees, max_depth=7)', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Style-only diff-vector representation', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
