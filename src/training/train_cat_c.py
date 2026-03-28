@@ -1,7 +1,6 @@
 """
-Category C — DeBERTa Training Script.
-Supports both AV (Siamese) and NLI (cross-encoder) modes.
-Run on CSF3 with GPU: sbatch train_cat_c.sh
+Cat C DeBERTa training. Handles both AV (siamese) and NLI (cross-encoder).
+Needs a GPU -- we ran this on CSF3 A100s.
 """
 
 import sys
@@ -24,7 +23,7 @@ from src.scorer import compute_all_metrics, print_metrics
 
 
 class AVDeBERTaDataset(Dataset):
-    """Dataset for AV Siamese DeBERTa."""
+    """Tokenizes text pairs separately for the siamese setup."""
 
     def __init__(self, df, tokenizer, max_len=256):
         self.texts_1 = list(df['text_1'])
@@ -55,7 +54,7 @@ class AVDeBERTaDataset(Dataset):
 
 
 class NLIDeBERTaDataset(Dataset):
-    """Dataset for NLI cross-encoder DeBERTa."""
+    """Tokenizes premise+hypothesis as a pair, plus hypothesis alone for the adversarial head."""
 
     def __init__(self, df, tokenizer, max_len=128, hyp_max_len=48):
         self.premises = list(df['premise'])
@@ -69,13 +68,11 @@ class NLIDeBERTaDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        # Cross-encoder: premise + hypothesis
         enc = self.tokenizer(
             self.premises[idx], self.hypotheses[idx],
             truncation=True, max_length=self.max_len,
             padding='max_length', return_tensors='pt'
         )
-        # Hypothesis-only (for adversarial debiasing)
         hyp_enc = self.tokenizer(
             self.hypotheses[idx], truncation=True, max_length=self.hyp_max_len,
             padding='max_length', return_tensors='pt'
