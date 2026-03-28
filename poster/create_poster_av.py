@@ -1020,3 +1020,31 @@ def create_poster():
     _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
                       col_w - Emu(300000), limits_h - Emu(200000), limits_paras)
 
+    y += limits_h + SECTION_GAP
+
+    # --- References ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Key References')
+    y += hdr_h
+
+    refs_h = Emu(2100000)
+    _add_section_body_bg(slide, x, y, col_w, refs_h)
+
+    refs_paras = [
+        {'text': 'Stamatatos et al. (2023) "Diff-Vectors for Authorship Analysis"',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 4},
+        {'text': 'Ganin & Lempitsky (2015) "Unsupervised Domain Adaptation by Backpropagation"',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 4},
+        {'text': 'Abbasi & Chen (2008) "Writeprints: A Stylometric Approach to '
+                 'Identity-Level Identification"',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 4},
+        {'text': 'Boenninghoff et al. (2019) "AdHominem: Explainable Authorship Verification"',
+         'font_size': SMALL_FONT, 'font_color': MID_GRAY, 'space_after': 2},
+    ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), refs_h - Emu(200000), refs_paras)
+
+    y += refs_h
+
+    # =====================================================
+    # FOOTER
+    # =====================================================
