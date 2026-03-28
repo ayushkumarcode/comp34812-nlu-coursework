@@ -1,6 +1,5 @@
 """
-AV Category A — Full feature extraction pipeline.
-Combines all feature groups into a single feature matrix for training/inference.
+Full Cat A pipeline -- combines all feature groups into one matrix.
 """
 
 import numpy as np
@@ -15,7 +14,7 @@ from src.av_feature_engineering import (
 from src.av_tfidf_features import CharNgramTFIDF, CosineSimFeatures
 
 
-# Style-only feature prefixes (for topic-robustness mechanism)
+# features we consider "style" rather than "content" for topic robustness
 STYLE_FEATURE_PREFIXES = [
     'fw_', 'pos_', 'avg_dep_depth', 'max_dep_depth', 'avg_branching_factor',
     'subordination_index', 'avg_dep_arc_length', 'passive_ratio', 'relcl_ratio',
@@ -32,17 +31,7 @@ STYLE_FEATURE_PREFIXES = [
 
 
 class AVFeatureExtractor:
-    """Complete AV Category A feature extraction pipeline.
-
-    Handles:
-    - Per-text features (Groups 1, 2, 4, 6, 8, 9)
-    - spaCy features (Groups 5, 7) - optional, can be disabled
-    - TF-IDF + SVD features (Group 3)
-    - Cosine similarity features
-    - Diff-vector computation
-    - Pairwise features
-    - Style-only diff-vector (topic-robustness mechanism)
-    """
+    """Extracts all features, computes diff-vectors, and builds the feature matrix."""
 
     def __init__(self, use_spacy=True, n_svd_components=100):
         self.use_spacy = use_spacy
