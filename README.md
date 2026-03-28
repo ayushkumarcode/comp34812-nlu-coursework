@@ -84,19 +84,19 @@ Check `notebooks/demo_av_cat_a.py` and `notebooks/demo_av_cat_b.py` for demos.
 
 ## Trained Models
 
-Models stored on GitHub (this repository):
-- `models/av_cat_b_best.pt` (3.1MB) — Siamese char-CNN+BiLSTM+GRL
-- `models/av_cat_a_lgbm.joblib` (5.6MB) — LightGBM classifier
-- `models/av_cat_a_scaler.joblib` — StandardScaler
-- `models/av_cat_a_feature_names.joblib` — Feature name list
-- `models/av_cat_a_tfidf.joblib` — Pre-fitted TF-IDF vectorizer
-- `models/av_cat_a_cosine.joblib` — Pre-fitted cosine similarity features
+All under 10MB so they're in the repo directly:
+- `models/av_cat_b_best.pt` (3.1MB) -- the Siamese char-CNN+BiLSTM network
+- `models/av_cat_a_lgbm.joblib` (5.6MB) -- LightGBM classifier
+- `models/av_cat_a_scaler.joblib` -- StandardScaler for feature normalization
+- `models/av_cat_a_feature_names.joblib` -- feature name ordering
+- `models/av_cat_a_tfidf.joblib` -- fitted TF-IDF vectorizer
+- `models/av_cat_a_cosine.joblib` -- fitted cosine similarity module
 
-## Data Sources
+## Data
 
-- Training data: COMP34812 AV shared task (provided by course)
-- Pre-trained models: spaCy en_core_web_md (POS tagging + dependency parsing)
-- No external datasets used (closed mode)
+- Training data from the COMP34812 AV shared task (provided by course staff)
+- We use spaCy's `en_core_web_md` for POS tagging and dependency parsing
+- No external datasets -- this is closed mode
 
 ## Code Attribution
 
