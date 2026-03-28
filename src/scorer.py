@@ -1,6 +1,6 @@
 """
-Programmatic wrapper around the local scorer for COMP34812.
-Computes all 8 official metrics without needing CLI invocation.
+Wrapper around the local scorer so we can compute all 8 official metrics
+without having to invoke the CLI every time.
 """
 
 import sys
@@ -13,14 +13,14 @@ from src.data_utils import SCORER_ROOT, save_predictions
 
 
 def compute_all_metrics(y_true, y_pred):
-    """Compute all 8 official scorer metrics.
+    """Compute all 8 metrics the official scorer uses.
 
     Args:
-        y_true: Ground truth labels (list or array of 0/1).
-        y_pred: Predicted labels (list or array of 0/1).
+        y_true: ground truth (0/1).
+        y_pred: predictions (0/1).
 
     Returns:
-        Dict mapping metric name to float value.
+        dict of metric name -> value.
     """
     y_true = np.asarray(y_true, dtype=float).ravel()
     y_pred = np.asarray(y_pred, dtype=float).ravel()
