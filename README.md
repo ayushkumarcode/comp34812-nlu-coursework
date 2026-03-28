@@ -86,7 +86,7 @@ See `notebooks/demo_av_cat_a.py` and `notebooks/demo_av_cat_b.py`.
 
 Models stored on GitHub (this repository):
 - `models/av_cat_b_best.pt` (3.1MB) — Siamese char-CNN+BiLSTM+GRL
-- `models/av_cat_a_lgbm.joblib` (~1MB) — LightGBM classifier
+- `models/av_cat_a_lgbm.joblib` (5.6MB) — LightGBM classifier
 - `models/av_cat_a_scaler.joblib` — StandardScaler
 - `models/av_cat_a_feature_names.joblib` — Feature name list
 - `models/av_cat_a_tfidf.joblib` — Pre-fitted TF-IDF vectorizer
