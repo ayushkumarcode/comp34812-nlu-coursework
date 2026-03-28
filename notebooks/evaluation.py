@@ -342,47 +342,46 @@ for sol_name, y_pred in [('Sol 1', y_pred_sol1), ('Sol 2', y_pred_sol2)]:
     print()
 
 # %% [markdown]
-# ## 12. MCC Comparison
+# ## 12. MCC comparison
 #
-# Matthews Correlation Coefficient provides a balanced measure
-# even for imbalanced classes, ranging from -1 to +1.
+# Matthews Correlation Coefficient is a nice balanced metric that
+# works well even with imbalanced classes. Ranges from -1 to +1.
 
 # %%
 mcc_sol1 = metrics_sol1['matthews_corrcoef']
 mcc_sol2 = metrics_sol2['matthews_corrcoef']
-print(f"Solution 1 MCC: {mcc_sol1:.4f}")
-print(f"Solution 2 MCC: {mcc_sol2:.4f}")
-print(f"\nMCC > 0.4 indicates moderate agreement with ground truth.")
-print(f"MCC > 0.7 indicates strong agreement.")
+print(f"Sol 1 MCC: {mcc_sol1:.4f}")
+print(f"Sol 2 MCC: {mcc_sol2:.4f}")
+print(f"\nMCC > 0.4 = moderate agreement, MCC > 0.7 = strong agreement.")
 
 # %% [markdown]
-# ## 13. Inter-Model Agreement (Cohen's Kappa)
+# ## 13. Inter-model agreement (Cohen's Kappa)
 #
-# Cohen's Kappa measures agreement between our two solutions
-# beyond chance. Low kappa suggests complementary models.
+# Cohen's Kappa measures agreement between our two solutions beyond
+# what you'd expect by chance. Low kappa = complementary models.
 
 # %%
 from src.evaluation.eval_utils import cohens_kappa
 kappa = cohens_kappa(y_pred_sol1, y_pred_sol2)
 print(f"Cohen's Kappa between Sol 1 and Sol 2: {kappa:.4f}")
 if kappa < 0.4:
-    print("Low agreement — models capture different aspects of the task.")
+    print("Low agreement — models are picking up on different things.")
 elif kappa < 0.75:
-    print("Moderate agreement — some overlap but distinct strengths.")
+    print("Moderate agreement — some overlap but they've got distinct strengths.")
 else:
-    print("High agreement — models make similar predictions.")
+    print("High agreement — models are making pretty similar predictions.")
 
 # %% [markdown]
-# ## 14. Baseline Improvement Visualization
+# ## 14. Baseline improvement visualization
 #
-# Visualize the magnitude of improvement over each baseline
-# for both solutions, highlighting statistical significance.
+# How much better (or worse) we do compared to each baseline,
+# with significance flagged.
 
 # %%
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 for ax, sol_name, y_pred, metrics in [
-    (axes[0], 'Solution 1 (Cat A)', y_pred_sol1, metrics_sol1),
-    (axes[1], 'Solution 2 (Cat B)', y_pred_sol2, metrics_sol2),
+    (axes[0], 'Sol 1 (Cat A)', y_pred_sol1, metrics_sol1),
+    (axes[1], 'Sol 2 (Cat B)', y_pred_sol2, metrics_sol2),
 ]:
     bl_names = list(baseline_f1s.keys())
     gaps = [metrics['macro_f1'] - baseline_f1s[n] for n in bl_names]
