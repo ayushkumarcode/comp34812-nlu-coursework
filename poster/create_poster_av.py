@@ -376,3 +376,31 @@ def _add_shape_with_fill(slide, shape_type, left, top, width, height,
 
 def _add_textbox(slide, left, top, width, height, text, font_size,
                  font_color=DARK, bold=False, alignment=PP_ALIGN.LEFT,
+                 font_name='Calibri', line_spacing=1.15, word_wrap=True):
+    """Add a text box with styled text."""
+    txBox = slide.shapes.add_textbox(left, top, width, height)
+    tf = txBox.text_frame
+    tf.word_wrap = word_wrap
+    p = tf.paragraphs[0]
+    p.text = text
+    p.font.size = font_size
+    p.font.color.rgb = font_color
+    p.font.bold = bold
+    p.font.name = font_name
+    p.alignment = alignment
+    p.space_after = Pt(0)
+    p.space_before = Pt(0)
+    if line_spacing:
+        p.line_spacing = line_spacing
+    return txBox
+
+
+def _add_rich_textbox(slide, left, top, width, height, paragraphs_data,
+                      font_name='Calibri', word_wrap=True):
+    """Add a text box with multiple styled paragraphs.
+
+    paragraphs_data: list of dicts with keys:
+        text, font_size, font_color, bold, alignment, bullet, line_spacing,
+        space_after, space_before
+    """
+    txBox = slide.shapes.add_textbox(left, top, width, height)
