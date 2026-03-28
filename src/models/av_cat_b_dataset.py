@@ -1,6 +1,5 @@
 """
-AV Category B — Character-level dataset for PyTorch.
-Handles character encoding, padding/truncation, and topic pseudo-labels.
+Char-level dataset for Cat B. Handles encoding, augmentation, and topic labels.
 """
 
 import re
@@ -12,7 +11,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import MiniBatchKMeans
 
 
-# Character vocabulary
 CHAR_VOCAB = {chr(c): i+1 for i, c in enumerate(range(ord('a'), ord('z')+1))}
 for i, c in enumerate(range(ord('A'), ord('Z')+1)):
     CHAR_VOCAB[chr(c)] = 27 + i
@@ -27,20 +25,11 @@ VOCAB_SIZE = UNK_IDX + 1  # ~97
 
 
 def char_encode(text, max_len=1500):
-    """Encode text as character indices with padding/truncation.
-
-    Args:
-        text: Raw text string.
-        max_len: Maximum character sequence length.
-
-    Returns:
-        numpy array of shape (max_len,) with character indices.
-    """
+    """Turn text into a fixed-length array of char indices."""
     indices = []
     for c in text[:max_len]:
         indices.append(CHAR_VOCAB.get(c, UNK_IDX))
 
-    # Pad to max_len
     if len(indices) < max_len:
         indices.extend([PAD_IDX] * (max_len - len(indices)))
 
