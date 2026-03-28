@@ -128,9 +128,7 @@ def character_features(text):
     return feats
 
 
-# ============================================================
-# GROUP 4: FUNCTION WORD FREQUENCIES (150 features)
-# ============================================================
+# -- group 4: function word frequencies (150) --
 
 FUNCTION_WORDS = [
     'the', 'of', 'and', 'a', 'to', 'in', 'is', 'it', 'that', 'was',
@@ -173,9 +171,7 @@ def function_word_features(text):
     return feats
 
 
-# ============================================================
-# GROUP 6: STRUCTURAL FEATURES (15 features)
-# ============================================================
+# -- group 6: structural features (15) --
 
 def structural_features(text):
     """Extract structural features from text.
@@ -227,9 +223,7 @@ def structural_features(text):
     return feats
 
 
-# ============================================================
-# GROUP 8: WRITING RHYTHM FEATURES (6 features) — NOVEL
-# ============================================================
+# -- group 8: writing rhythm features (6) -- NOVEL
 
 def writing_rhythm_features(text):
     """Extract writing rhythm features capturing temporal/sequential patterns.
@@ -312,9 +306,7 @@ def writing_rhythm_features(text):
     return feats
 
 
-# ============================================================
-# GROUP 9: INFORMATION-THEORETIC FEATURES (5 features) — NOVEL
-# ============================================================
+# -- group 9: information-theoretic features (5) -- NOVEL
 
 def info_theoretic_features(text):
     """Extract information-theoretic features.
@@ -402,9 +394,7 @@ def info_theoretic_features(text):
     return feats
 
 
-# ============================================================
-# PAIRWISE FEATURES (14 features)
-# ============================================================
+# -- pairwise features (14) --
 
 def pairwise_features(text_1, text_2):
     """Compute pairwise similarity/distance features between two texts.
@@ -563,9 +553,7 @@ def _burrows_delta(text_1, text_2, n_top=100):
     return delta / len(top_words) if top_words else 0.0
 
 
-# ============================================================
-# COMBINED FEATURE EXTRACTION
-# ============================================================
+# -- combined feature extraction --
 
 def extract_per_text_features(text):
     """Extract all per-text features (Groups 1, 2, 4, 6, 8, 9).
