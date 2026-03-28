@@ -91,19 +91,13 @@ def _empty_lexical():
     return feats
 
 
-# ============================================================
-# GROUP 2: CHARACTER-LEVEL FEATURES (56 features)
-# ============================================================
+# -- group 2: character-level features (56) --
 
 _SPECIAL_CHARS = list('.,;:!?\'"()-/\\@#$%&*_')
 
 
 def character_features(text):
-    """Extract character-level frequency features.
-
-    Returns:
-        Dict with 26 letter + 10 digit + 20 special char frequency features.
-    """
+    """Character frequency features: 26 letters + 10 digits + 20 special chars."""
     feats = {}
     total_chars = len(text)
     if total_chars == 0:
