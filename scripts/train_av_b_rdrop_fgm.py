@@ -23,5 +23,30 @@ from src.data_utils import load_av_data, load_solution_labels, save_predictions
 from src.scorer import compute_all_metrics, print_metrics
 
 
+class FGM:
+    """Fast Gradient Method — perturb char embeddings in gradient direction."""
+
+    def __init__(self, model, epsilon=0.5, emb_name='char_emb'):
+        self.model = model
+        self.epsilon = epsilon
+        self.emb_name = emb_name
+        self.backup = {}
+
+    def attack(self):
+        for name, param in self.model.named_parameters():
+            if self.emb_name in name and param.requires_grad and param.grad is not None:
+                self.backup[name] = param.data.clone()
+                norm = param.grad.norm()
+                if norm != 0 and not torch.isnan(norm):
+                    r_adv = self.epsilon * param.grad / norm
+                    param.data.add_(r_adv)
+
+    def restore(self):
+        for name, param in self.model.named_parameters():
+            if name in self.backup:
+                param.data = self.backup[name]
+        self.backup = {}
+
+
 if __name__ == '__main__':
     pass
