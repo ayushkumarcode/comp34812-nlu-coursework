@@ -35,7 +35,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {device}")
 
 # %% [markdown]
-# ## 1. Load and Prepare Data
+# ## 1. Load and prepare data
 
 # %%
 train_df = load_av_data(split='train')
@@ -43,14 +43,14 @@ dev_df = load_av_data(split='dev')
 dev_labels = load_solution_labels(task='av')
 print(f"Train: {len(train_df)}, Dev: {len(dev_df)}")
 
-# Generate topic pseudo-labels for adversarial training
+# generate topic pseudo-labels for the adversarial head
 all_texts = list(train_df['text_1']) + list(train_df['text_2'])
 topic_labels = generate_topic_labels(all_texts, n_clusters=10)
 train_topics = topic_labels[:len(train_df)]
 num_topics = int(topic_labels.max()) + 1
 
 # %% [markdown]
-# ## 2. Create Datasets
+# ## 2. Create datasets
 
 # %%
 from torch.utils.data import DataLoader
