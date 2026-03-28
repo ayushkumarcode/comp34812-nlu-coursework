@@ -4,18 +4,18 @@
 
 # Model Card for AV-StyleLGBM: LightGBM with Comprehensive Stylometric Features
 
-A LightGBM gradient boosting classifier for authorship verification (AV) that determines whether two texts were written by the same author, using ~695 stylometric features per text pair including novel syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures.
+A LightGBM gradient boosting classifier for authorship verification (AV) that figures out whether two texts were written by the same author. It uses ~695 stylometric features per text pair, including syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures that we designed ourselves.
 
 ## Model Details
 
 ### Model Description
 
-AV-StyleLGBM is a Category A (traditional ML) solution for the COMP34812 Authorship Verification shared task. Given a pair of texts, it extracts comprehensive stylometric features from each text independently, computes element-wise absolute difference vectors (diff-vectors) to capture authorial style divergence, and classifies the pair as same-author (1) or different-author (0) using LightGBM.
+AV-StyleLGBM is our Category A (traditional ML) solution for the COMP34812 Authorship Verification shared task. Given a pair of texts, we extract a big set of stylometric features from each text independently, compute element-wise absolute difference vectors (diff-vectors) to capture how much the authorial styles diverge, and then classify the pair as same-author (1) or different-author (0) with LightGBM.
 
-The key innovations are:
-1. **Comprehensive feature engineering** spanning 9 feature groups (435 features per text), including novel syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures
-2. **Topic-robustness mechanism** via function-word-only style diff-vectors and topic-correlated feature filtering, addressing the style-content confound without neural adversarial training
-3. **LightGBM classifier** with tuned hyperparameters for optimal gradient boosting on high-dimensional stylometric feature spaces
+What makes this approach work is three things:
+1. **Comprehensive feature engineering** across 9 feature groups (435 features per text), including novel syntactic complexity profiling, writing rhythm analysis, and information-theoretic authorial signatures
+2. **A topic-robustness mechanism** using function-word-only style diff-vectors and topic-correlated feature filtering -- this tackles the style-content confound without needing neural adversarial training
+3. **LightGBM classifier** with tuned hyperparameters that handles the high-dimensional stylometric feature space well
 
 - **Developed by:** Group 34
 - **Language(s):** English
@@ -28,7 +28,7 @@ The key innovations are:
 - **Repository:** https://github.com/ayushkumarcode/comp34812-nlu-coursework
 - **Paper or documentation:**
   - Stamatatos et al. (2023) "Same or Different? Diff-Vectors for Authorship Analysis" -- diff-vector representation
-  - Abbasi & Chen (2008) "Writeprints" -- baseline feature set (extended with novel Groups 7-9)
+  - Abbasi & Chen (2008) "Writeprints" -- baseline feature set (we extended it with our novel Groups 7-9)
   - Jiang et al. (2023) "Low-Resource Text Classification: A Parameter-Free Classification Method with Compressors" -- NCD features
   - Bevendorff et al. (2022) PAN 2022 -- character n-gram cosine similarity baseline
   - Ke et al. (2017) "LightGBM: A Highly Efficient Gradient Boosting Decision Tree" -- LightGBM classifier
@@ -42,7 +42,7 @@ The key innovations are:
 - **Size:** 27,643 text pairs
 - **Label distribution:** ~50% same-author (class 1), ~50% different-author (class 0)
 - **Text sources:** Enron emails, blog posts, movie reviews (cross-domain)
-- **Preprocessing:** HTML entity decoding, Unicode NFC normalization, URL replacement with `<URL>` token. Case and punctuation preserved (stylistic signals). No stemming or lemmatization.
+- **Preprocessing:** HTML entity decoding, Unicode NFC normalization, URL replacement with `<URL>` token. We kept case and punctuation intact since they're important stylistic signals. No stemming or lemmatization.
 
 ### Training Procedure
 
@@ -61,7 +61,7 @@ The key innovations are:
 
 2. **Diff-vector computation:** |f(text_1) - f(text_2)| for all per-text features (~435 dims)
 
-3. **Style-only diff-vector (NOVEL topic-robustness):** Separate diff-vector using only function words, POS tags, syntactic, rhythm, and information-theoretic features (~246 dims)
+3. **Style-only diff-vector (NOVEL topic-robustness):** We compute a separate diff-vector using only function words, POS tags, syntactic, rhythm, and information-theoretic features (~246 dims). The idea is to strip out anything that might be topic-related and focus purely on style.
 
 4. **Pairwise features (14):** NCD (gzip, lzma, bz2), cosine similarity of character 3/4/5-gram TF-IDF vectors, Jensen-Shannon divergence (word, char bigram), Jaccard overlap, content word overlap, length/word count/vocabulary ratios, Burrows' Delta (with 200-word stability guard)
 
@@ -88,7 +88,7 @@ The key innovations are:
 - **Model training:** ~2-5 minutes on CPU
 - **Total training time:** ~20-35 minutes
 - **Model size:** ~14.6MB (5 files: LightGBM model + scaler + TF-IDF vectorizers + feature names)
-- **Inference speed:** ~100 pairs/second (bottleneck is spaCy feature extraction)
+- **Inference speed:** ~100 pairs/second (the bottleneck is spaCy feature extraction)
 
 ## Evaluation
 
