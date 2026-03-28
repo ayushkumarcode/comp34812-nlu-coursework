@@ -180,3 +180,31 @@ def generate_confusion_matrices():
         ax.set_yticks([0, 1])
         ax.set_xticklabels(['Different\nAuthor', 'Same\nAuthor'], fontsize=18)
         ax.set_yticklabels(['Different\nAuthor', 'Same\nAuthor'], fontsize=18)
+        ax.set_xlabel('Predicted', fontsize=20, fontweight='bold', labelpad=10)
+        ax.set_ylabel('True', fontsize=20, fontweight='bold', labelpad=10)
+        ax.set_title(title, fontsize=22, fontweight='bold', pad=15,
+                     color='#1B3A5C')
+
+        # Cell values
+        for i in range(2):
+            for j in range(2):
+                val = cm[i, j]
+                color = 'white' if val > cm.max() * 0.55 else '#2D2D2D'
+                ax.text(j, i, f'{val:,}', ha='center', va='center',
+                        fontsize=26, fontweight='bold', color=color)
+
+        # Compute metrics per model
+        tp = cm[1, 1]; tn = cm[0, 0]; fp = cm[0, 1]; fn = cm[1, 0]
+        prec = tp / (tp + fp)
+        rec = tp / (tp + fn)
+        f1 = 2 * prec * rec / (prec + rec)
+        ax.text(0.5, -0.22, f'Prec={prec:.3f}  Rec={rec:.3f}  F1={f1:.3f}',
+                transform=ax.transAxes, ha='center', fontsize=16,
+                color='#666666', style='italic')
+
+    plt.tight_layout(w_pad=3)
+    path = POSTER_DIR / 'cm_av_combined.png'
+    plt.savefig(str(path), dpi=250, bbox_inches='tight',
+                facecolor='white', edgecolor='none')
+    plt.close()
+    print(f"  Saved confusion matrices to {path}")
