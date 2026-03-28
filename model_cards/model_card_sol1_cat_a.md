@@ -121,13 +121,13 @@ What makes this approach work is three things:
 | LSTM baseline | 0.6226 | +0.1114 |
 | BERT baseline | 0.7854 | -0.0514 |
 
-The model significantly outperforms both the SVM and LSTM baselines. While it does not surpass the BERT baseline, it achieves competitive performance using only handcrafted features and a traditional ML classifier, demonstrating the value of comprehensive stylometric analysis.
+We significantly outperform both the SVM and LSTM baselines. It doesn't beat BERT, but we think it's still a strong result for a purely handcrafted-feature approach -- getting within 5 points of a fine-tuned transformer with no pre-trained representations at all shows that thoughtful stylometric analysis still has real value.
 
 ## Technical Specifications
 
 ### Hardware
 
-- **Training:** CSF3 HPC cluster, CPU nodes (no GPU required for Category A)
+- **Training:** CSF3 HPC cluster, CPU nodes (no GPU needed for Category A)
 - **Inference:** Any machine with Python 3.11+, ~4GB RAM
 
 ### Software
@@ -140,18 +140,18 @@ The model significantly outperforms both the SVM and LSTM baselines. While it do
 
 ## Bias, Risks, and Limitations
 
-- **Domain sensitivity:** Performance may degrade on text domains not represented in training (e.g., scientific papers, social media posts). The model was trained on Enron emails, blog posts, and movie reviews.
-- **Text length sensitivity:** Vocabulary richness features (Yule's K, Honore's R) are imputed for texts with fewer than 50 words, and Burrows' Delta requires 200+ words per text. Very short texts may receive degraded predictions.
-- **Topic confound:** Despite the topic-robustness mechanism, same-topic different-author pairs may still be misclassified if authors share similar writing styles. The style-only diff-vector mitigates but does not eliminate this.
-- **Language assumption:** Features are designed for English text only. Function words, POS tags, and syntactic features assume English grammar.
-- **Authorship vs style:** The model detects stylistic similarity, not true authorship. Writers who deliberately imitate another's style could fool the model.
+- **Domain sensitivity:** Performance will likely drop on text types we didn't train on (e.g., scientific papers, social media posts). Our training data covers Enron emails, blog posts, and movie reviews, so anything outside those domains is a risk.
+- **Text length sensitivity:** Some vocabulary richness features (Yule's K, Honore's R) get imputed for texts under 50 words, and Burrows' Delta needs 200+ words per text to be reliable. Very short texts won't get the best predictions.
+- **Topic confound:** Even with the topic-robustness mechanism, same-topic different-author pairs can still trip up the model if the authors happen to write similarly. The style-only diff-vector helps but doesn't completely solve this.
+- **Language assumption:** Everything's designed for English only. The function words, POS tags, and syntactic features all assume English grammar.
+- **Authorship vs style:** We're really detecting stylistic similarity, not proving authorship. Someone deliberately imitating another writer's style could fool the model.
 
 ## Additional Information
 
 - **Novel contributions:**
-  1. Syntactic complexity profiling for AV (dependency depth, subordination, arc length) -- inspired by Feng et al. (2012) on syntactic stylometry
-  2. Writing rhythm analysis (sentence-length autocorrelation, punctuation burstiness) -- time-series analysis applied to linguistic sequences
-  3. Information-theoretic authorial signatures (char bigram MI, entropy rate, conditional entropy) -- finer-grained than NCD
-  4. Topic-robustness mechanism for Cat A (style-only diff-vector, function-word subspace) -- addresses style-content confound without neural adversarial training
+  1. Syntactic complexity profiling for AV (dependency depth, subordination, arc length) -- we drew on Feng et al. (2012)'s work on syntactic stylometry
+  2. Writing rhythm analysis (sentence-length autocorrelation, punctuation burstiness) -- basically applying time-series analysis to linguistic sequences, which turned out to capture authorial habits pretty well
+  3. Information-theoretic authorial signatures (char bigram MI, entropy rate, conditional entropy) -- these give a finer-grained picture than NCD alone
+  4. Topic-robustness mechanism for Cat A (style-only diff-vector, function-word subspace) -- our way of handling the style-content confound without needing any neural adversarial training
 
 - **Code attribution:** scikit-learn StandardScaler, LightGBM classifier, spaCy NLP pipeline, standard Python libraries. No external code copied directly.

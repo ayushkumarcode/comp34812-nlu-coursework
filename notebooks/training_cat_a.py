@@ -34,7 +34,7 @@ from src.av_pipeline import AVFeatureExtractor
 from src.scorer import compute_all_metrics, print_metrics
 
 # %% [markdown]
-# ## 1. Load Data
+# ## 1. Load data
 
 # %%
 train_df = load_av_data(split='train')
