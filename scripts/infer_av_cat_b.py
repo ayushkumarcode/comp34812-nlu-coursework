@@ -60,3 +60,22 @@ def main():
     # Inference in batches
     print("\n[4/4] Running inference...", flush=True)
     t0 = time.time()
+    batch_size = 64
+    all_preds = []
+
+    with torch.no_grad():
+        for start in range(0, len(df), batch_size):
+            end = min(start + batch_size, len(df))
+            b1 = ids_1[start:end].to(device)
+            b2 = ids_2[start:end].to(device)
+            logits, _ = model(b1, b2)
+            probs = torch.sigmoid(logits).squeeze(-1)
+            preds = (probs > 0.5).long().cpu().numpy()
+            all_preds.extend(preds)
+            if (start // batch_size) % 20 == 0:
+                print(f"  Batch {start//batch_size}: {start}/{len(df)}", flush=True)
+
+    all_preds = np.array(all_preds)
+    print(f"  Inference time: {time.time()-t0:.1f}s", flush=True)
+    print(f"  Predictions: {len(all_preds)}", flush=True)
+    print(f"  Class distribution: 0={sum(all_preds==0)}, 1={sum(all_preds==1)}", flush=True)
