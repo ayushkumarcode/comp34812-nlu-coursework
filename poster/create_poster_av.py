@@ -768,3 +768,31 @@ def create_poster():
             {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
             {'text': 'Multi-width CNN', 'font_size': BODY_FONT_SM, 'bold': True},
             {'text': ' (kernels: 3, 5, 7) for local patterns', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'BiLSTM', 'font_size': BODY_FONT_SM, 'bold': True},
+            {'text': ' (128h \u2192 256d) for sequential dependencies', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Additive Attention', 'font_size': BODY_FONT_SM, 'bold': True},
+            {'text': ' for salient feature weighting', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 10},
+        {'text': 'Adversarial Debiasing:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': ACCENT_ORANGE, 'space_after': 6},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Gradient Reversal Layer', 'font_size': BODY_FONT_SM, 'bold': True},
+            {'text': ' (Ganin & Lempitsky 2015)', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Topic pseudo-labels via TF-IDF + KMeans clustering',
+             'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Forces model to learn style representations ',
+             'font_size': BODY_FONT_SM},
+            {'text': 'invariant to topic', 'font_size': BODY_FONT_SM, 'bold': True,
