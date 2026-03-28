@@ -96,3 +96,31 @@ def generate_f1_chart():
 
     # Value labels on top
     for bar, score in zip(bars, scores):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.008,
+                f'{score:.4f}', ha='center', va='bottom',
+                fontsize=22, fontweight='bold', color='#2D2D2D')
+
+    # Styling
+    ax.set_ylabel('Macro F1 Score', fontsize=24, fontweight='bold',
+                  labelpad=15, color='#2D2D2D')
+    ax.set_title('Authorship Verification - Model Comparison',
+                 fontsize=28, fontweight='bold', pad=20, color='#1B3A5C')
+    ax.set_ylim(0, 0.92)
+    ax.set_xlim(-0.6, 4.6)
+
+    # Grid
+    ax.yaxis.grid(True, linestyle='--', alpha=0.4, zorder=0)
+    ax.set_axisbelow(True)
+
+    # Tick styling
+    ax.tick_params(axis='both', labelsize=18, colors='#2D2D2D')
+    ax.tick_params(axis='x', length=0)
+
+    # Spine styling
+    for spine in ['top', 'right']:
+        ax.spines[spine].set_visible(False)
+    for spine in ['left', 'bottom']:
+        ax.spines[spine].set_color('#CCCCCC')
+
+    # Baseline reference line
+    ax.axhline(y=0.5610, color='#BDC3C7', linestyle=':', linewidth=1.5,
