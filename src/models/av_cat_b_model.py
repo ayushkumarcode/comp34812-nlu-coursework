@@ -131,12 +131,8 @@ class SharedEncoder(nn.Module):
         return embedding, weights
 
 
-# ============================================================
-# FULL MODEL
-# ============================================================
-
 class AVCatBModel(nn.Module):
-    """Adversarial Style-Content Disentanglement Network."""
+    """Full Cat B model: siamese encoder + comparison MLP + topic adversarial head."""
 
     def __init__(self, vocab_size=97, char_emb_dim=32,
                  cnn_filters=128, lstm_hidden=128,
@@ -153,8 +149,7 @@ class AVCatBModel(nn.Module):
             dropout=dropout,
         )
 
-        # Comparison + MLP Classifier
-        comparison_dim = proj_dim * 4  # [v1, v2, |v1-v2|, v1*v2] = 512
+        comparison_dim = proj_dim * 4  # [v1, v2, |v1-v2|, v1*v2]
         self.classifier = nn.Sequential(
             nn.Linear(comparison_dim, 256),
             nn.ReLU(),
@@ -165,7 +160,6 @@ class AVCatBModel(nn.Module):
             nn.Linear(64, 1),
         )
 
-        # Topic adversarial head
         self.grl = GradientReversalLayer(lambda_val=grl_lambda)
         self.topic_head = nn.Sequential(
             nn.Linear(proj_dim, 64),
@@ -188,16 +182,12 @@ class AVCatBModel(nn.Module):
         v1, attn1 = self.encoder(char_ids_1)
         v2, attn2 = self.encoder(char_ids_2)
 
-        # Comparison
         diff = torch.abs(v1 - v2)
         prod = v1 * v2
         combined = torch.cat([v1, v2, diff, prod], dim=1)
 
-        # Classification
         logits = self.classifier(combined)
 
-        # Topic prediction (on randomly selected text embedding)
-        # Use v1 for simplicity (alternating in training loop)
         topic_input = self.grl(v1)
         topic_logits = self.topic_head(topic_input)
 
@@ -207,7 +197,7 @@ class AVCatBModel(nn.Module):
         return logits, topic_logits
 
     def predict(self, char_ids_1, char_ids_2):
-        """Generate binary predictions."""
+        """Binary predictions (threshold 0.5)."""
         logits, _ = self.forward(char_ids_1, char_ids_2)
         probs = torch.sigmoid(logits)
         return (probs > 0.5).long().squeeze(-1)
