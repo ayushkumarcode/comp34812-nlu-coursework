@@ -964,3 +964,31 @@ def create_poster():
             {'text': '   \u2022 Cat B: ', 'font_size': BODY_FONT_SM, 'bold': True,
              'font_color': ACCENT_ORANGE},
             {'text': 'Struggles with formal texts — less character-level '
+                     'variation in structured writing', 'font_size': BODY_FONT_SM}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 8},
+        {'runs': [
+            {'text': 'Topic Confound: ', 'font_size': BODY_FONT, 'bold': True},
+            {'text': 'Both models show elevated false positive rates on '
+                     'same-topic pairs, confirming the style-content '
+                     'challenge.', 'font_size': BODY_FONT}
+        ], 'font_size': BODY_FONT, 'space_after': 4},
+    ]
+    _add_rich_textbox(slide, x + Emu(150000), y + Emu(120000),
+                      col_w - Emu(300000), error_h - Emu(200000), error_paras)
+
+    y += error_h + SECTION_GAP
+
+    # --- Limitations & Ethical Considerations ---
+    hdr_h = _add_section_header(slide, x, y, col_w,
+                                 'Limitations & Ethical Considerations')
+    y += hdr_h
+
+    limits_h = Emu(3200000)
+    _add_section_body_bg(slide, x, y, col_w, limits_h)
+
+    limits_paras = [
+        {'text': 'Limitations:',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Closed-mode training only — may not generalize to '
