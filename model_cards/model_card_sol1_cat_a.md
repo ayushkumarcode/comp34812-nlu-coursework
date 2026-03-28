@@ -97,7 +97,7 @@ What makes this approach work is three things:
 - **Feature extraction:** ~15-30 minutes on CPU (27K pairs with spaCy processing)
 - **Model training:** ~2-5 minutes on CPU
 - **Total training time:** ~20-35 minutes
-- **Model size:** ~14.6MB (5 files: LightGBM model + scaler + TF-IDF vectorizers + feature names)
+- **Model size:** ~18.6MB (5 files: LightGBM model 9.6MB + scaler 18KB + TF-IDF vectorizer 8.0MB + cosine vectorizer 1.0MB + feature names 15KB)
 - **Inference speed:** ~100 pairs/second (the bottleneck is spaCy feature extraction)
 
 ## Evaluation
@@ -119,19 +119,19 @@ What makes this approach work is three things:
 
 | Metric | Value |
 |--------|-------|
-| macro_f1 | 0.7340 |
-| accuracy | 0.7340 |
-| MCC | 0.4690 |
+| macro_f1 | 0.7367 |
+| accuracy | 0.7367 |
+| MCC | 0.4745 |
 
 **Baseline comparison:**
 
 | Model | macro_f1 | vs Ours (gap) |
 |-------|----------|---------------|
-| SVM baseline | 0.5610 | +0.1730 |
-| LSTM baseline | 0.6226 | +0.1114 |
-| BERT baseline | 0.7854 | -0.0514 |
+| SVM baseline | 0.5610 | +0.1757 |
+| LSTM baseline | 0.6226 | +0.1141 |
+| BERT baseline | 0.7854 | -0.0487 |
 
-We significantly outperform both the SVM and LSTM baselines. It doesn't beat BERT, but we think it's still a strong result for a purely handcrafted-feature approach -- getting within 5 points of a fine-tuned transformer with no pre-trained representations at all shows that thoughtful stylometric analysis still has real value.
+We significantly outperform both the SVM and LSTM baselines. It doesn't beat BERT, but we think it's still a strong result for a purely handcrafted-feature approach -- getting within 5 points of a fine-tuned transformer with no pre-trained representations at all shows that thoughtful stylometric analysis still has real value. The v2 model with 736 features (adding FFT spectral analysis, Zipf-Mandelbrot fitting, Benford's law, and Hurst exponents) improved over the v1 model (695 features, F1=0.7340) by +0.0027.
 
 ## Technical Specifications
 
