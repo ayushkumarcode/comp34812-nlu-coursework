@@ -10,4 +10,5 @@ module load apps/binapps/conda/miniforge3/25.3.0
 conda activate nlu
 
 cd ~/scratch/nlu-project
-python scripts/retrain_av_a_novel_features.py
+export PYTHONUNBUFFERED=1
+python -u scripts/retrain_av_a_novel_features.py
