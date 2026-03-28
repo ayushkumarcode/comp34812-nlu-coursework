@@ -1,17 +1,13 @@
-"""
-COMP34812 — Solution 2 (Category B) Demo
-Group 34 — AV Track
-Adversarial Style-Content Disentanglement Network.
-"""
+"""cat B demo — siamese char-CNN + BiLSTM + GRL for AV (group 34)"""
 
 # %% [markdown]
-# # Solution 2 (Category B) — Demo / Inference
-# ## Siamese Char-CNN + BiLSTM + GRL for Authorship Verification
+# # Cat B — Demo / Inference
+# ## Siamese Char-CNN + BiLSTM + GRL
 #
-# This notebook demonstrates inference with our Category B solution.
-# The model uses a Siamese architecture with character-level CNN
-# encoders, BiLSTM sequence modeling, additive attention, and a
-# gradient reversal layer for adversarial topic debiasing.
+# this notebook runs inference with our cat B solution. it's a siamese
+# architecture that uses character-level CNN encoders, BiLSTM for
+# sequence modeling, additive attention, and a gradient reversal layer
+# to debias for topic.
 
 # %%
 # !pip install torch numpy pandas
