@@ -49,14 +49,14 @@ notebooks/
   training_cat_a.py/.ipynb   -- Cat A training walkthrough
   training_cat_b.py/.ipynb   -- Cat B training walkthrough
   evaluation.py/.ipynb       -- full evaluation + significance tests
-├── model_cards/
-│   ├── model_card_sol1_cat_a.md   # Model card for Solution 1
-│   └── model_card_sol2_cat_b.md   # Model card for Solution 2
-├── predictions/
-│   ├── Group_34_A.csv             # Solution 1 predictions
-│   └── Group_34_B.csv             # Solution 2 predictions
-├── scripts/                       # Slurm batch scripts for CSF3
-└── models/                        # Trained model files
+model_cards/
+  model_card_sol1_cat_a.md   -- model card for Sol 1
+  model_card_sol2_cat_b.md   -- model card for Sol 2
+predictions/
+  Group_34_A.csv             -- Sol 1 predictions
+  Group_34_B.csv             -- Sol 2 predictions
+scripts/                     -- Slurm job scripts (CSF3)
+models/                      -- saved weights + artifacts
 ```
 
 ## Reproduction
