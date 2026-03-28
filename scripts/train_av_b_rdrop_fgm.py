@@ -109,5 +109,20 @@ def train_epoch(model, dl, opt, device, bce_fn, topic_fn, fgm,
     f1 = f1_score(all_l, all_p, average='macro', zero_division=0)
     return total_loss / n, total_kl / n, total_adv / n, f1
 
+
+def evaluate(model, dl, device):
+    """Standard eval — single forward pass."""
+    model.eval()
+    all_p, all_pr, all_l = [], [], []
+    with torch.no_grad():
+        for b in dl:
+            c1, c2 = b['char_ids_1'].to(device), b['char_ids_2'].to(device)
+            logits, _ = model(c1, c2)
+            pr = torch.sigmoid(logits.squeeze(-1))
+            all_p.extend((pr > 0.5).long().cpu().numpy())
+            all_pr.extend(pr.cpu().numpy())
+            all_l.extend(b['label'].numpy())
+    return np.array(all_p), np.array(all_pr), np.array(all_l)
+
 if __name__ == '__main__':
     pass
