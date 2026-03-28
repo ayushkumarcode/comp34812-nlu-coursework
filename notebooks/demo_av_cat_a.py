@@ -1,17 +1,13 @@
-"""
-COMP34812 — Solution 1 (Category A) Demo
-Group 34 — AV Track
-LightGBM with 695 stylometric features.
-"""
+"""cat A demo — lightgbm with 695 stylometric features (group 34, av track)"""
 
 # %% [markdown]
-# # Solution 1 (Category A) — Demo / Inference
-# ## LightGBM Classifier with Comprehensive Stylometric Features
+# # Cat A — Demo / Inference
+# ## LightGBM with stylometric features
 #
-# This notebook demonstrates inference with our Category A solution for
-# Authorship Verification. The model uses ~695 handcrafted stylometric
-# features including novel syntactic complexity, writing rhythm, and
-# information-theoretic features, fed into a LightGBM classifier.
+# this notebook shows how to run inference with our cat A model for
+# authorship verification. it's a LightGBM classifier trained on ~695
+# handcrafted stylometric features — stuff like syntactic complexity,
+# writing rhythm, and information-theoretic measures.
 
 # %%
 # !pip install scikit-learn lightgbm numpy pandas joblib spacy
