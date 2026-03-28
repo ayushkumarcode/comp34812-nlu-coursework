@@ -55,16 +55,9 @@ class ScalarMix(nn.Module):
         return mixed
 
 
-# ============================================================
-# AV Cat C — Siamese DeBERTa
-# ============================================================
-
 class AVDeBERTaSiamese(nn.Module):
-    """Siamese DeBERTa for Authorship Verification.
-
-    Each text encoded independently through shared DeBERTa.
-    Layer-weighted [CLS] representations compared via MLP.
-    """
+    """Siamese DeBERTa for AV. Each text gets its own [CLS] embedding,
+    then we compare them with an MLP."""
 
     def __init__(self, model_name='microsoft/deberta-v3-base',
                  proj_dim=128, num_topics=10, grl_lambda=0.05):
@@ -77,10 +70,8 @@ class AVDeBERTaSiamese(nn.Module):
         hidden_size = self.encoder.config.hidden_size  # 768
         num_layers = self.encoder.config.num_hidden_layers  # 12
 
-        # Scalar mix of layers
         self.scalar_mix = ScalarMix(num_layers, style_bias=True)
 
-        # Style projection
         self.style_proj = nn.Sequential(
             nn.Linear(hidden_size, 256),
             nn.LayerNorm(256),
@@ -89,8 +80,6 @@ class AVDeBERTaSiamese(nn.Module):
             nn.Linear(256, proj_dim),
         )
 
-        # Comparison + classifier
-        # [v1, v2, |v1-v2|, v1*v2, cos_sim] = 4*proj_dim + 1
         comparison_dim = proj_dim * 4 + 1
         self.classifier = nn.Sequential(
             nn.Linear(comparison_dim, 256),
@@ -99,7 +88,6 @@ class AVDeBERTaSiamese(nn.Module):
             nn.Linear(256, 1),
         )
 
-        # Topic adversarial head
         self.grl = GRL(grl_lambda)
         self.topic_head = nn.Sequential(
             nn.Linear(proj_dim, 64),
