@@ -96,15 +96,12 @@ class AVDeBERTaSiamese(nn.Module):
         )
 
     def encode(self, input_ids, attention_mask):
-        """Encode a single text to style embedding."""
+        """Encode one text to a normalized style embedding."""
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
 
-        # Get all hidden states (skip embedding layer)
         hidden_states = outputs.hidden_states[1:]  # 12 layers
 
-        # Layer-weighted [CLS] representation
         cls_states = [h[:, 0, :] for h in hidden_states]  # each (batch, hidden)
-        # Stack for scalar mix
         stacked = torch.stack(cls_states, dim=0)  # (layers, batch, hidden)
         mixed_cls = sum(
             w * s for w, s in zip(
@@ -112,9 +109,8 @@ class AVDeBERTaSiamese(nn.Module):
             )
         )
 
-        # Project to style embedding
         style_emb = self.style_proj(mixed_cls)
-        style_emb = F.normalize(style_emb, p=2, dim=1)  # L2 normalize
+        style_emb = F.normalize(style_emb, p=2, dim=1)
 
         return style_emb
 
@@ -129,7 +125,6 @@ class AVDeBERTaSiamese(nn.Module):
         v1 = self.encode(input_ids_1, attention_mask_1)
         v2 = self.encode(input_ids_2, attention_mask_2)
 
-        # Comparison
         diff = torch.abs(v1 - v2)
         prod = v1 * v2
         cos_sim = (v1 * v2).sum(dim=1, keepdim=True)
@@ -137,7 +132,6 @@ class AVDeBERTaSiamese(nn.Module):
 
         logits = self.classifier(combined)
 
-        # Topic adversarial
         topic_input = self.grl(v1)
         topic_logits = self.topic_head(topic_input)
 
