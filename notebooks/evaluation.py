@@ -101,8 +101,28 @@ X_dev_scaled = sol1_scaler.transform(X_dev)
 y_pred_sol1 = sol1_model.predict(X_dev_scaled)
 print(f"Solution 1 predictions: {len(y_pred_sol1)}")
 
-# Sol 2 placeholder — replaced in next commit
-y_pred_sol2 = np.zeros(len(dev_df), dtype=int)
+# %% [markdown]
+# ### Solution 2 — Cat B (Char-CNN+BiLSTM+GRL) dev inference
+
+# %%
+# Generate Sol 2 dev predictions: char encode, load model, batch inference
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+sol2_model = AVCatBModel(
+    vocab_size=VOCAB_SIZE, char_emb_dim=32,
+    cnn_filters=128, lstm_hidden=128,
+    proj_dim=128, num_topics=10,
+).to(device)
+sol2_model.load_state_dict(torch.load(
+    'models/av_cat_b_best.pt', map_location=device, weights_only=True))
+sol2_model.eval()
+
+max_len = 1500
+enc_1 = [char_encode(t, max_len) for t in dev_df['text_1']]
+enc_2 = [char_encode(t, max_len) for t in dev_df['text_2']]
+ids_1 = torch.tensor(np.array(enc_1), dtype=torch.long)
+ids_2 = torch.tensor(np.array(enc_2), dtype=torch.long)
+# Inference loop in next cell
+y_pred_sol2 = np.zeros(len(dev_df), dtype=int)  # placeholder
 print(f"Solution 2 predictions: {len(y_pred_sol2)}")
 
 # %% [markdown]
