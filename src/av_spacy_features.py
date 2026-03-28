@@ -63,10 +63,7 @@ _TOP_POS_BIGRAMS = [
 
 
 def syntactic_complexity_features(doc):
-    """Extract syntactic complexity features from a spaCy Doc.
-
-    Group 7 — NOVEL for AV. 10 features.
-    """
+    """Syntactic complexity features (group 7, novel). 10 features total."""
     feats = {}
     sents = list(doc.sents)
     n_sents = max(len(sents), 1)
@@ -145,7 +142,7 @@ def syntactic_complexity_features(doc):
 
 
 def _tree_depth(token):
-    """Recursively compute depth of dependency subtree."""
+    """Depth of a dependency subtree (recursive)."""
     children = list(token.children)
     if not children:
         return 0
@@ -153,15 +150,7 @@ def _tree_depth(token):
 
 
 def extract_spacy_features(text, nlp):
-    """Extract all spaCy-dependent features for a single text.
-
-    Args:
-        text: Raw text string.
-        nlp: spaCy Language model.
-
-    Returns:
-        Dict of feature name -> float value. ~55 features.
-    """
+    """All spaCy features for one text (~55 features total)."""
     doc = nlp(text)
     feats = {}
     feats.update(pos_features(doc))
@@ -170,16 +159,7 @@ def extract_spacy_features(text, nlp):
 
 
 def batch_extract_spacy_features(texts, nlp, batch_size=256):
-    """Extract spaCy features for a batch of texts.
-
-    Args:
-        texts: List of text strings.
-        nlp: spaCy Language model.
-        batch_size: Batch size for spaCy.pipe().
-
-    Returns:
-        List of dicts, one per text.
-    """
+    """Batch version of extract_spacy_features using spaCy.pipe()."""
     results = []
     for doc in nlp.pipe(texts, batch_size=batch_size):
         feats = {}
