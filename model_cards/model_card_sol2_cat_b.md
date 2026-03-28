@@ -148,7 +148,7 @@ We beat both the SVM and LSTM baselines by a solid margin. It doesn't quite reac
   1. Adversarial style-content disentanglement via GRL for AV -- we adapted Ganin & Lempitsky (2015)'s domain adaptation idea to the authorship verification setting
   2. Careful GRL scheduling (slow lambda ramp over 20 epochs, delayed topic loss from epoch 15) -- we found this was essential to prevent training instability
   3. Stylistic invariance training via character perturbation augmentation
-  4. Interpretable attention weights (XAI contribution via Bahdanau attention)
+  4. Interpretable attention weights as an XAI contribution via Bahdanau attention
 
 - **Design decisions:**
   - We tried contrastive loss in earlier versions (v1, v2) but ended up dropping it in the final model (v3) because BCE + topic adversarial loss alone actually performed better
