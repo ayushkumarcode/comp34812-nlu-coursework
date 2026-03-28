@@ -432,3 +432,31 @@ def _add_rich_textbox(slide, left, top, width, height, paragraphs_data,
                     run.font.italic = True
         else:
             p.text = text
+            p.font.size = pdata.get('font_size', BODY_FONT)
+            p.font.color.rgb = pdata.get('font_color', DARK)
+            p.font.bold = pdata.get('bold', False)
+            p.font.name = pdata.get('font_name', font_name)
+            if pdata.get('italic', False):
+                p.font.italic = True
+
+        p.alignment = pdata.get('alignment', PP_ALIGN.LEFT)
+        p.space_after = Pt(pdata.get('space_after', 4))
+        p.space_before = Pt(pdata.get('space_before', 0))
+        ls = pdata.get('line_spacing', 1.15)
+        if ls:
+            p.line_spacing = ls
+
+        # Bullet / indent
+        if pdata.get('bullet', False):
+            p.level = pdata.get('level', 0)
+            pf = p._pPr
+            if pf is None:
+                from pptx.oxml.ns import qn
+                pf = p._p.get_or_add_pPr()
+            # Set indent for bullet effect
+            from lxml import etree
+            from pptx.oxml.ns import qn
+            pf.set(qn('indent'), str(Emu(-228600)))
+            pf.set(qn('marL'), str(Emu(457200 * (pdata.get('level', 0) + 1))))
+
+    return txBox
