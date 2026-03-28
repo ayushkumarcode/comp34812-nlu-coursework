@@ -10,12 +10,14 @@ rm -rf submission
 mkdir -p submission
 
 # Prediction files
-cp predictions/Group_34_A.csv submission/
-cp predictions/Group_34_B.csv submission/
+mkdir -p submission/predictions
+cp predictions/Group_34_A.csv submission/predictions/
+cp predictions/Group_34_B.csv submission/predictions/
 
 # Model cards
-cp model_cards/model_card_sol1_cat_a.md submission/
-cp model_cards/model_card_sol2_cat_b.md submission/
+mkdir -p submission/model_cards
+cp model_cards/model_card_sol1_cat_a.md submission/model_cards/
+cp model_cards/model_card_sol2_cat_b.md submission/model_cards/
 
 # Demo notebooks (.py and .ipynb)
 mkdir -p submission/notebooks
