@@ -208,3 +208,31 @@ def generate_confusion_matrices():
                 facecolor='white', edgecolor='none')
     plt.close()
     print(f"  Saved confusion matrices to {path}")
+    return path
+
+
+def generate_architecture_diagram():
+    """Generate a visual architecture diagram for Sol 2 (Cat B)."""
+    fig, ax = plt.subplots(figsize=(14, 10))
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+    ax.axis('off')
+
+    # Title
+    ax.text(5, 9.6, 'Solution 2: Adversarial Style-Content Disentanglement',
+            ha='center', fontsize=22, fontweight='bold', color='#1B3A5C')
+
+    # Helper to draw a box
+    def draw_box(x, y, w, h, text, color='#2E86AB', text_color='white',
+                 fontsize=14, alpha=1.0):
+        rect = mpatches.FancyBboxPatch(
+            (x - w/2, y - h/2), w, h,
+            boxstyle='round,pad=0.1',
+            facecolor=color, edgecolor='#1B3A5C',
+            linewidth=2, alpha=alpha)
+        ax.add_patch(rect)
+        ax.text(x, y, text, ha='center', va='center',
+                fontsize=fontsize, fontweight='bold', color=text_color)
+
+    # Input layer
+    draw_box(2.5, 8.5, 2.8, 0.8, 'Text 1', '#E8F0FE', '#1B3A5C', 16)
