@@ -52,13 +52,13 @@ model.eval()
 print("Model loaded.")
 
 # %% [markdown]
-# ## 2. Load Test Data
+# ## 2. Load test data
 #
-# Text pairs are encoded at the character level (max 1500 chars).
-# No augmentation is applied during inference.
+# Text pairs get encoded at character level (max 1500 chars).
+# No augmentation at inference time.
 
 # %%
-# Load data: use INPUT_FILE if set, otherwise default to dev split.
+# use INPUT_FILE if provided, otherwise default to dev split
 if INPUT_FILE is not None:
     test_df = pd.read_csv(INPUT_FILE, quotechar='"', engine='python')
     test_df['text_1'] = test_df['text_1'].apply(
@@ -69,7 +69,7 @@ else:
     test_df = load_av_data(split='dev')
 print(f"Test data: {len(test_df)} pairs")
 
-# Encode characters directly (no label column required)
+# char encode directly — don't need labels here
 max_len = 1500
 encoded_1 = [char_encode(t, max_len) for t in test_df['text_1']]
 encoded_2 = [char_encode(t, max_len) for t in test_df['text_2']]
@@ -77,10 +77,10 @@ ids_1 = torch.tensor(np.array(encoded_1), dtype=torch.long)
 ids_2 = torch.tensor(np.array(encoded_2), dtype=torch.long)
 
 # %% [markdown]
-# ## 3. Generate Predictions
+# ## 3. Generate predictions
 #
-# For each batch, we run the forward pass and apply sigmoid to get
-# probabilities, then threshold at 0.5 for binary predictions.
+# Forward pass in batches, sigmoid to get probabilities, then
+# threshold at 0.5 for the binary prediction.
 
 # %%
 batch_size = 64
@@ -100,7 +100,7 @@ print(f"Predictions: {len(predictions)}")
 print(f"Class distribution: {np.bincount(predictions)}")
 
 # %% [markdown]
-# ## 4. Save Predictions
+# ## 4. Save predictions
 
 # %%
 save_predictions(predictions, 'predictions/Group_34_B.csv')
