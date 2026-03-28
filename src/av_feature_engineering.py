@@ -297,11 +297,7 @@ def writing_rhythm_features(text):
 # -- group 9: information-theoretic features (5) -- NOVEL
 
 def info_theoretic_features(text):
-    """Extract information-theoretic features.
-
-    Returns:
-        Dict with 5 information-theoretic features.
-    """
+    """Info-theoretic features: char bigram MI, entropy rate, conditional entropy."""
     feats = {}
 
     if len(text) < 10:
@@ -385,11 +381,7 @@ def info_theoretic_features(text):
 # -- pairwise features (14) --
 
 def pairwise_features(text_1, text_2):
-    """Compute pairwise similarity/distance features between two texts.
-
-    Returns:
-        Dict with ~14 pairwise features.
-    """
+    """Pairwise similarity/distance features between two texts (~14 features)."""
     feats = {}
 
     # NCD with gzip
@@ -446,7 +438,7 @@ def pairwise_features(text_1, text_2):
 
 
 def _ncd(text_1, text_2, compress_fn):
-    """Normalized Compression Distance."""
+    """NCD between two texts using the given compressor."""
     b1 = text_1.encode('utf-8')
     b2 = text_2.encode('utf-8')
     c1 = len(compress_fn(b1))
