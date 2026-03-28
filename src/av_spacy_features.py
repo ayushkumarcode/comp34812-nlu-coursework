@@ -1,13 +1,12 @@
 """
-AV Feature Engineering — spaCy-dependent features.
-Groups 5 (POS tags) and 7 (Syntactic complexity).
+spaCy-based features: POS tag distributions (group 5) and
+syntactic complexity measures (group 7).
 """
 
 import numpy as np
 from collections import Counter
 
 
-# Universal POS tags
 UPOS_TAGS = [
     'ADJ', 'ADP', 'ADV', 'AUX', 'CCONJ', 'DET', 'INTJ', 'NOUN',
     'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X'
@@ -15,7 +14,7 @@ UPOS_TAGS = [
 
 
 def get_spacy_model():
-    """Load and return spaCy model. Cached after first call."""
+    """Load spaCy model, falls back to sm if md isn't installed."""
     import spacy
     try:
         nlp = spacy.load('en_core_web_md', disable=['ner'])
@@ -25,14 +24,7 @@ def get_spacy_model():
 
 
 def pos_features(doc):
-    """Extract POS tag frequency features from a spaCy Doc.
-
-    Args:
-        doc: spaCy Doc object.
-
-    Returns:
-        Dict with 17 UPOS frequencies + 28 POS bigram features = 45 features.
-    """
+    """POS tag frequencies (17 UPOS) + POS bigram frequencies (28) = 45 features."""
     feats = {}
     tokens = [t for t in doc if not t.is_space]
     n_tokens = max(len(tokens), 1)
