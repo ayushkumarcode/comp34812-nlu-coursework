@@ -1,13 +1,14 @@
-"""cat A demo — lightgbm with 695 stylometric features (group 34, av track)"""
+"""cat A demo — lightgbm with 736 stylometric features (group 34, av track)"""
 
 # %% [markdown]
 # # Cat A — Demo / Inference
 # ## LightGBM with stylometric features
 #
 # this notebook shows how to run inference with our cat A model for
-# authorship verification. it's a LightGBM classifier trained on ~695
+# authorship verification. it's a LightGBM classifier trained on ~736
 # handcrafted stylometric features — stuff like syntactic complexity,
-# writing rhythm, and information-theoretic measures.
+# writing rhythm, information-theoretic measures, FFT spectral analysis,
+# zipf-mandelbrot law deviation, benford's law, and hurst exponents.
 
 # %%
 # !pip install scikit-learn lightgbm numpy pandas joblib spacy
@@ -33,7 +34,7 @@ INPUT_FILE = None  # e.g. 'test_data_av.csv'
 # ## 1. Load the trained model
 #
 # We're loading the pre-trained LightGBM, the scaler, and the feature
-# name list. The model was trained on 27,643 text pairs with 695
+# name list. The model was trained on 27,643 text pairs with 736
 # features per pair.
 
 # %%
@@ -46,7 +47,7 @@ print(f"Model loaded. Features: {len(feature_names)}")
 # ## 2. Load data and extract features
 #
 # We load the dev set (swap in test data path for final submission)
-# and extract all 695 features using AVFeatureExtractor. This covers
+# and extract all 736 features using AVFeatureExtractor. This covers
 # TF-IDF+SVD, spaCy POS/syntactic stuff, and our novel feature groups.
 
 # %%
