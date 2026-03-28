@@ -1,19 +1,7 @@
 """
-Authorship Verification (AV) Feature Engineering — Category A.
-Comprehensive stylometric feature extraction for diff-vector stacking ensemble.
-
-Feature Groups:
-  1. Lexical (30)
-  2. Character-level (56)
-  3. Char n-gram TF-IDF + SVD (100)
-  4. Function words (150)
-  5. POS tags (45)
-  6. Structural (15)
-  7. Syntactic complexity (10) — NOVEL
-  8. Writing rhythm (6) — NOVEL
-  9. Information-theoretic (5) — NOVEL
-  + Pairwise features (14)
-  + Topic-robustness style-only diff-vector
+AV Cat A feature engineering -- the stylometric feature extraction.
+9 feature groups total, ~695 features per text pair when combined with
+pairwise measures and diff-vectors. Groups 7-9 are our novel contributions.
 """
 
 import math
