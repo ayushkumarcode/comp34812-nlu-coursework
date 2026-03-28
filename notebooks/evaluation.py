@@ -49,33 +49,31 @@ plt.style.use('seaborn-v0_8-whitegrid')
 sns.set_palette('Set2')
 
 # %% [markdown]
-# ## 1. Load Predictions and Ground Truth
+# ## 1. Load predictions and ground truth
 
 # %%
 TASK = 'av'
 
-# NOTE: predictions/Group_34_A.csv and Group_34_B.csv contain TEST predictions
-# (5985 rows). Evaluation here is performed on DEV data by running inference
-# directly, so that predictions align with dev ground truth labels.
+# NOTE: predictions/Group_34_A.csv and Group_34_B.csv have TEST predictions
+# (5985 rows). We evaluate on DEV data here by running inference directly,
+# so predictions line up with dev ground truth.
 
-# Load ground truth
 y_true = np.array(load_solution_labels(task=TASK))
 print(f"Ground truth: {len(y_true)} samples")
 print(f"Class distribution: {np.bincount(y_true)}")
 
-# Load baseline predictions
 baselines = load_baseline_predictions(task=TASK)
 print(f"Baselines loaded: {list(baselines.keys())}")
 
-# Load dev data once (used by both solutions)
+# load dev data once — both solutions need it
 dev_df = load_av_data(split='dev')
 print(f"Dev data: {len(dev_df)} pairs")
 
 # %% [markdown]
-# ### Solution 1 — Cat A (LightGBM) dev inference
+# ### Sol 1 — Cat A (LightGBM) dev inference
 
 # %%
-# Generate Sol 1 dev predictions: load saved model artifacts, extract features
+# run sol 1 on dev: load model artifacts, extract features, predict
 sol1_scaler = joblib.load('models/av_cat_a_scaler.joblib')
 sol1_model = joblib.load('models/av_cat_a_lgbm.joblib')
 sol1_feat_names = joblib.load('models/av_cat_a_feature_names.joblib')
@@ -89,13 +87,13 @@ extractor._feature_names = sol1_feat_names
 X_dev, _ = extractor.transform(dev_df)
 X_dev_scaled = sol1_scaler.transform(X_dev)
 y_pred_sol1 = sol1_model.predict(X_dev_scaled)
-print(f"Solution 1 predictions: {len(y_pred_sol1)}")
+print(f"Sol 1 predictions: {len(y_pred_sol1)}")
 
 # %% [markdown]
-# ### Solution 2 — Cat B (Char-CNN+BiLSTM+GRL) dev inference
+# ### Sol 2 — Cat B (Char-CNN+BiLSTM+GRL) dev inference
 
 # %%
-# Generate Sol 2 dev predictions: char encode, load model, batch inference
+# run sol 2 on dev: char encode, load model, batch inference
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 sol2_model = AVCatBModel(
     vocab_size=VOCAB_SIZE, char_emb_dim=32,
