@@ -908,3 +908,31 @@ def create_poster():
     _add_section_body_bg(slide, x, y, col_w, f1_chart_h)
 
     if f1_chart_path.exists():
+        img_margin = Emu(200000)
+        img_w = col_w - 2 * img_margin
+        img_h = Emu(4800000)
+        slide.shapes.add_picture(str(f1_chart_path),
+                                  x + img_margin, y + Emu(300000),
+                                  img_w, img_h)
+
+    y += f1_chart_h
+
+    # =====================================================
+    # COLUMN 4: Confusion Matrices + Error Analysis + Limitations + References
+    # =====================================================
+    x = col_x[3]
+    y = y_start
+
+    # --- Confusion Matrices ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Confusion Matrices')
+    y += hdr_h
+
+    cm_h = Emu(5200000)
+    _add_section_body_bg(slide, x, y, col_w, cm_h)
+
+    if cm_path.exists():
+        img_margin = Emu(150000)
+        img_w = col_w - 2 * img_margin
+        img_h = Emu(4600000)
+        slide.shapes.add_picture(str(cm_path),
+                                  x + img_margin, y + Emu(300000),
