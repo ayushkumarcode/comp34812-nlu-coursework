@@ -99,13 +99,10 @@ def load_nli_data(split='train'):
 
 
 def load_baseline_predictions(task='av'):
-    """Load baseline predictions for McNemar's test.
+    """Load the provided baseline predictions (SVM/LSTM/BERT) for McNemar's test.
 
     Args:
         task: 'av' or 'nli'.
-
-    Returns:
-        Dict with keys 'reference', 'SVM', 'LSTM', 'BERT' mapping to numpy arrays.
     """
     path = AV_BASELINE_PATH if task == 'av' else NLI_BASELINE_PATH
     df = pd.read_csv(path, index_col=0)
@@ -113,13 +110,10 @@ def load_baseline_predictions(task='av'):
 
 
 def load_solution_labels(task='av'):
-    """Load ground truth labels from the scorer's reference data.
+    """Grab ground truth labels from the scorer's reference files.
 
     Args:
         task: 'av' or 'nli'.
-
-    Returns:
-        List of integer labels.
     """
     ref_dir = SCORER_ROOT / "local_scorer" / "reference_data"
     if task == 'av':
@@ -140,11 +134,11 @@ def load_solution_labels(task='av'):
 
 
 def save_predictions(predictions, filepath):
-    """Save predictions in the expected format (single column of integers).
+    """Write predictions to a file, one int per line.
 
     Args:
-        predictions: List or array of integer predictions (0 or 1).
-        filepath: Path to save the CSV file.
+        predictions: list/array of 0s and 1s.
+        filepath: where to save it.
     """
     filepath = Path(filepath)
     with open(filepath, 'w') as f:
@@ -153,10 +147,10 @@ def save_predictions(predictions, filepath):
 
 
 def get_data_stats(df, task='av'):
-    """Print summary statistics for a dataset.
+    """Print some quick summary stats (label distribution, word counts, etc).
 
     Args:
-        df: DataFrame loaded from load_av_data or load_nli_data.
+        df: a DataFrame from load_av_data or load_nli_data.
         task: 'av' or 'nli'.
     """
     print(f"Dataset shape: {df.shape}")
