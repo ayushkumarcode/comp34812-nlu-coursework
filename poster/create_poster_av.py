@@ -292,3 +292,31 @@ def generate_architecture_diagram():
     # GRL explanation
     ax.text(7.2, 0.1, 'Gradient Reversal Layer\n(Ganin & Lempitsky 2015)',
             ha='center', fontsize=11, color='#999999', style='italic')
+
+    plt.tight_layout()
+    path = POSTER_DIR / 'arch_diagram_av.png'
+    plt.savefig(str(path), dpi=250, bbox_inches='tight',
+                facecolor='white', edgecolor='none')
+    plt.close()
+    print(f"  Saved architecture diagram to {path}")
+    return path
+
+
+def generate_feature_groups_chart():
+    """Generate a horizontal bar chart showing feature group breakdown."""
+    groups = [
+        'TF-IDF + SVD', 'Function Words', 'Character N-gram',
+        'POS Tags', 'Lexical Richness', 'Structural',
+        'Syntactic Complexity', 'Writing Rhythm', 'Info-Theoretic'
+    ]
+    counts = [100, 150, 56, 45, 30, 15, 10, 6, 5]
+
+    # Categorize: standard vs novel
+    colors = ['#2E86AB'] * 6 + ['#E67E22'] * 3
+
+    fig, ax = plt.subplots(figsize=(12, 7))
+    y_pos = np.arange(len(groups))
+    bars = ax.barh(y_pos, counts, color=colors, edgecolor='#1B3A5C',
+                   linewidth=1, height=0.65, zorder=3)
+
+    # Value labels
