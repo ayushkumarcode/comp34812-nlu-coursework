@@ -1,19 +1,17 @@
 """
-COMP34812 — Solution 1 (Category A) Training Notebook
-Group 34
+cat A training — lightgbm with ~695 stylometric features for AV (group 34).
 
-LightGBM classifier with comprehensive stylometric features for Authorship Verification.
-
-To convert: python scripts/convert_to_ipynb.py notebooks/training_cat_a.py
+to convert: python scripts/convert_to_ipynb.py notebooks/training_cat_a.py
 """
 
 # %% [markdown]
-# # Solution 1 (Category A) — Training
-# ## LightGBM with Comprehensive Stylometric Features
+# # Cat A — Training
+# ## LightGBM with stylometric features
 #
-# This notebook trains our Category A solution: a LightGBM gradient boosting
-# classifier using ~695 stylometric features per text pair, including novel
-# syntactic complexity, writing rhythm, and information-theoretic features.
+# this notebook trains our cat A solution: a LightGBM gradient boosting
+# classifier using ~695 stylometric features per text pair. we've got
+# novel features in there too — syntactic complexity, writing rhythm,
+# and information-theoretic stuff.
 
 # %%
 # !pip install scikit-learn lightgbm spacy numpy pandas tqdm joblib

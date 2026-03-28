@@ -1,6 +1,6 @@
 """
-Data loading and preprocessing utilities for COMP34812 NLU Coursework.
-Supports both AV (Authorship Verification) and NLI (Natural Language Inference) tracks.
+Data loading and preprocessing for COMP34812.
+Handles both AV and NLI tracks.
 """
 
 import html
@@ -10,23 +10,19 @@ from pathlib import Path
 
 import pandas as pd
 
-# Project root paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_ROOT = PROJECT_ROOT / "training_extracted" / "training_data"
 SCORER_ROOT = PROJECT_ROOT / "baseline_extracted" / "nlu_bundle-feature-unified-local-scorer"
 BASELINE_ROOT = SCORER_ROOT / "baseline"
 
-# Data paths
 AV_TRAIN_PATH = DATA_ROOT / "AV" / "train.csv"
 AV_DEV_PATH = DATA_ROOT / "AV" / "dev.csv"
 NLI_TRAIN_PATH = DATA_ROOT / "NLI" / "train.csv"
 NLI_DEV_PATH = DATA_ROOT / "NLI" / "dev.csv"
 
-# Baseline prediction paths
 AV_BASELINE_PATH = BASELINE_ROOT / "25_DEV_AV.csv"
 NLI_BASELINE_PATH = BASELINE_ROOT / "25_DEV_NLI.csv"
 
-# URL regex pattern
 URL_PATTERN = re.compile(
     r'https?://\S+|www\.\S+|ftp://\S+', re.IGNORECASE
 )
