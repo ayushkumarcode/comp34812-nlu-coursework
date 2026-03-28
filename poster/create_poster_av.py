@@ -460,3 +460,31 @@ def _add_rich_textbox(slide, left, top, width, height, paragraphs_data,
             pf.set(qn('marL'), str(Emu(457200 * (pdata.get('level', 0) + 1))))
 
     return txBox
+
+
+def _add_section_header(slide, left, top, width, title, height=None):
+    """Add a styled section header bar."""
+    h = height or Emu(700000)
+
+    # Header background
+    shape = _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
+                                  left, top, width, h, TEAL)
+
+    # Accent line on left
+    accent_w = Emu(80000)
+    _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
+                          left, top, accent_w, h, DARK_TEAL)
+
+    # Header text
+    _add_textbox(slide, left + Emu(200000), top + Emu(100000),
+                 width - Emu(300000), h - Emu(200000),
+                 title, HEADER_FONT, WHITE, bold=True)
+
+    return h
+
+
+def _add_section_body_bg(slide, left, top, width, height):
+    """Add a light background for section body content."""
+    shape = _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
+                                  left, top, width, height,
+                                  LIGHT_BG, BORDER_COLOR, Pt(1))
