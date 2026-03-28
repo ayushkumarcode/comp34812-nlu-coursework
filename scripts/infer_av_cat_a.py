@@ -26,3 +26,20 @@ def main():
     # Load test data
     print("\n[1/5] Loading test data...", flush=True)
     t0 = time.time()
+    df = pd.read_csv(test_path, quotechar='"', engine='python')
+    df['text_1'] = df['text_1'].apply(lambda x: clean_text(x, lowercase=False))
+    df['text_2'] = df['text_2'].apply(lambda x: clean_text(x, lowercase=False))
+    print(f"  Loaded {len(df)} pairs in {time.time()-t0:.1f}s", flush=True)
+
+    # Load pre-fitted components
+    print("\n[2/5] Loading model artifacts...", flush=True)
+    lgbm = joblib.load(model_dir / 'av_cat_a_lgbm.joblib')
+    scaler = joblib.load(model_dir / 'av_cat_a_scaler.joblib')
+    saved_names = joblib.load(model_dir / 'av_cat_a_feature_names.joblib')
+    saved_tfidf = joblib.load(model_dir / 'av_cat_a_tfidf.joblib')
+    saved_cosine = joblib.load(model_dir / 'av_cat_a_cosine.joblib')
+    print(f"  Feature count: {len(saved_names)}", flush=True)
+
+    # Extract features using pre-fitted TF-IDF and cosine
+    print("\n[3/5] Extracting features...", flush=True)
+    t0 = time.time()
