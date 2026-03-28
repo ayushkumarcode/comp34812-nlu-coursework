@@ -1,11 +1,6 @@
 """
-AV Category B — Training script (v3, final).
-Adversarial Style-Content Disentanglement Network.
-Loss: BCE + Topic Adversarial (NO contrastive loss).
-Optimizer: AdamW, lr=2e-4, weight_decay=1e-4.
-Scheduler: CosineAnnealingWarmRestarts, T_0=30, T_mult=2.
-GRL: lambda ramps 0->0.05 over epochs 1-20. Topic weight 0.02 from epoch 15.
-Patience: 20, max_epochs: 120.
+Cat B training script. BCE + topic adversarial loss, no contrastive.
+AdamW lr=2e-4, cosine scheduler, GRL lambda ramps over first 20 epochs.
 """
 
 import sys
@@ -32,7 +27,7 @@ from src.scorer import compute_all_metrics, print_metrics
 
 def train_epoch(model, dataloader, optimizer, device,
                 bce_loss_fn, topic_loss_fn, topic_weight=0.02):
-    """Train for one epoch with BCE + optional topic adversarial loss."""
+    """One training epoch. Returns (avg_loss, macro_f1)."""
     model.train()
     total_loss = 0
     all_preds = []
@@ -49,10 +44,8 @@ def train_epoch(model, dataloader, optimizer, device,
             char_1, char_2, return_embeddings=True
         )
 
-        # BCE loss (primary)
         loss = bce_loss_fn(logits.squeeze(-1), labels)
 
-        # Topic adversarial loss (secondary)
         if topic_weight > 0 and 'topic' in batch:
             topic_labels = batch['topic'].to(device)
             loss = loss + topic_weight * topic_loss_fn(topic_logits, topic_labels)
@@ -72,7 +65,7 @@ def train_epoch(model, dataloader, optimizer, device,
 
 
 def evaluate(model, dataloader, device):
-    """Evaluate model on a dataset."""
+    """Run eval, return (preds, probs, labels)."""
     model.eval()
     all_preds = []
     all_probs = []
