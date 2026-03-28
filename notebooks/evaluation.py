@@ -1,26 +1,17 @@
 """
-COMP34812 NLU Coursework — Comprehensive Evaluation
-Group 34
+full evaluation suite for both AV solutions (group 34).
+confusion matrices, per-class metrics, mcnemar's, bootstrap CIs,
+error analysis, ablation studies. all plots include written interpretation.
 
-This script generates the full evaluation suite for both submitted solutions:
-- Confusion matrices
-- Per-class metrics
-- McNemar's test vs baselines
-- Bootstrap confidence intervals
-- Error analysis by text properties
-- Ablation studies
-
-All plots include written interpretation (3-5 sentences).
-
-To convert to notebook: python scripts/convert_to_ipynb.py notebooks/evaluation.py
+to convert: python scripts/convert_to_ipynb.py notebooks/evaluation.py
 """
 
 # %% [markdown]
-# # COMP34812 NLU Coursework — Evaluation
-# ## Group 34 — Authorship Verification Track
+# # Evaluation — Authorship Verification
+# ## Group 34
 #
-# This notebook provides comprehensive evaluation of our two submitted solutions,
-# going significantly beyond Codabench benchmarking.
+# this notebook has all the evaluation for our two submitted solutions,
+# going well beyond what Codabench gives us.
 
 # %%
 import sys
