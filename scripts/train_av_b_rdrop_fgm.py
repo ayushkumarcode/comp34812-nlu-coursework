@@ -147,6 +147,30 @@ def main():
     train_topic = topic_all[:len(train_df)]
     num_topics = int(topic_all.max()) + 1
 
+    print("\n[3/5] Creating datasets...")
+    train_ds = AVCharDataset(train_df, max_len=1500, augment=True,
+                             topic_labels=train_topic)
+    dev_ds = AVCharDataset(dev_df, max_len=1500, augment=False, topic_labels=None)
+    dev_ds.labels = np.array(dev_labels, dtype=np.float32)
+    train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True,
+                          num_workers=4, pin_memory=True)
+    dev_dl = DataLoader(dev_ds, batch_size=BATCH_SIZE, shuffle=False,
+                        num_workers=4, pin_memory=True)
+
+    print("\n[4/5] Building model...")
+    model = AVCatBModel(
+        vocab_size=VOCAB_SIZE, char_emb_dim=32, cnn_filters=128,
+        lstm_hidden=128, proj_dim=128, num_topics=num_topics,
+        grl_lambda=0.0,
+    ).to(device)
+    print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")
+
+    bce_fn = nn.BCEWithLogitsLoss()
+    topic_fn = nn.CrossEntropyLoss()
+    fgm = FGM(model, epsilon=FGM_EPSILON, emb_name='char_emb')
+    opt = AdamW(model.parameters(), lr=LR, weight_decay=1e-4)
+    sched = CosineAnnealingWarmRestarts(opt, T_0=30, T_mult=2)
+
 
 if __name__ == '__main__':
     main()
