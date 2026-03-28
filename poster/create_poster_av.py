@@ -656,3 +656,31 @@ def create_poster():
     x = col_x[1]
     y = y_start
 
+    # --- Solution 1 ---
+    hdr_h = _add_section_header(slide, x, y, col_w, 'Solution 1: Category A — Stylometric Feature Ensemble')
+    y += hdr_h
+
+    sol1_h = Emu(7000000)
+    _add_section_body_bg(slide, x, y, col_w, sol1_h)
+
+    sol1_paras = [
+        {'text': '695 handcrafted features across 9 groups:',
+         'font_size': BODY_FONT, 'bold': True, 'space_after': 10},
+        # Standard features
+        {'text': 'Standard Features (396):',
+         'font_size': BODY_FONT, 'bold': True, 'font_color': TEAL, 'space_after': 4},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Lexical richness (30)', 'font_size': BODY_FONT_SM},
+            {'text': ' — TTR, Yule\'s K, hapax ratios', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'Character n-grams (56)', 'font_size': BODY_FONT_SM},
+            {'text': ' — 2-4 gram frequency profiles', 'font_size': SMALL_FONT,
+             'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': '   \u2022 ', 'font_size': BODY_FONT_SM},
+            {'text': 'TF-IDF + SVD (100)', 'font_size': BODY_FONT_SM},
