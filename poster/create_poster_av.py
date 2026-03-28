@@ -516,3 +516,31 @@ def create_poster():
 
     # Background
     bg = slide.background
+    fill = bg.fill
+    fill.solid()
+    fill.fore_color.rgb = RGBColor(0xF8, 0xF9, 0xFB)
+
+    # =====================================================
+    # TITLE BANNER
+    # =====================================================
+    title_h = Emu(3200000)  # ~1.27 inches
+
+    # Main title background
+    _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
+                          0, 0, SLIDE_W, title_h, NAVY)
+
+    # Accent stripe at bottom of title
+    _add_shape_with_fill(slide, MSO_SHAPE.RECTANGLE,
+                          0, title_h - Emu(80000), SLIDE_W, Emu(80000), TEAL)
+
+    # Title text
+    _add_textbox(slide, Emu(800000), Emu(300000),
+                 SLIDE_W - Emu(1600000), Emu(1500000),
+                 'Authorship Verification: A Multi-Strategy Approach Combining\n'
+                 'Stylometric Feature Engineering with Adversarial Neural Disentanglement',
+                 TITLE_FONT, WHITE, bold=True, alignment=PP_ALIGN.CENTER,
+                 line_spacing=1.1)
+
+    # Subtitle
+    _add_textbox(slide, Emu(800000), Emu(2000000),
+                 SLIDE_W - Emu(1600000), Emu(800000),
