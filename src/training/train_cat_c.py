@@ -87,7 +87,7 @@ class NLIDeBERTaDataset(Dataset):
 
 
 def train_av(args):
-    """Train AV Cat C — Siamese DeBERTa."""
+    """Train AV siamese DeBERTa with contrastive loss."""
     from transformers import AutoTokenizer
     from src.models.cat_c_deberta import AVDeBERTaSiamese
 
@@ -96,7 +96,6 @@ def train_av(args):
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name, use_fast=False)
 
-    # Load data
     train_df = load_av_data(split='train')
     dev_df = load_av_data(split='dev')
     dev_labels = load_solution_labels(task='av')
@@ -112,7 +111,6 @@ def train_av(args):
     bce_loss = nn.BCEWithLogitsLoss()
     contrastive_loss = nn.CosineEmbeddingLoss(margin=0.3)
 
-    # Optimizer with discriminative LR
     param_groups = [
         {'params': model.encoder.parameters(), 'lr': 2e-5},
         {'params': model.scalar_mix.parameters(), 'lr': 1e-3},
@@ -154,7 +152,6 @@ def train_av(args):
             scaler.update()
             total_loss += loss.item()
 
-        # Evaluate
         model.eval()
         preds, labels_all = [], []
         with torch.no_grad():
@@ -182,7 +179,6 @@ def train_av(args):
                 print(f"Early stopping at epoch {epoch}")
                 break
 
-    # Final evaluation with best model
     print(f"\nBest AV Cat C dev F1: {best_f1:.4f}")
     model.load_state_dict(torch.load(save_dir / 'av_cat_c_best.pt', weights_only=True))
     model.eval()
@@ -214,7 +210,7 @@ def train_av(args):
 
 
 def train_nli(args):
-    """Train NLI Cat C — Cross-Encoder DeBERTa."""
+    """Train NLI cross-encoder DeBERTa with optional adversarial head."""
     from transformers import AutoTokenizer
     from src.models.cat_c_deberta import NLIDeBERTaCrossEncoder
 
@@ -278,7 +274,6 @@ def train_nli(args):
             scaler.update()
             total_loss += loss.item()
 
-        # Evaluate
         model.eval()
         preds, labels_all = [], []
         with torch.no_grad():
@@ -304,7 +299,6 @@ def train_nli(args):
                 print(f"Early stopping at epoch {epoch}")
                 break
 
-    # Final evaluation with best model
     print(f"\nBest NLI Cat C dev F1: {best_f1:.4f}")
     model.load_state_dict(torch.load(save_dir / 'nli_cat_c_best.pt', weights_only=True))
     model.eval()
