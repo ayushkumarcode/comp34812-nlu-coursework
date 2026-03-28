@@ -112,16 +112,13 @@ def character_features(text):
     text_lower = text.lower()
     char_counts = Counter(text_lower)
 
-    # Letter frequencies (a-z)
     for c in 'abcdefghijklmnopqrstuvwxyz':
         feats[f'char_freq_{c}'] = char_counts.get(c, 0) / total_chars
 
-    # Digit frequencies (0-9)
     digit_counts = Counter(c for c in text if c.isdigit())
     for d in range(10):
         feats[f'digit_freq_{d}'] = digit_counts.get(str(d), 0) / total_chars
 
-    # Special character frequencies
     for sc in _SPECIAL_CHARS:
         feats[f'special_freq_{ord(sc)}'] = text.count(sc) / total_chars
 
@@ -173,7 +170,6 @@ def structural_features(text):
     """Sentence lengths, paragraph counts, punctuation densities, etc."""
     feats = {}
 
-    # Sentence splitting (simple heuristic: split on .!? followed by space or end)
     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
     sentences = [s for s in sentences if s.strip()]
     n_sentences = max(len(sentences), 1)
@@ -190,22 +186,18 @@ def structural_features(text):
     feats['pct_short_sentences'] = sum(1 for l in sent_lengths if l < 8) / n_sentences
     feats['pct_long_sentences'] = sum(1 for l in sent_lengths if l > 25) / n_sentences
 
-    # Paragraph features
     paragraphs = [p for p in text.split('\n\n') if p.strip()]
     n_paragraphs = max(len(paragraphs), 1)
     feats['avg_words_per_paragraph'] = len(text.split()) / n_paragraphs
     feats['n_paragraphs'] = n_paragraphs
 
-    # Quote ratio
     quote_chars = text.count('"') + text.count("'") + text.count('\u201c') + text.count('\u201d')
     feats['quote_ratio'] = quote_chars / len(text) if len(text) > 0 else 0.0
 
-    # Punctuation densities
     feats['exclamation_density'] = text.count('!') / n_sentences
     feats['question_density'] = text.count('?') / n_sentences
     feats['ellipsis_count_norm'] = text.count('...') / n_sentences
 
-    # Capitalization ratio
     letters = [c for c in text if c.isalpha()]
     if letters:
         feats['capitalization_ratio'] = sum(1 for c in letters if c.isupper()) / len(letters)
