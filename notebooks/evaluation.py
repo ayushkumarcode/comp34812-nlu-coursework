@@ -77,24 +77,13 @@ print(f"Class distribution: {np.bincount(y_true)}")
 baselines = load_baseline_predictions(task=TASK)
 print(f"Baselines loaded: {list(baselines.keys())}")
 
-# Load our predictions
-sol1_path = 'predictions/Group_34_A.csv'  # Cat A (LightGBM)
-sol2_path = 'predictions/Group_34_B.csv'  # Cat B (char-CNN+BiLSTM+GRL)
+# Load dev data once (used by both solutions)
+dev_df = load_av_data(split='dev')
+print(f"Dev data: {len(dev_df)} pairs")
 
-def load_preds(path):
-    preds = []
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                try:
-                    preds.append(int(float(line)))
-                except ValueError:
-                    continue
-    return np.array(preds)
-
-y_pred_sol1 = load_preds(sol1_path)
-y_pred_sol2 = load_preds(sol2_path)
+# Sol 1 and Sol 2 dev predictions generated below
+y_pred_sol1 = np.zeros(len(dev_df), dtype=int)  # placeholder
+y_pred_sol2 = np.zeros(len(dev_df), dtype=int)  # placeholder
 print(f"Solution 1 predictions: {len(y_pred_sol1)}")
 print(f"Solution 2 predictions: {len(y_pred_sol2)}")
 
