@@ -852,3 +852,31 @@ def create_poster():
             {'text': '         ', 'font_size': BODY_FONT},
             {'text': 'vs Baseline', 'font_size': BODY_FONT, 'bold': True, 'font_color': NAVY},
         ], 'font_size': BODY_FONT, 'space_after': 6},
+        {'text': '\u2500' * 60,
+         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 4},
+        {'runs': [
+            {'text': 'SVM Baseline        ', 'font_size': BODY_FONT_SM},
+            {'text': '0.5610', 'font_size': BODY_FONT_SM},
+            {'text': '     0.124       ', 'font_size': BODY_FONT_SM},
+            {'text': '\u2014', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': 'LSTM Baseline       ', 'font_size': BODY_FONT_SM},
+            {'text': '0.6226', 'font_size': BODY_FONT_SM},
+            {'text': '     0.245       ', 'font_size': BODY_FONT_SM},
+            {'text': '\u2014', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 3},
+        {'runs': [
+            {'text': 'BERT Baseline       ', 'font_size': BODY_FONT_SM},
+            {'text': '0.7854', 'font_size': BODY_FONT_SM},
+            {'text': '     0.571       ', 'font_size': BODY_FONT_SM},
+            {'text': '\u2014', 'font_size': BODY_FONT_SM, 'font_color': MID_GRAY}
+        ], 'font_size': BODY_FONT_SM, 'space_after': 4},
+        {'text': '\u2500' * 60,
+         'font_size': SMALL_FONT, 'font_color': BORDER_COLOR, 'space_after': 4},
+        {'runs': [
+            {'text': 'Sol 1 (Cat A)    ', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_GREEN},
+            {'text': '0.7340', 'font_size': BODY_FONT, 'bold': True,
+             'font_color': ACCENT_GREEN},
+            {'text': '     0.469     ', 'font_size': BODY_FONT, 'bold': True},
