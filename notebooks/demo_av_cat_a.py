@@ -26,15 +26,15 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.data_utils import load_av_data, clean_text, save_predictions
 from src.av_pipeline import AVFeatureExtractor
 
-# Set INPUT_FILE to a CSV path for custom inference, or None for dev data.
+# set this to a csv path if you want to run on custom data, otherwise we use dev
 INPUT_FILE = None  # e.g. 'test_data_av.csv'
 
 # %% [markdown]
-# ## 1. Load Trained Model
+# ## 1. Load the trained model
 #
-# We load the pre-trained LightGBM classifier, StandardScaler,
-# and feature name list. The model was trained on 27,643 text pairs
-# with 695 features per pair.
+# We're loading the pre-trained LightGBM, the scaler, and the feature
+# name list. The model was trained on 27,643 text pairs with 695
+# features per pair.
 
 # %%
 scaler = joblib.load('models/av_cat_a_scaler.joblib')
@@ -43,15 +43,14 @@ feature_names = joblib.load('models/av_cat_a_feature_names.joblib')
 print(f"Model loaded. Features: {len(feature_names)}")
 
 # %% [markdown]
-# ## 2. Load Test Data and Extract Features
+# ## 2. Load data and extract features
 #
-# We load the dev set (replace with test data path for final submission)
-# and extract all 695 stylometric features using the AVFeatureExtractor
-# pipeline. This includes TF-IDF+SVD, spaCy POS/syntactic features,
-# and all novel feature groups.
+# We load the dev set (swap in test data path for final submission)
+# and extract all 695 features using AVFeatureExtractor. This covers
+# TF-IDF+SVD, spaCy POS/syntactic stuff, and our novel feature groups.
 
 # %%
-# Load data: use INPUT_FILE if set, otherwise default to dev split.
+# grab data — use INPUT_FILE if set, otherwise fall back to dev split
 if INPUT_FILE is not None:
     test_df = pd.read_csv(INPUT_FILE, quotechar='"', engine='python')
     test_df['text_1'] = test_df['text_1'].apply(
@@ -63,7 +62,7 @@ else:
 print(f"Test data: {len(test_df)} pairs")
 
 extractor = AVFeatureExtractor(use_spacy=True, n_svd_components=100)
-# Load pre-fitted TF-IDF components
+# load the pre-fitted tfidf stuff
 extractor.tfidf = joblib.load('models/av_cat_a_tfidf.joblib')
 extractor.cosine = joblib.load('models/av_cat_a_cosine.joblib')
 extractor._fitted = True
@@ -74,10 +73,10 @@ X_test_scaled = scaler.transform(X_test)
 print(f"Features: {X_test_scaled.shape}")
 
 # %% [markdown]
-# ## 3. Generate Predictions
+# ## 3. Generate predictions
 #
-# The LightGBM model predicts binary labels (0 = different author,
-# 1 = same author) for each text pair.
+# LightGBM predicts binary labels — 0 for different author,
+# 1 for same author.
 
 # %%
 predictions = model.predict(X_test_scaled)
