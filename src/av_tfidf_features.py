@@ -43,10 +43,7 @@ class CharNgramTFIDF:
 
 
 class CosineSimFeatures:
-    """Pairwise cosine similarity features using raw TF-IDF vectors.
-
-    Computes cosine similarity at char 3-gram, 4-gram, and 5-gram levels.
-    """
+    """Cosine similarity at char 3/4/5-gram levels between text pairs."""
 
     def __init__(self, max_features=10000):
         self.max_features = max_features
@@ -61,26 +58,14 @@ class CosineSimFeatures:
         self._fitted = False
 
     def fit(self, texts):
-        """Fit vectorizers on all training texts.
-
-        Args:
-            texts: List of all training text strings.
-        """
+        """Fit vectorizers on all training texts."""
         for n, vec in self.vectorizers.items():
             vec.fit(texts)
         self._fitted = True
         return self
 
     def compute_similarities(self, text_1, text_2):
-        """Compute cosine similarities for a text pair.
-
-        Args:
-            text_1: First text string.
-            text_2: Second text string.
-
-        Returns:
-            Dict with 'cosine_char3', 'cosine_char4', 'cosine_char5'.
-        """
+        """Cosine similarity at each n-gram level for a text pair."""
         feats = {}
         for n, vec in self.vectorizers.items():
             v1 = vec.transform([text_1])
