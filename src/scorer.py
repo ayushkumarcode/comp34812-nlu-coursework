@@ -44,11 +44,11 @@ def compute_all_metrics(y_true, y_pred):
 
 
 def print_metrics(metrics, title=None):
-    """Pretty-print metrics dict.
+    """Pretty-print a metrics dict.
 
     Args:
-        metrics: Dict from compute_all_metrics.
-        title: Optional title string.
+        metrics: dict from compute_all_metrics.
+        title: optional header to print.
     """
     if title:
         print(f"\n{'='*50}")
@@ -59,18 +59,13 @@ def print_metrics(metrics, title=None):
 
 
 def score_predictions_file(pred_path, task='av'):
-    """Score a predictions file against the official reference data.
-
-    Uses the same reference data as the local scorer CLI.
+    """Score a prediction file against the official reference data.
+    Uses the same refs as the CLI scorer.
 
     Args:
-        pred_path: Path to prediction file (single column of 0/1 integers).
+        pred_path: path to a file with one 0/1 per line.
         task: 'av' or 'nli'.
-
-    Returns:
-        Dict mapping metric name to float value.
     """
-    # Add scorer to path and use its IO utilities
     scorer_path = str(SCORER_ROOT)
     if scorer_path not in sys.path:
         sys.path.insert(0, scorer_path)
