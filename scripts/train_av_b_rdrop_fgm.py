@@ -201,6 +201,26 @@ def main():
                 print(f"Early stopping at epoch {epoch}")
                 break
 
+    # --- final evaluation ---
+    print(f"\n{'='*60}\n  Best dev macro_f1: {best_f1:.4f}\n{'='*60}")
+    model.load_state_dict(torch.load(
+        save_dir / 'av_cat_b_rdrop_fgm_best.pt', weights_only=True))
+    dp, dpr, dt = evaluate(model, dev_dl, device)
+
+    # threshold search
+    best_thresh, best_tf1 = 0.5, 0
+    for t in np.arange(0.30, 0.75, 0.01):
+        pt = (dpr >= t).astype(int)
+        ft = f1_score(dt, pt, average='macro', zero_division=0)
+        if ft > best_tf1:
+            best_thresh, best_tf1 = t, ft
+    print(f"Best threshold: {best_thresh:.2f} -> F1={best_tf1:.4f}")
+
+    fp = (dpr >= best_thresh).astype(int)
+    m = compute_all_metrics(dt, fp)
+    print_metrics(m, "AV Cat B v4 (R-Drop+FGM) — Final")
+    save_predictions(fp, PROJECT_ROOT / 'predictions' / 'av_Group_34_B_rdrop_fgm.csv')
+
 
 if __name__ == '__main__':
     main()
