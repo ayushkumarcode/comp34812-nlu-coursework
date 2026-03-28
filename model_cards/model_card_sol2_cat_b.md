@@ -4,20 +4,20 @@
 
 # Model Card for AV-StyleDisentangle: Adversarial Style-Content Disentanglement Network
 
-A Siamese neural network for authorship verification that disentangles writing style from topic content using gradient reversal adversarial training, character-level CNN + BiLSTM encoding, and additive attention.
+A Siamese neural network for authorship verification that learns to separate writing style from topic content. It uses gradient reversal adversarial training, character-level CNN + BiLSTM encoding, and additive attention to produce style-focused text representations.
 
 ## Model Details
 
 ### Model Description
 
-AV-StyleDisentangle is a Category B (neural network without pre-trained transformers) solution for the COMP34812 Authorship Verification shared task. The model processes each text as a character sequence through a shared (Siamese) encoder consisting of multi-width character-level CNNs (kernels 3, 5, 7), a BiLSTM, and additive (Bahdanau) attention, producing a fixed-size 128-dimensional document embedding. Two text embeddings are compared via concatenation of [v1, v2, |v1-v2|, v1*v2] (512 dimensions) and classified through an MLP.
+AV-StyleDisentangle is our Category B (neural network, no pre-trained transformers) solution for the COMP34812 Authorship Verification shared task. Each text gets fed through a shared (Siamese) encoder as a character sequence: multi-width character-level CNNs (kernels 3, 5, 7) followed by a BiLSTM and additive (Bahdanau) attention, producing a 128-dimensional document embedding. We then compare two text embeddings by concatenating [v1, v2, |v1-v2|, v1*v2] (512 dimensions total) and running that through an MLP for classification.
 
-The central innovation is adversarial style-content disentanglement: a gradient reversal layer (GRL) on an auxiliary topic prediction head forces the encoder to produce representations that are NOT predictive of topic/domain, focusing purely on authorial style. This addresses the key confound in cross-domain AV where same-topic pairs are easily misclassified as same-author.
+The main idea here is adversarial style-content disentanglement: we attach a gradient reversal layer (GRL) to an auxiliary topic prediction head, which forces the encoder to learn representations that aren't predictive of topic/domain. This means it focuses on authorial style instead. It's designed to solve a real problem in cross-domain AV where same-topic pairs get misclassified as same-author just because they're about the same thing.
 
-Additional contributions include:
-1. **Stylistic invariance training** via character perturbation augmentation (5% per-char) and random truncation (80-100%)
-2. **Careful GRL scheduling** with linear lambda ramp from 0 to 0.05 over 20 epochs, and topic adversarial loss introduced only after epoch 15
-3. **Interpretable attention weights** providing XAI explainability (Bahdanau attention)
+We also added a few other things that helped:
+1. **Stylistic invariance training** through character perturbation augmentation (5% per-char) and random truncation (80-100%)
+2. **Careful GRL scheduling** -- lambda ramps linearly from 0 to 0.05 over 20 epochs, and we don't introduce the topic adversarial loss until epoch 15 (we tried earlier and it destabilized training)
+3. **Interpretable attention weights** via Bahdanau attention, giving us some XAI explainability
 
 - **Developed by:** Group 34
 - **Language(s):** English
@@ -44,8 +44,8 @@ Additional contributions include:
 - **Size:** 27,643 text pairs
 - **Label distribution:** ~50% same-author, ~50% different-author
 - **Text sources:** Cross-domain (emails, blogs, movie reviews)
-- **Preprocessing:** Character-level encoding (vocabulary size 97: a-z, A-Z, 0-9, common punctuation, whitespace, UNK, PAD). No text normalization beyond URL replacement. Max sequence length: 1500 characters.
-- **Topic pseudo-labels:** Generated via TF-IDF (5000 features) + MiniBatch K-Means clustering (10 clusters) on all training texts, with heuristic corpus-type labels (email/blog/review/unknown) used when coverage is sufficient.
+- **Preprocessing:** Character-level encoding (vocabulary size 97: a-z, A-Z, 0-9, common punctuation, whitespace, UNK, PAD). We didn't do any text normalization beyond replacing URLs. Max sequence length is 1500 characters.
+- **Topic pseudo-labels:** We generated these via TF-IDF (5000 features) + MiniBatch K-Means clustering (10 clusters) on all training texts. We also used heuristic corpus-type labels (email/blog/review/unknown) when coverage was good enough.
 
 ### Training Procedure
 
@@ -72,9 +72,9 @@ Additional contributions include:
 
 - **Optimizer:** AdamW, lr=2e-4, weight_decay=1e-4
 - **Scheduler:** CosineAnnealingWarmRestarts, T_0=30, T_mult=2
-- **Loss:** BCEWithLogitsLoss + topic adversarial CrossEntropyLoss (NO contrastive loss)
-- **Topic adversarial weight:** 0.02 (applied from epoch 15 onward)
-- **GRL schedule:** lambda ramps linearly from 0 to 0.05 over epochs 1-20, then fixed at 0.05
+- **Loss:** BCEWithLogitsLoss + topic adversarial CrossEntropyLoss (we dropped contrastive loss -- see design decisions below)
+- **Topic adversarial weight:** 0.02 (only applied from epoch 15 onward)
+- **GRL schedule:** lambda ramps linearly from 0 to 0.05 over epochs 1-20, then stays fixed at 0.05
 - **Batch size:** 64
 - **Epochs:** Max 120, early stopping patience=20 on dev macro_f1
 - **Gradient clipping:** max_norm=5.0
