@@ -84,7 +84,7 @@ print(f"Predictions: {len(predictions)}")
 print(f"Class distribution: {np.bincount(predictions)}")
 
 # %% [markdown]
-# ## 4. Save Predictions
+# ## 4. Save predictions
 
 # %%
 save_predictions(predictions, 'predictions/Group_34_A.csv')
