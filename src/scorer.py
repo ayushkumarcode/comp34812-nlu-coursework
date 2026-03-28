@@ -85,15 +85,7 @@ def score_predictions_file(pred_path, task='av'):
 
 
 def quick_score(y_true, y_pred):
-    """Return the two most important metrics: macro_f1 and MCC.
-
-    Args:
-        y_true: Ground truth labels.
-        y_pred: Predicted labels.
-
-    Returns:
-        Tuple of (macro_f1, mcc).
-    """
+    """Just the two metrics we care about most: macro_f1 and MCC."""
     y_true = np.asarray(y_true, dtype=float).ravel()
     y_pred = np.asarray(y_pred, dtype=float).ravel()
 
