@@ -1,20 +1,17 @@
 """
-COMP34812 — Solution 2 (Category B) Training Notebook
-Group 34
+cat B training — siamese char-CNN + BiLSTM + GRL for AV (group 34).
 
-AV: Adversarial Style-Content Disentanglement Network (Siamese Char-CNN+BiLSTM+GRL)
-
-To convert: python scripts/convert_to_ipynb.py notebooks/training_cat_b.py
+to convert: python scripts/convert_to_ipynb.py notebooks/training_cat_b.py
 """
 
 # %% [markdown]
-# # Solution 2 (Category B) — Training
+# # Cat B — Training
 # ## Adversarial Style-Content Disentanglement Network
 #
-# This notebook trains our Category B solution: a Siamese neural network
-# with character-level CNN, BiLSTM, additive attention, and gradient reversal
-# for topic adversarial debiasing. NO contrastive loss is used in the final
-# version (v3) -- only BCE + topic adversarial CrossEntropy.
+# this trains our cat B solution: a siamese network with character-level
+# CNN, BiLSTM, additive attention, and gradient reversal for topic
+# debiasing. the final version (v3) uses BCE + topic adversarial CE only
+# — we dropped contrastive loss since it didn't help.
 
 # %%
 # !pip install torch scikit-learn numpy pandas tqdm
