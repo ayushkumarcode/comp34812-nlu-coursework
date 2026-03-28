@@ -404,3 +404,31 @@ def _add_rich_textbox(slide, left, top, width, height, paragraphs_data,
         space_after, space_before
     """
     txBox = slide.shapes.add_textbox(left, top, width, height)
+    tf = txBox.text_frame
+    tf.word_wrap = word_wrap
+
+    for i, pdata in enumerate(paragraphs_data):
+        if i == 0:
+            p = tf.paragraphs[0]
+        else:
+            p = tf.add_paragraph()
+
+        text = pdata.get('text', '')
+        # Handle runs (mixed formatting within a paragraph)
+        runs = pdata.get('runs', None)
+        if runs:
+            for j, run_data in enumerate(runs):
+                if j == 0:
+                    run = p.runs[0] if p.runs else p.add_run()
+                    run.text = run_data.get('text', '')
+                else:
+                    run = p.add_run()
+                    run.text = run_data.get('text', '')
+                run.font.size = run_data.get('font_size', pdata.get('font_size', BODY_FONT))
+                run.font.color.rgb = run_data.get('font_color', pdata.get('font_color', DARK))
+                run.font.bold = run_data.get('bold', pdata.get('bold', False))
+                run.font.name = run_data.get('font_name', font_name)
+                if run_data.get('italic', False):
+                    run.font.italic = True
+        else:
+            p.text = text
