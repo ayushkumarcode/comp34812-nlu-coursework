@@ -6,7 +6,7 @@ This repo has our two solutions for the COMP34812 AV shared task. The goal's pre
 
 We're submitting one solution from Category A and one from Category B:
 
-### Solution 1: Cat A -- LightGBM + Stylometric Features (F1=0.7450)
+### Solution 1: Cat A -- LightGBM + Stylometric Features (F1=0.7367)
 
 We built about 736 handcrafted features per text pair from 13 groups:
 - The usual stuff: lexical, character-level, function words, POS tags, structural
@@ -39,7 +39,7 @@ src/
     av_cat_b_dataset.py      -- char encoding + dataset class
     cat_c_deberta.py         -- DeBERTa fine-tuning (Cat C, experimental)
   training/
-    train_av_ensemble.py     -- Cat A LightGBM training
+    run_av_cat_a.py          -- Cat A LightGBM training
     train_av_cat_b.py        -- Cat B training loop
   evaluation/
     eval_utils.py            -- McNemar's, bootstrap CIs, error analysis
